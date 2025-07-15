@@ -34,7 +34,7 @@ export default function SearchInterface() {
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      vendorId: 1, // Default to Kinray (only vendor available)
+      vendorId: 1, // Default to first vendor (McKesson Connect)
       searchTerm: "",
       searchType: "name",
     },
@@ -49,16 +49,15 @@ export default function SearchInterface() {
       setCurrentSearchId(data.searchId);
       toast({
         title: "Search Started",
-        description: `Browser automation started - Search ID: ${data.searchId}`,
+        description: "Your medication search is in progress...",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/activity"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
     },
-    onError: (error: Error) => {
-      console.error('Search mutation error:', error);
+    onError: () => {
       toast({
-        title: "Search Failed", 
-        description: error.message || "Failed to start medication search",
+        title: "Search Failed",
+        description: "Failed to start medication search",
         variant: "destructive",
       });
     },
