@@ -34,7 +34,7 @@ export default function SearchInterface() {
   const form = useForm<SearchFormData>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      vendorId: 1, // Default to first vendor (McKesson Connect)
+      vendorId: 1, // Default to Kinray (only vendor available)
       searchTerm: "",
       searchType: "name",
     },
@@ -42,24 +42,51 @@ export default function SearchInterface() {
 
   const searchMutation = useMutation({
     mutationFn: async (data: SearchFormData) => {
-      const response = await apiRequest("POST", "/api/search", data);
-      return response.json() as Promise<SearchResponse>;
+      try {
+        const response = await apiRequest("POST", "/api/search", data);
+        const result = await response.json();
+        return result as SearchResponse;
+      } catch (error) {
+        console.error('API request failed:', error);
+        // If it's a network error, throw a more user-friendly message
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          throw new Error('Network connection error. Please check your internet connection.');
+        }
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setCurrentSearchId(data.searchId);
       toast({
-        title: "Search Started",
-        description: "Your medication search is in progress...",
+        title: "Search Started Successfully",
+        description: `Kinray portal search initiated - Search ID: ${data.searchId}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/activity"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
     },
-    onError: () => {
-      toast({
-        title: "Search Failed",
-        description: "Failed to start medication search",
-        variant: "destructive",
-      });
+    onError: (error: Error) => {
+      console.error('Search mutation error:', error);
+      
+      // Check if it's a server error response
+      if (error.message.includes('500:')) {
+        toast({
+          title: "Server Error", 
+          description: "There was an issue with the search service. Please try again.",
+          variant: "destructive",
+        });
+      } else if (error.message.includes('400:')) {
+        toast({
+          title: "Invalid Search", 
+          description: "Please check your search parameters and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Search Error", 
+          description: error.message || "Failed to start medication search",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -104,7 +131,7 @@ export default function SearchInterface() {
 
         {/* Search Form */}
         <Form {...form}>
-          <form className="mb-6">
+          <form onSubmit={form.handleSubmit(onSearch)} className="mb-6">
             <div className="flex space-x-4 mb-4">
               <div className="flex-1">
                 <FormField
@@ -180,8 +207,7 @@ export default function SearchInterface() {
             <div className="flex justify-between items-center">
               <div className="flex space-x-3">
                 <Button
-                  type="button"
-                  onClick={form.handleSubmit(onSearch)}
+                  type="submit"
                   disabled={searchMutation.isPending}
                   className="bg-primary hover:bg-primary/90"
                 >
