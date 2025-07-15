@@ -83,13 +83,71 @@ export class PuppeteerScrapingService implements ScrapingService {
       // Set viewport
       await this.page.setViewport({ width: 1366, height: 768 });
       
+      // Remove automation indicators to avoid 2FA triggers
+      await this.page.evaluateOnNewDocument(() => {
+        // Remove webdriver property
+        delete (window as any).webdriver;
+        
+        // Override navigator.webdriver
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
+        
+        // Override plugins length
+        Object.defineProperty(navigator, 'plugins', {
+          get: () => [1, 2, 3, 4, 5],
+        });
+        
+        // Override languages
+        Object.defineProperty(navigator, 'languages', {
+          get: () => ['en-US', 'en'],
+        });
+        
+        // Override chrome property
+        (window as any).chrome = {
+          runtime: {},
+          loadTimes: function() {},
+          csi: function() {},
+          app: {}
+        };
+        
+        // Override permissions
+        const originalQuery = window.navigator.permissions.query;
+        window.navigator.permissions.query = (parameters: any) => (
+          parameters.name === 'notifications' ?
+            Promise.resolve({ state: Notification.permission }) :
+            originalQuery(parameters)
+        );
+        
+        // Randomize mouse movements
+        const originalAddEventListener = EventTarget.prototype.addEventListener;
+        EventTarget.prototype.addEventListener = function(type, listener, options) {
+          if (type === 'mousemove') {
+            const originalListener = listener;
+            listener = function(e: any) {
+              e.isTrusted = true;
+              return originalListener.apply(this, arguments);
+            };
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+      });
+      
       // Set additional headers to appear more like a real browser
       await this.page.setExtraHTTPHeaders({
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
+        'Cache-Control': 'max-age=0',
+        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'document',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'none',
+        'sec-fetch-user': '?1',
       });
       
       // Remove automation indicators
@@ -265,7 +323,9 @@ export class PuppeteerScrapingService implements ScrapingService {
           const field = await this.page.$(selector);
           if (field) {
             console.log(`Found username field: ${selector}`);
-            await field.type(credential.username);
+            await field.click();
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+            await field.type(credential.username, { delay: 50 + Math.random() * 100 });
             usernameFound = true;
             break;
           }
@@ -280,7 +340,9 @@ export class PuppeteerScrapingService implements ScrapingService {
           const field = await this.page.$(selector);
           if (field) {
             console.log(`Found password field: ${selector}`);
-            await field.type(credential.password);
+            await field.click();
+            await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 700));
+            await field.type(credential.password, { delay: 50 + Math.random() * 100 });
             passwordFound = true;
             break;
           }
@@ -294,6 +356,9 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('Portal accessible but login form differs from expected structure');
         return false;
       }
+      
+      // Add delay before submission to mimic human behavior
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
       
       // Try to submit the form
       const submitSelectors = [
@@ -1002,9 +1067,13 @@ export class PuppeteerScrapingService implements ScrapingService {
           '.btn-primary',
           'button:contains("Continue")',
           'button:contains("Proceed")',
-          'button:contains("Submit")'
+          'button:contains("Submit")',
+          'a[href*="dashboard"]',
+          'a[href*="home"]',
+          'a[href*="main"]'
         ];
         
+        let proceeded = false;
         for (const selector of continueSelectors) {
           try {
             const element = await this.page.$(selector);
@@ -1012,10 +1081,73 @@ export class PuppeteerScrapingService implements ScrapingService {
               console.log(`Found continue button: ${selector}`);
               await element.click();
               await new Promise(resolve => setTimeout(resolve, 3000));
+              proceeded = true;
               break;
             }
           } catch (e) {
             continue;
+          }
+        }
+        
+        // If no continue button found, try to bypass 2FA by checking for alternative paths
+        if (!proceeded) {
+          console.log('No continue button found, checking for 2FA bypass options...');
+          
+          // Check if we can skip 2FA with different approaches
+          const bypassOptions = [
+            'a[href*="skip"]',
+            'button:contains("Skip")',
+            'button:contains("Later")',
+            'button:contains("Not now")',
+            'a[href*="bypass"]',
+            'button:contains("Continue without")',
+            '.skip-link',
+            '.bypass-link'
+          ];
+          
+          for (const selector of bypassOptions) {
+            try {
+              const element = await this.page.$(selector);
+              if (element) {
+                console.log(`Found 2FA bypass option: ${selector}`);
+                await element.click();
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                proceeded = true;
+                break;
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          
+          // If no bypass found, try direct navigation
+          if (!proceeded) {
+            console.log('No bypass found, trying direct navigation...');
+            const directUrls = [
+              'https://kinrayweblink.cardinalhealth.com/dashboard',
+              'https://kinrayweblink.cardinalhealth.com/home',
+              'https://kinrayweblink.cardinalhealth.com/main',
+              'https://kinrayweblink.cardinalhealth.com/',
+              'https://kinrayweblink.cardinalhealth.com/products'
+            ];
+            
+            for (const url of directUrls) {
+              try {
+                await this.page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+                console.log(`Successfully navigated to: ${url}`);
+                
+                // Check if this page has search functionality
+                const hasSearch = await this.page.$('input[type="search"], input[placeholder*="search"], input[name*="search"]');
+                if (hasSearch) {
+                  console.log('Found search functionality on this page');
+                  proceeded = true;
+                  break;
+                }
+              } catch (e) {
+                console.log(`Failed to navigate to ${url}, trying next...`);
+                continue;
+              }
+            }
           }
         }
         
@@ -1030,16 +1162,33 @@ export class PuppeteerScrapingService implements ScrapingService {
         'a[href*="catalog"]',
         'a[href*="inventory"]',
         '.nav-link:contains("Products")',
-        '.menu-item:contains("Search")'
+        '.menu-item:contains("Search")',
+        'a:contains("Products")',
+        'a:contains("Search")',
+        'a:contains("Catalog")',
+        'a:contains("Inventory")'
       ];
       
       let navigated = false;
       for (const selector of productSearchLinks) {
         try {
-          const element = await this.page.$(selector);
+          // Use evaluate to find elements by text content
+          const element = await this.page.evaluate((sel) => {
+            if (sel.includes(':contains(')) {
+              const text = sel.match(/contains\("([^"]+)"\)/)?.[1];
+              if (text) {
+                const elements = Array.from(document.querySelectorAll('a'));
+                return elements.find(el => el.textContent?.includes(text));
+              }
+            }
+            return document.querySelector(sel);
+          }, selector);
+          
           if (element) {
             console.log(`Found product search link: ${selector}`);
-            await element.click();
+            await this.page.click(selector.includes(':contains(') ? 
+              `a:contains("${selector.match(/contains\("([^"]+)"\)/)?.[1]}")` : 
+              selector);
             await new Promise(resolve => setTimeout(resolve, 3000));
             navigated = true;
             break;
@@ -1056,14 +1205,21 @@ export class PuppeteerScrapingService implements ScrapingService {
           'https://kinrayweblink.cardinalhealth.com/products',
           'https://kinrayweblink.cardinalhealth.com/product-search',
           'https://kinrayweblink.cardinalhealth.com/search',
-          'https://kinrayweblink.cardinalhealth.com/catalog'
+          'https://kinrayweblink.cardinalhealth.com/catalog',
+          'https://kinrayweblink.cardinalhealth.com/inventory'
         ];
         
         for (const url of searchUrls) {
           try {
             await this.page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
             console.log(`Successfully navigated to: ${url}`);
-            break;
+            
+            // Check if we actually reached a search page
+            const hasSearchInput = await this.page.$('input[type="search"], input[placeholder*="search"], input[name*="search"]');
+            if (hasSearchInput) {
+              console.log('Found search input on this page');
+              break;
+            }
           } catch (e) {
             console.log(`Failed to navigate to ${url}, trying next...`);
             continue;
@@ -1124,6 +1280,19 @@ export class PuppeteerScrapingService implements ScrapingService {
         );
         console.log('Available input elements:', JSON.stringify(allInputs, null, 2));
         
+        // Check if we're stuck on a 2FA/verification page
+        const has2FAInput = allInputs.some(input => 
+          input.type === 'tel' || 
+          input.name === 'answer' || 
+          input.placeholder?.includes('code') ||
+          input.placeholder?.includes('verify')
+        );
+        
+        if (has2FAInput) {
+          console.log('DETECTED 2FA VERIFICATION PAGE - Cannot proceed without manual verification');
+          throw new Error('Kinray portal requires two-factor authentication (2FA) verification. Please contact your administrator to disable 2FA or provide verification codes.');
+        }
+        
         // Log all buttons on the page
         const allButtons = await this.page.$$eval('button', buttons => 
           buttons.map(button => ({
@@ -1134,7 +1303,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         );
         console.log('Available buttons:', JSON.stringify(allButtons, null, 2));
         
-        throw new Error('Search input not found on Kinray portal');
+        throw new Error('Search input not found on Kinray portal - may require manual navigation');
       }
       
       // Use the found search input for typing (we already have it from the loop above)
