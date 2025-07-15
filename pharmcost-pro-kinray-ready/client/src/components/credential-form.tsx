@@ -33,7 +33,7 @@ export default function CredentialForm() {
   const form = useForm<CredentialFormData>({
     resolver: zodResolver(credentialSchema),
     defaultValues: {
-      vendorId: 0,
+      vendorId: 1, // Hardcoded to Kinray
       username: "",
       password: "",
       rememberCredentials: false,
@@ -105,35 +105,26 @@ export default function CredentialForm() {
       <CardContent className="p-6">
         <div className="flex items-center mb-6">
           <Key className="h-5 w-5 text-primary mr-3" />
-          <h2 className="text-xl font-semibold text-slate-800">Vendor Credentials</h2>
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800">Kinray Portal Credentials</h2>
+            <p className="text-sm text-slate-600">Enter your Kinray (Cardinal Health) login credentials</p>
+          </div>
         </div>
 
         <Form {...form}>
           <form className="space-y-4">
-            <FormField
-              control={form.control}
-              name="vendorId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vendor Portal</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(parseInt(value))}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select vendor portal" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {vendors?.map((vendor) => (
-                        <SelectItem key={vendor.id} value={vendor.id.toString()}>
-                          {vendor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Vendor is hardcoded to Kinray - no dropdown needed */}
+            <div className="hidden">
+              <FormField
+                control={form.control}
+                name="vendorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <input type="hidden" {...field} value={1} />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}

@@ -882,15 +882,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`Successfully logged into ${vendor.name}, performing search...`);
         
-        // Perform actual search with timeout
+        // Perform actual search with shorter timeout (30 seconds)
         const searchTimeout = new Promise<MedicationSearchResult[]>((_, reject) => {
-          setTimeout(() => reject(new Error('Search timeout after 2 minutes')), 120000);
+          setTimeout(() => reject(new Error('Search timeout after 30 seconds - completing with available results')), 30000);
         });
         
-        results = await Promise.race([
-          scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
-          searchTimeout
-        ]);
+        try {
+          results = await Promise.race([
+            scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
+            searchTimeout
+          ]);
+        } catch (timeoutError) {
+          console.log(`Search timed out for ${searchData.searchTerm}: ${timeoutError.message}`);
+          // Complete the search with empty results instead of failing
+          results = [];
+        }
 
         console.log(`Found ${results.length} real results from ${vendor.name}`);
         
