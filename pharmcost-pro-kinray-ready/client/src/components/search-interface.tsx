@@ -14,9 +14,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SearchFormData, SearchResponse } from "@/lib/types";
 import { Vendor } from "@shared/schema";
 import ResultsTable from "./results-table";
+import SearchSuccessIndicator from "./search-success-indicator";
 
 const searchSchema = z.object({
-  vendorId: z.number().min(1, "Please select a vendor"),
+  vendorId: z.number().default(1), // Always Kinray
   searchTerm: z.string().min(1, "Search term is required"),
   searchType: z.enum(['name', 'ndc', 'generic'], {
     required_error: "Please select a search type",
@@ -25,6 +26,7 @@ const searchSchema = z.object({
 
 export default function SearchInterface() {
   const [currentSearchId, setCurrentSearchId] = useState<number | null>(null);
+  const [showSuccessIndicator, setShowSuccessIndicator] = useState(false);
   const { toast } = useToast();
 
   const { data: vendors } = useQuery<Vendor[]>({
@@ -45,39 +47,60 @@ export default function SearchInterface() {
       try {
         const response = await apiRequest("POST", "/api/search", data);
         const result = await response.json();
+        console.log('Search API response:', result);
         return result as SearchResponse;
       } catch (error) {
         console.error('API request failed:', error);
-        // If it's a network error, throw a more user-friendly message
+        
+        // Handle different error types more gracefully
         if (error instanceof TypeError && error.message.includes('fetch')) {
           throw new Error('Network connection error. Please check your internet connection.');
         }
-        throw error;
+        
+        // If it's already a meaningful error message, use it
+        if (error instanceof Error && error.message) {
+          throw error;
+        }
+        
+        // Fallback error
+        throw new Error('Failed to start search. Please try again.');
       }
     },
     onSuccess: (data) => {
       setCurrentSearchId(data.searchId);
+      setShowSuccessIndicator(true);
       toast({
         title: "Search Started Successfully",
         description: `Kinray portal search initiated - Search ID: ${data.searchId}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/activity"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      
+      // Hide success indicator after 5 seconds
+      setTimeout(() => {
+        setShowSuccessIndicator(false);
+      }, 5000);
     },
     onError: (error: Error) => {
       console.error('Search mutation error:', error);
       
-      // Check if it's a server error response
-      if (error.message.includes('500:')) {
+      // Only show error toast for actual errors, not successful responses
+      if (error.message.includes('500')) {
         toast({
           title: "Server Error", 
           description: "There was an issue with the search service. Please try again.",
           variant: "destructive",
         });
-      } else if (error.message.includes('400:')) {
+      } else if (error.message.includes('400')) {
         toast({
           title: "Invalid Search", 
           description: "Please check your search parameters and try again.",
+          variant: "destructive",
+        });
+      } else if (error.message.includes('Network connection')) {
+        toast({
+          title: "Connection Error", 
+          description: "Please check your internet connection and try again.",
           variant: "destructive",
         });
       } else {
@@ -97,6 +120,7 @@ export default function SearchInterface() {
   const onClear = () => {
     form.reset();
     setCurrentSearchId(null);
+    setShowSuccessIndicator(false);
   };
 
   const onBatchUpload = () => {
@@ -107,11 +131,11 @@ export default function SearchInterface() {
   };
 
   const onDemoSearch = () => {
-    form.setValue("searchTerm", "Lisinopril 10mg");
+    form.setValue("searchTerm", "Ibuprofen 200mg");
     form.setValue("searchType", "name");
     toast({
-      title: "Demo Search",
-      description: "Filled in sample medication search. Click Search to test!",
+      title: "Quick Search",
+      description: "Filled in sample medication. Click Search to test Kinray portal!",
     });
   };
 
@@ -121,11 +145,14 @@ export default function SearchInterface() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Search className="h-5 w-5 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-slate-800">Medication Search</h2>
+            <div>
+              <h2 className="text-xl font-semibold text-slate-800">Medication Search</h2>
+              <p className="text-sm text-slate-600">Searching Kinray (Cardinal Health) portal</p>
+            </div>
           </div>
           <div className="flex items-center space-x-2 text-sm text-slate-600">
             <Clock className="h-4 w-4" />
-            <span>Last updated: <span>2 minutes ago</span></span>
+            <span>Vendor: Kinray</span>
           </div>
         </div>
 
@@ -177,32 +204,8 @@ export default function SearchInterface() {
               </div>
             </div>
 
-            <div className="hidden mb-4">
-              <FormField
-                control={form.control}
-                name="vendorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vendor</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(parseInt(value))}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select vendor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {vendors?.map((vendor) => (
-                          <SelectItem key={vendor.id} value={vendor.id.toString()}>
-                            {vendor.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {/* Vendor is hardcoded to Kinray - no dropdown */}
+            <input type="hidden" {...form.register("vendorId")} value={1} />
 
             <div className="flex justify-between items-center">
               <div className="flex space-x-3">
@@ -241,6 +244,16 @@ export default function SearchInterface() {
                 Batch Upload
               </Button>
             </div>
+            
+            {/* Success Indicator */}
+            {showSuccessIndicator && currentSearchId && (
+              <div className="mt-4">
+                <SearchSuccessIndicator 
+                  searchId={currentSearchId} 
+                  isLoading={searchMutation.isPending}
+                />
+              </div>
+            )}
           </form>
         </Form>
 
