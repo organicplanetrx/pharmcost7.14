@@ -1028,48 +1028,190 @@ export class PuppeteerScrapingService implements ScrapingService {
         throw new Error('Search input not found on Kinray portal');
       }
       
-      // Clear and type search term
-      await this.page.evaluate(() => {
-        const searchInput = document.querySelector('#productSearch, .search-input, input[name="search"]') as HTMLInputElement;
-        if (searchInput) searchInput.value = '';
+      // Use the found search input for typing (we already have it from the loop above)
+      console.log(`Typing "${searchTerm}" into the found search input`);
+      
+      // Clear the input field
+      await searchInput.click({ clickCount: 3 }); // Select all text
+      await this.page.keyboard.press('Backspace'); // Clear it
+      
+      // Type the search term
+      await searchInput.type(searchTerm);
+      console.log(`Successfully typed "${searchTerm}" into search field`);
+      
+      // Look for submit buttons
+      const submitSelectors = [
+        'button[type="submit"]',
+        '.search-btn',
+        '#searchSubmit',
+        'input[type="submit"]',
+        'button[class*="search"]',
+        'button[class*="submit"]'
+      ];
+      
+      let submitButton = null;
+      for (const selector of submitSelectors) {
+        const element = await this.page.$(selector);
+        if (element) {
+          submitButton = element;
+          console.log(`Found submit button: ${selector}`);
+          await element.click();
+          break;
+        }
+      }
+      
+      if (!submitButton) {
+        // Try pressing Enter key as fallback
+        console.log('No submit button found, trying Enter key');
+        await this.page.keyboard.press('Enter');
+      }
+      
+      // Wait for results or give up after timeout
+      console.log('Waiting for search results...');
+      try {
+        await this.page.waitForSelector('.search-results, .product-grid, .results-table, .results, .product-list, table, .data-table', { timeout: 10000 });
+        console.log('Found results container');
+      } catch (e) {
+        console.log('No results container found within timeout, proceeding to extract available data');
+      }
+      
+      // Take a screenshot to help debug the results page structure
+      await this.page.screenshot({ path: 'kinray-search-results.png', fullPage: true });
+      console.log('Screenshot saved: kinray-search-results.png');
+      
+      // Log the current page structure for debugging
+      const pageStructure = await this.page.evaluate(() => {
+        const allElements = document.querySelectorAll('*');
+        const structure = [];
+        for (let i = 0; i < Math.min(allElements.length, 50); i++) {
+          const el = allElements[i];
+          if (el.textContent && el.textContent.trim().length > 0 && el.textContent.trim().length < 100) {
+            structure.push({
+              tag: el.tagName.toLowerCase(),
+              class: el.className,
+              id: el.id,
+              text: el.textContent.trim().substring(0, 50)
+            });
+          }
+        }
+        return structure;
       });
+      console.log('Page structure:', JSON.stringify(pageStructure, null, 2));
       
-      await this.page.type('#productSearch, .search-input, input[name="search"]', searchTerm);
-      
-      // Submit search
-      await this.page.click('button[type="submit"], .search-btn, #searchSubmit');
-      await this.page.waitForSelector('.search-results, .product-grid, .results-table', { timeout: 15000 });
-      
-      // Extract results
+      // Extract results with enhanced selectors
       return await this.page.evaluate((vendorName) => {
         const results: MedicationSearchResult[] = [];
-        const rows = document.querySelectorAll('.search-results .product-row, .product-grid .product-item, .results-table tbody tr');
         
-        rows.forEach((row) => {
-          const nameEl = row.querySelector('.product-name, .item-name, td:nth-child(1)');
-          const ndcEl = row.querySelector('.ndc, .product-code, td:nth-child(2)');
-          const sizeEl = row.querySelector('.package, .size, td:nth-child(3)');
-          const priceEl = row.querySelector('.price, .cost, .unit-price, td:nth-child(4)');
-          const statusEl = row.querySelector('.availability, .status, td:nth-child(5)');
+        // Try multiple selector patterns for different page structures
+        const rowSelectors = [
+          '.search-results .product-row',
+          '.product-grid .product-item', 
+          '.results-table tbody tr',
+          'table tbody tr',
+          '.data-table tbody tr',
+          '.results tr',
+          '.product-list .product-item',
+          '.search-result-item',
+          '.product-row',
+          '.item-row'
+        ];
+        
+        let foundRows = [];
+        for (const selector of rowSelectors) {
+          const rows = document.querySelectorAll(selector);
+          if (rows.length > 0) {
+            foundRows = Array.from(rows);
+            console.log(`Found ${rows.length} rows using selector: ${selector}`);
+            break;
+          }
+        }
+        
+        // If no structured rows found, try to find any elements containing medication data
+        if (foundRows.length === 0) {
+          const allElements = document.querySelectorAll('*');
+          const potentialResults = [];
           
-          if (nameEl && priceEl) {
-            results.push({
-              medication: {
-                id: 0,
-                name: nameEl.textContent?.trim() || '',
-                genericName: null,
-                ndc: ndcEl?.textContent?.trim() || null,
-                packageSize: sizeEl?.textContent?.trim() || null,
-                strength: null,
-                dosageForm: null,
-              },
-              cost: priceEl.textContent?.replace(/[^0-9.]/g, '') || '0',
-              availability: statusEl?.textContent?.trim() || 'unknown',
-              vendor: vendorName,
-            });
+          for (const el of allElements) {
+            const text = el.textContent?.trim() || '';
+            // Look for elements containing medication-like patterns
+            if (text.match(/\b(mg|tablets|capsules|ml|oz|strength|NDC|tylenol|acetaminophen)\b/i)) {
+              potentialResults.push({
+                tag: el.tagName.toLowerCase(),
+                class: el.className,
+                text: text.substring(0, 100)
+              });
+            }
+          }
+          
+          console.log('Potential medication elements found:', potentialResults.length);
+          console.log('Sample elements:', potentialResults.slice(0, 5));
+        }
+        
+        foundRows.forEach((row, index) => {
+          // Enhanced selectors for extracting medication data
+          const nameSelectors = ['.product-name', '.item-name', '.medication-name', '.name', 'td:nth-child(1)', '.title'];
+          const ndcSelectors = ['.ndc', '.product-code', '.code', 'td:nth-child(2)', '.product-id'];
+          const sizeSelectors = ['.package', '.size', '.package-size', 'td:nth-child(3)', '.qty'];
+          const priceSelectors = ['.price', '.cost', '.unit-price', 'td:nth-child(4)', '.amount'];
+          const statusSelectors = ['.availability', '.status', '.stock', 'td:nth-child(5)', '.available'];
+          
+          let nameEl = null, ndcEl = null, sizeEl = null, priceEl = null, statusEl = null;
+          
+          // Try each selector pattern
+          for (const sel of nameSelectors) {
+            nameEl = row.querySelector(sel);
+            if (nameEl) break;
+          }
+          
+          for (const sel of ndcSelectors) {
+            ndcEl = row.querySelector(sel);
+            if (ndcEl) break;
+          }
+          
+          for (const sel of sizeSelectors) {
+            sizeEl = row.querySelector(sel);
+            if (sizeEl) break;
+          }
+          
+          for (const sel of priceSelectors) {
+            priceEl = row.querySelector(sel);
+            if (priceEl) break;
+          }
+          
+          for (const sel of statusSelectors) {
+            statusEl = row.querySelector(sel);
+            if (statusEl) break;
+          }
+          
+          // If we found a name element, create a result
+          if (nameEl) {
+            const name = nameEl.textContent?.trim() || '';
+            const ndc = ndcEl?.textContent?.trim() || null;
+            const size = sizeEl?.textContent?.trim() || null;
+            const price = priceEl?.textContent?.replace(/[^0-9.]/g, '') || '0';
+            const status = statusEl?.textContent?.trim() || 'unknown';
+            
+            // Only add results that look like real medications
+            if (name.length > 0 && !name.match(/^(no|none|empty|null|undefined)$/i)) {
+              results.push({
+                medication: {
+                  id: index,
+                  name: name,
+                  genericName: null,
+                  ndc: ndc,
+                  packageSize: size,
+                  strength: null,
+                  dosageForm: null,
+                },
+                cost: price,
+                availability: status,
+                vendor: vendorName,
+              });
+            }
           }
         });
         
+        console.log(`Extracted ${results.length} medication results`);
         return results;
       }, this.currentVendor?.name || 'Kinray');
       
