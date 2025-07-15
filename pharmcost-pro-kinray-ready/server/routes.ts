@@ -467,6 +467,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/credentials/:id/test", async (req, res) => {
+    try {
+      const credentialId = parseInt(req.params.id);
+      const credential = await storage.getCredentials().then(creds => 
+        creds.find(c => c.id === credentialId)
+      );
+      
+      if (!credential) {
+        res.status(404).json({ message: "Credential not found" });
+        return;
+      }
+
+      const vendor = await storage.getVendor(credential.vendorId);
+      if (!vendor) {
+        res.status(404).json({ message: "Vendor not found" });
+        return;
+      }
+
+      // Test the credential by attempting to login
+      const loginSuccess = await scrapingService.login(vendor, credential);
+      
+      if (loginSuccess) {
+        await storage.updateCredential(credentialId, { 
+          lastValidated: new Date().toISOString(),
+          isActive: true 
+        });
+        res.json({ success: true, message: "Credentials verified successfully" });
+      } else {
+        await storage.updateCredential(credentialId, { 
+          lastValidated: new Date().toISOString(),
+          isActive: false 
+        });
+        res.json({ success: false, message: "Invalid credentials or login failed" });
+      }
+    } catch (error) {
+      console.error('Credential test error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to test credentials: " + (error instanceof Error ? error.message : 'Unknown error')
+      });
+    }
+  });
+
   app.delete("/api/credentials/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
