@@ -90,10 +90,9 @@ function getPharmaCostInterface(): string {
                     <p>Manage your wholesale vendor portal credentials for automated price retrieval.</p>
                     <form id="credentialsForm">
                         <div class="form-group">
-                            <label for="vendor">Select Vendor:</label>
-                            <select id="vendor" class="form-control" required>
-                                <option value="">Choose a vendor...</option>
-                            </select>
+                            <label>Vendor: Kinray (Cardinal Health)</label>
+                            <input type="hidden" id="vendor" value="1">
+                            <div class="alert alert-success">Using Kinray (Cardinal Health) portal exclusively</div>
                         </div>
                         <div class="form-group">
                             <label for="username">Username:</label>
@@ -114,10 +113,9 @@ function getPharmaCostInterface(): string {
                     <p>Search for medication prices across your configured vendor portals.</p>
                     <form id="searchForm">
                         <div class="form-group">
-                            <label for="searchVendor">Vendor:</label>
-                            <select id="searchVendor" class="form-control" required>
-                                <option value="">Select vendor...</option>
-                            </select>
+                            <label>Vendor: Kinray (Cardinal Health)</label>
+                            <input type="hidden" id="searchVendor" value="1">
+                            <div class="alert alert-success">Searching Kinray (Cardinal Health) portal exclusively</div>
                         </div>
                         <div class="form-group">
                             <label for="searchType">Search Type:</label>
@@ -165,12 +163,8 @@ function getPharmaCostInterface(): string {
             try {
                 const response = await fetch('/api/vendors');
                 vendors = await response.json();
-                const vendorSelect = document.getElementById('vendor');
-                const searchVendorSelect = document.getElementById('searchVendor');
-                vendors.forEach(vendor => {
-                    vendorSelect.add(new Option(vendor.name, vendor.id));
-                    searchVendorSelect.add(new Option(vendor.name, vendor.id));
-                });
+                // Kinray is hardcoded as vendor ID 1 - no dropdown needed
+                console.log('Using Kinray (Cardinal Health) portal exclusively');
             } catch (error) {
                 console.error('Error loading vendors:', error);
             }
