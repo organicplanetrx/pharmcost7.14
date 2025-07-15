@@ -983,14 +983,112 @@ export class PuppeteerScrapingService implements ScrapingService {
     if (!this.page) return [];
     
     try {
-      // Look for Kinray-specific search elements
+      // First, try to handle any additional authentication steps
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Check if we need to handle any 2FA or additional verification
+      const currentUrl = this.page.url();
+      console.log(`Current URL after login: ${currentUrl}`);
+      
+      // If we're on a verification page, try to proceed
+      if (currentUrl.includes('verify') || currentUrl.includes('okta')) {
+        console.log('Detected verification page, attempting to proceed...');
+        
+        // Look for any "continue" or "proceed" buttons
+        const continueSelectors = [
+          'button[type="submit"]',
+          'input[type="submit"]',
+          '.button-primary',
+          '.btn-primary',
+          'button:contains("Continue")',
+          'button:contains("Proceed")',
+          'button:contains("Submit")'
+        ];
+        
+        for (const selector of continueSelectors) {
+          try {
+            const element = await this.page.$(selector);
+            if (element) {
+              console.log(`Found continue button: ${selector}`);
+              await element.click();
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+        
+        // Wait for navigation to complete
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
+      // Try to navigate to the product search page
+      const productSearchLinks = [
+        'a[href*="product"]',
+        'a[href*="search"]', 
+        'a[href*="catalog"]',
+        'a[href*="inventory"]',
+        '.nav-link:contains("Products")',
+        '.menu-item:contains("Search")'
+      ];
+      
+      let navigated = false;
+      for (const selector of productSearchLinks) {
+        try {
+          const element = await this.page.$(selector);
+          if (element) {
+            console.log(`Found product search link: ${selector}`);
+            await element.click();
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            navigated = true;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      
+      if (!navigated) {
+        console.log('Could not find product search navigation, trying direct URL...');
+        // Try to navigate to common search URLs
+        const searchUrls = [
+          'https://kinrayweblink.cardinalhealth.com/products',
+          'https://kinrayweblink.cardinalhealth.com/product-search',
+          'https://kinrayweblink.cardinalhealth.com/search',
+          'https://kinrayweblink.cardinalhealth.com/catalog'
+        ];
+        
+        for (const url of searchUrls) {
+          try {
+            await this.page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+            console.log(`Successfully navigated to: ${url}`);
+            break;
+          } catch (e) {
+            console.log(`Failed to navigate to ${url}, trying next...`);
+            continue;
+          }
+        }
+      }
+      
+      // Wait for page to load
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Look for search input with expanded selectors
       const kinraySearchSelectors = [
         '#productSearch',
+        '#searchInput',
+        '#search',
         'input[id*="search"]',
         'input[name*="search"]',
         'input[class*="search"]',
+        'input[placeholder*="search"]',
+        'input[placeholder*="product"]',
+        'input[placeholder*="item"]',
         '.search-input',
-        'input[type="text"]'
+        '.product-search',
+        'input[type="text"]',
+        'input[type="search"]'
       ];
       
       let searchInput = null;
@@ -1009,7 +1107,7 @@ export class PuppeteerScrapingService implements ScrapingService {
       }
       
       if (!searchInput) {
-        console.log('No search input found on current page, checking page structure...');
+        console.log('No search input found, taking screenshot for debugging...');
         // Take a screenshot to debug the page structure
         await this.page.screenshot({ path: 'kinray-page-structure.png', fullPage: true });
         
@@ -1020,10 +1118,21 @@ export class PuppeteerScrapingService implements ScrapingService {
             name: input.name,
             id: input.id,
             className: input.className,
-            placeholder: input.placeholder
+            placeholder: input.placeholder,
+            value: input.value
           }))
         );
         console.log('Available input elements:', JSON.stringify(allInputs, null, 2));
+        
+        // Log all buttons on the page
+        const allButtons = await this.page.$$eval('button', buttons => 
+          buttons.map(button => ({
+            type: button.type,
+            className: button.className,
+            textContent: button.textContent?.trim()
+          }))
+        );
+        console.log('Available buttons:', JSON.stringify(allButtons, null, 2));
         
         throw new Error('Search input not found on Kinray portal');
       }
