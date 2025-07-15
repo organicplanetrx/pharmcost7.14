@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Shield, Settings, PillBottle } from "lucide-react";
+import { Shield, Settings, PillBottle, Key } from "lucide-react";
+import { Link } from "wouter";
 import CredentialForm from "@/components/credential-form";
 import SearchInterface from "@/components/search-interface";
 import ActivityLog from "@/components/activity-log";
@@ -30,6 +31,12 @@ export default function Dashboard() {
                 <Shield className="h-4 w-4 text-green-500" />
                 <span>Secure Connection</span>
               </div>
+              <Link href="/credentials">
+                <Button variant="outline" className="text-slate-700">
+                  <Key className="h-4 w-4 mr-2" />
+                  Credentials
+                </Button>
+              </Link>
               <Button variant="outline" className="text-slate-700">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
