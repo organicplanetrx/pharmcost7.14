@@ -789,15 +789,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get vendor and credentials
       const vendor = await storage.getVendor(searchData.vendorId);
-      const credential = await storage.getCredentialByVendorId(searchData.vendorId);
-
+      
       if (!vendor) {
         throw new Error("Vendor not found");
       }
 
+      let credential = null;
+      
+      // Use real Kinray credentials from environment variables if available
+      console.log(`Checking credentials for vendor: ${vendor.name}`);
+      console.log(`Environment variables - KINRAY_USERNAME: ${process.env.KINRAY_USERNAME ? 'exists' : 'missing'}`);
+      console.log(`Environment variables - KINRAY_PASSWORD: ${process.env.KINRAY_PASSWORD ? 'exists' : 'missing'}`);
+      
+      if (vendor.name.includes('Kinray') && process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
+        console.log('Using real Kinray credentials from environment variables');
+        credential = {
+          id: 1,
+          vendorId: searchData.vendorId,
+          username: process.env.KINRAY_USERNAME,
+          password: process.env.KINRAY_PASSWORD,
+          lastValidated: null,
+          isActive: true
+        };
+      } else {
+        // Fall back to database credentials
+        console.log('Trying to get credentials from database...');
+        credential = await storage.getCredentialByVendorId(searchData.vendorId);
+      }
+
       if (!credential) {
+        console.log('No credentials found - throwing error');
         throw new Error("No credentials found for vendor");
       }
+      
+      console.log(`Using credentials for username: ${credential.username.substring(0, 5)}...`);
 
       let results: MedicationSearchResult[] = [];
 
@@ -838,6 +863,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Log scraping error but do not use demo data
         console.log(`Scraping error encountered for ${vendor.name}: ${scrapingError.message}`);
         results = []; // Only show authentic data from vendor portals
+        
+        // Mark search as failed if it's a credential or connection issue
+        if (scrapingError.message.includes('login') || scrapingError.message.includes('credentials') || scrapingError.message.includes('connection')) {
+          await storage.updateSearch(searchId, { status: "failed", completedAt: new Date() });
+          throw scrapingError;
+        }
       }
 
       // Save results
