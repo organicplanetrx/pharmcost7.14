@@ -88,6 +88,7 @@ export default function SearchInterface() {
   };
 
   const handleSearchComplete = () => {
+    console.log("Search completed, showing results...");
     setShowResults(true);
   };
 
@@ -193,15 +194,18 @@ export default function SearchInterface() {
         </div>
       </div>
 
-      {searchId && !showResults && (
-        <SearchSuccessIndicator 
-          searchId={searchId} 
-          onComplete={handleSearchComplete}
-        />
-      )}
-
-      {showResults && searchId && (
-        <ResultsTable searchId={searchId} />
+      {searchId && (
+        <>
+          <SearchSuccessIndicator 
+            searchId={searchId} 
+            onComplete={handleSearchComplete}
+          />
+          {showResults && (
+            <div className="mt-4">
+              <ResultsTable searchId={searchId} />
+            </div>
+          )}
+        </>
       )}
     </>
   );
