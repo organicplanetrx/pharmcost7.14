@@ -73,14 +73,8 @@ export default function SearchInterface() {
   });
 
   const onSubmit = (data: SearchFormData) => {
-    if (!credentials || credentials.length === 0) {
-      toast({
-        title: "No Credentials",
-        description: "Please save your Kinray credentials before searching.",
-        variant: "destructive",
-      });
-      return;
-    }
+    console.log("Starting search with data:", data);
+    console.log("Credentials available:", credentials);
     searchMutation.mutate(data);
   };
 
@@ -146,7 +140,7 @@ export default function SearchInterface() {
 
               <Button
                 type="submit"
-                disabled={searchMutation.isPending || !credentials || credentials.length === 0}
+                disabled={searchMutation.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"
               >
                 {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
