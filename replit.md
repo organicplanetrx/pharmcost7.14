@@ -172,6 +172,10 @@ Changelog:
 - July 16, 2025: Fixed DigitalOcean deployment issue by moving build tools (vite, esbuild, tailwindcss) to production dependencies
 - July 16, 2025: Completely removed vendor dropdowns from legacy HTML interface in server/routes.ts for streamlined Kinray-only workflow
 - July 16, 2025: Resolved deployment rejection caused by buildpack pruning dev dependencies before build execution
+- July 16, 2025: Fixed Tailwind CSS utility class compatibility issues with newer version (border-border, font-sans)
+- July 16, 2025: Updated PostCSS configuration to use @tailwindcss/postcss for proper CSS processing
+- July 16, 2025: Moved Replit plugins (@replit/vite-plugin-runtime-error-modal, @replit/vite-plugin-cartographer) to production dependencies
+- July 16, 2025: Successfully achieved complete build process working for DigitalOcean deployment
 ```
 
 ## User Preferences
