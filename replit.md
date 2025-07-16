@@ -169,6 +169,9 @@ Changelog:
 - July 15, 2025: Hardcoded vendorId to 1 (Kinray) throughout entire application for streamlined workflow
 - July 15, 2025: Created automated git sync system with export packages to resolve repository merge conflicts
 - July 15, 2025: Eliminated all vendor selection steps - application now defaults exclusively to Kinray operations
+- July 16, 2025: Fixed DigitalOcean deployment issue by moving build tools (vite, esbuild, tailwindcss) to production dependencies
+- July 16, 2025: Completely removed vendor dropdowns from legacy HTML interface in server/routes.ts for streamlined Kinray-only workflow
+- July 16, 2025: Resolved deployment rejection caused by buildpack pruning dev dependencies before build execution
 ```
 
 ## User Preferences
