@@ -165,7 +165,7 @@ export default function SearchInterface() {
         </CardContent>
       </Card>
 
-      {searchId && (
+      {searchId && !showResults && (
         <SearchSuccessIndicator 
           searchId={searchId} 
           onComplete={handleSearchComplete}
