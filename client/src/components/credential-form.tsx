@@ -34,10 +34,7 @@ export default function CredentialForm() {
 
   const saveCredentialMutation = useMutation({
     mutationFn: (data: CredentialFormData) => 
-      apiRequest('/api/credentials', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+      apiRequest('POST', '/api/credentials', data),
     onSuccess: () => {
       toast({
         title: "Credentials Saved",
@@ -58,11 +55,10 @@ export default function CredentialForm() {
   });
 
   const testConnectionMutation = useMutation({
-    mutationFn: (data: CredentialFormData) => 
-      apiRequest('/api/test-connection', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+    mutationFn: async (data: CredentialFormData) => {
+      const response = await apiRequest('POST', '/api/credentials/test-connection', data);
+      return await response.json();
+    },
     onSuccess: (response: any) => {
       if (response.success) {
         toast({

@@ -1,0 +1,32 @@
+[pharmcost7-14] [2025-07-16 20:10:17] 
+[pharmcost7-14] [2025-07-16 20:10:17] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 20:10:17] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 20:10:17] 
+[pharmcost7-14] [2025-07-16 20:10:19] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 20:10:19] Environment: production
+[pharmcost7-14] [2025-07-16 20:10:19] Port: 5000
+[pharmcost7-14] [2025-07-16 20:10:19] ✓ Express app created
+[pharmcost7-14] [2025-07-16 20:10:19] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 20:10:19] Starting server initialization...
+[pharmcost7-14] [2025-07-16 20:10:19] Routes registered successfully
+[pharmcost7-14] [2025-07-16 20:10:19] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 20:10:19] Static files configured
+[pharmcost7-14] [2025-07-16 20:10:19] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 20:10:19] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 20:10:19] 8:10:19 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 20:09:49] 
+[pharmcost7-14] [2025-07-16 20:09:49] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 20:09:49] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 20:09:49] 
+[pharmcost7-14] [2025-07-16 20:09:51] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 20:09:51] Environment: production
+[pharmcost7-14] [2025-07-16 20:09:51] Port: 5000
+[pharmcost7-14] [2025-07-16 20:09:51] ✓ Express app created
+[pharmcost7-14] [2025-07-16 20:09:51] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 20:09:51] Starting server initialization...
+[pharmcost7-14] [2025-07-16 20:09:51] Routes registered successfully
+[pharmcost7-14] [2025-07-16 20:09:51] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 20:09:51] Static files configured
+[pharmcost7-14] [2025-07-16 20:09:51] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 20:09:51] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 20:09:52] 8:09:51 PM [express] serving on port 5000

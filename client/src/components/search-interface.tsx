@@ -41,11 +41,10 @@ export default function SearchInterface() {
   });
 
   const searchMutation = useMutation({
-    mutationFn: (data: SearchFormData) => 
-      apiRequest('/api/search', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }),
+    mutationFn: async (data: SearchFormData) => {
+      const response = await apiRequest('POST', '/api/search', data);
+      return await response.json();
+    },
     onSuccess: (response: any) => {
       console.log("Search API Response:", response);
       if (response && response.searchId) {
