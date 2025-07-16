@@ -20,6 +20,12 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
   });
 
   console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, data:`, searchResults);
+  console.log('SearchResults details:', {
+    status: searchResults?.status,
+    resultCount: searchResults?.resultCount,
+    resultsLength: searchResults?.results?.length,
+    hasResults: !!searchResults?.results?.length
+  });
 
   const handleExport = () => {
     window.open(`/api/search/${searchId}/export`, '_blank');

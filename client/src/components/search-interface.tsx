@@ -200,11 +200,9 @@ export default function SearchInterface() {
             searchId={searchId} 
             onComplete={handleSearchComplete}
           />
-          {showResults && (
-            <div className="mt-4">
-              <ResultsTable searchId={searchId} />
-            </div>
-          )}
+          <div className="mt-4">
+            <ResultsTable searchId={searchId} />
+          </div>
         </>
       )}
     </>

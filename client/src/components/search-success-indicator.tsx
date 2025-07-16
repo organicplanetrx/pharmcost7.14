@@ -29,6 +29,7 @@ export default function SearchSuccessIndicator({ searchId, onComplete }: SearchS
   useEffect(() => {
     if (searchResults && searchResults.status === 'completed') {
       console.log(`Search ${searchId} completed with status: ${searchResults.status}, results count: ${searchResults.results?.length || 0}`);
+      console.log('Search results data structure:', searchResults);
       if (onComplete) {
         console.log("Calling onComplete callback...");
         onComplete();
