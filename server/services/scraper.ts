@@ -295,7 +295,9 @@ export class PuppeteerScrapingService implements ScrapingService {
     if (!this.page) return false;
     
     try {
-      console.log('Attempting Kinray login...');
+      console.log('=== KINRAY LOGIN ATTEMPT ===');
+      console.log(`Username: ${credential.username} (length: ${credential.username.length})`);
+      console.log(`Password: [REDACTED] (length: ${credential.password.length})`);
       
       // Wait for page to load
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -352,8 +354,21 @@ export class PuppeteerScrapingService implements ScrapingService {
       }
       
       if (!usernameFound || !passwordFound) {
-        console.log(`Login fields found: username=${usernameFound}, password=${passwordFound}`);
+        console.log(`LOGIN FIELD STATUS: username=${usernameFound}, password=${passwordFound}`);
         console.log('Portal accessible but login form differs from expected structure');
+        
+        // Debug: Log all form elements on the page
+        const allInputs = await this.page.$$eval('input', inputs => 
+          inputs.map(input => ({
+            type: input.type,
+            name: input.name,
+            id: input.id,
+            placeholder: input.placeholder,
+            className: input.className
+          }))
+        );
+        console.log('All input elements found:', JSON.stringify(allInputs, null, 2));
+        
         return false;
       }
       
@@ -667,7 +682,10 @@ export class PuppeteerScrapingService implements ScrapingService {
     if (!this.page) return [];
     
     try {
-      console.log(`Searching Kinray for: ${searchTerm} (${searchType})`);
+      console.log(`=== KINRAY SEARCH STARTING ===`);
+      console.log(`Search term: ${searchTerm}`);
+      console.log(`Search type: ${searchType}`);
+      console.log(`Current URL: ${this.page.url()}`);
       
       // Wait for page to be ready
       await new Promise(resolve => setTimeout(resolve, 2000));
