@@ -194,8 +194,17 @@ export class MemStorage implements IStorage {
   }
 
   async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
+    console.log(`🔍 getSearchWithResults called for ID: ${id}`);
+    console.log(`🔍 Available search IDs:`, Array.from(this.searches.keys()));
+    console.log(`🔍 Total searches in storage:`, this.searches.size);
+    
     const search = this.searches.get(id);
-    if (!search) return undefined;
+    if (!search) {
+      console.log(`❌ Search with ID ${id} not found in storage`);
+      return undefined;
+    }
+
+    console.log(`✅ Found search:`, search);
 
     const results = Array.from(this.searchResults.values())
       .filter(sr => sr.searchId === id)
@@ -203,6 +212,8 @@ export class MemStorage implements IStorage {
         ...sr,
         medication: this.medications.get(sr.medicationId!)!,
       }));
+
+    console.log(`🔍 Found ${results.length} results for search ${id}`);
 
     return { ...search, results };
   }
@@ -216,7 +227,10 @@ export class MemStorage implements IStorage {
       vendorId: search.vendorId ?? null,
       resultCount: search.resultCount ?? null,
     };
+    console.log(`💾 Creating search with ID: ${newSearch.id}, current searchId counter: ${this.searchId}`);
+    console.log(`💾 Search data:`, newSearch);
     this.searches.set(newSearch.id, newSearch);
+    console.log(`💾 Storage now contains ${this.searches.size} searches:`, Array.from(this.searches.keys()));
     return newSearch;
   }
 
@@ -294,4 +308,13 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Create a singleton storage instance to ensure consistency
+let storageInstance: MemStorage | null = null;
+
+export const storage = (() => {
+  if (!storageInstance) {
+    console.log('🗄️ Creating new MemStorage instance');
+    storageInstance = new MemStorage();
+  }
+  return storageInstance;
+})();

@@ -1,0 +1,95 @@
+[pharmcost7-14] [2025-07-16 22:49:11] 
+[pharmcost7-14] [2025-07-16 22:49:11] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 22:49:11] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 22:49:11] 
+[pharmcost7-14] [2025-07-16 22:49:14] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 22:49:14] Environment: production
+[pharmcost7-14] [2025-07-16 22:49:14] Port: 5000
+[pharmcost7-14] [2025-07-16 22:49:14] ✓ Express app created
+[pharmcost7-14] [2025-07-16 22:49:14] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 22:49:14] Starting server initialization...
+[pharmcost7-14] [2025-07-16 22:49:14] Routes registered successfully
+[pharmcost7-14] [2025-07-16 22:49:14] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 22:49:14] Static files configured
+[pharmcost7-14] [2025-07-16 22:49:14] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 22:49:51] 
+[pharmcost7-14] [2025-07-16 22:49:51] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 22:49:51] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 22:49:51] 
+[pharmcost7-14] [2025-07-16 22:49:53] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 22:49:53] Environment: production
+[pharmcost7-14] [2025-07-16 22:49:53] Port: 5000
+[pharmcost7-14] [2025-07-16 22:49:53] ✓ Express app created
+[pharmcost7-14] [2025-07-16 22:49:53] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 22:49:53] Starting server initialization...
+[pharmcost7-14] [2025-07-16 22:49:53] Routes registered successfully
+[pharmcost7-14] [2025-07-16 22:49:53] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 22:49:53] Static files configured
+[pharmcost7-14] [2025-07-16 22:49:53] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 22:49:53] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 22:49:53] 10:49:53 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 22:50:34] 10:50:34 PM [express] GET /api/activity 200 in 5ms :: []
+[pharmcost7-14] [2025-07-16 22:50:43] 10:50:43 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:50:45] 10:50:45 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:49:14] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 22:49:14] 10:49:14 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 22:50:34] 10:50:34 PM [express] GET /api/credentials 200 in 4ms :: []
+[pharmcost7-14] [2025-07-16 22:50:34] 10:50:34 PM [express] GET /api/dashboard/stats 304 in 1ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 22:50:39] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-16 22:50:39] No browser executable found
+[pharmcost7-14] [2025-07-16 22:50:39] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 22:50:39] 10:50:39 PM [express] POST /api/credentials/test-connection 200 in 3ms :: {"success":true,"message":"…
+[pharmcost7-14] [2025-07-16 22:50:43] 📝 Search API called with body: { vendorId: 1, searchTerm: 'lisinopril', searchType: 'name' }
+[pharmcost7-14] [2025-07-16 22:50:43] ✅ Search data validated: {
+[pharmcost7-14] [2025-07-16 22:50:43]   vendorId: 1,
+[pharmcost7-14] [2025-07-16 22:50:43]   searchTerm: 'lisinopril',
+[pharmcost7-14] [2025-07-16 22:50:43]   searchType: 'name',
+[pharmcost7-14] [2025-07-16 22:50:43]   status: 'pending',
+[pharmcost7-14] [2025-07-16 22:50:43]   resultCount: 0
+[pharmcost7-14] [2025-07-16 22:50:43] }
+[pharmcost7-14] [2025-07-16 22:50:43] ✅ Search record created with ID: 1
+[pharmcost7-14] [2025-07-16 22:50:43] 🚀 Returning search ID: 1
+[pharmcost7-14] [2025-07-16 22:50:43] No browser executable found
+[pharmcost7-14] [2025-07-16 22:50:43] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 22:50:43] No browser executable found
+[pharmcost7-14] [2025-07-16 22:50:51] 10:50:51 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:50:55] 10:50:55 PM [express] GET /api/search/1 404 in 0ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:50:57] 10:50:57 PM [express] GET /api/search/1 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:51:08] 10:51:08 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:51:10] 10:51:10 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:51:16] 10:51:16 PM [express] GET /api/search/1 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-16 22:51:18] 📝 Search API called with body: { vendorId: 1, searchTerm: 'atorvastatin', searchType: 'name' }
+[pharmcost7-14] [2025-07-16 22:51:18] ✅ Search data validated: {
+[pharmcost7-14] [2025-07-16 22:51:18]   vendorId: 1,
+[pharmcost7-14] [2025-07-16 22:51:18]   searchTerm: 'atorvastatin',
+[pharmcost7-14] [2025-07-16 22:51:18]   searchType: 'name',
+[pharmcost7-14] [2025-07-16 22:51:18]   status: 'pending',
+[pharmcost7-14] [2025-07-16 22:51:18]   resultCount: 0
+[pharmcost7-14] [2025-07-16 22:51:18] }
+[pharmcost7-14] [2025-07-16 22:51:18] ✅ Search record created with ID: 1
+[pharmcost7-14] [2025-07-16 22:51:18] 🚀 Returning search ID: 1
+[pharmcost7-14] [2025-07-16 22:51:18] No browser executable found
+[pharmcost7-14] [2025-07-16 22:51:18] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 22:51:18] No browser executable found
+[pharmcost7-14] [2025-07-16 22:51:18] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 22:50:43] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 22:50:43] Generating realistic Kinray invoice pricing for: lisinopril (name)
+[pharmcost7-14] [2025-07-16 22:50:43] 10:50:43 PM [express] POST /api/search 200 in 11ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-16 22:50:43] 10:50:43 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-16 22:50:43] 10:50:43 PM [express] GET /api/search/1 200 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:50:47] 10:50:47 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:50:49] 10:50:49 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:50:53] 10:50:53 PM [express] GET /api/search/1 200 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:50:59] 10:50:59 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:01] 10:51:01 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:03] 10:51:03 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:05] 10:51:05 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:12] 10:51:12 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:14] 10:51:14 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:18] 10:51:18 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:20] 10:51:20 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-16 22:51:18] Generating realistic Kinray invoice pricing for: atorvastatin (name)
+[pharmcost7-14] [2025-07-16 22:51:18] 10:51:18 PM [express] POST /api/search 200 in 13ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-16 22:51:18] 10:51:18 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-16 22:51:22] 10:51:22 PM [express] GET /api/search/1 200 in 2ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-16 22:51:24] 10:51:24 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
