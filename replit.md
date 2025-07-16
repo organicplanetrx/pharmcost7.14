@@ -204,6 +204,10 @@ Changelog:
 - July 16, 2025: Fixed form submission preventing page navigation - search now stays on dashboard
 - July 16, 2025: Changed search button from submit to button type to prevent unwanted form redirects
 - July 16, 2025: Added preventDefault and stopPropagation to maintain single-page application behavior
+- July 16, 2025: CRITICAL RESULTS FIX: Updated search API endpoint to return SearchWithResults instead of basic search record
+- July 16, 2025: Fixed polling component to properly detect search completion with results array
+- July 16, 2025: Resolved 404 "Search not found" errors during result polling by using getSearchWithResults() method
+- July 16, 2025: Search workflow now complete - form submission, progress tracking, and results display all functional
 ```
 
 ## User Preferences
