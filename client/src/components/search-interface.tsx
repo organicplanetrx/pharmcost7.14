@@ -90,23 +90,15 @@ export default function SearchInterface() {
 
   return (
     <>
-      <Card className="bg-white shadow-sm border-slate-200">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-slate-200">
-          <CardTitle className="flex items-center text-slate-800">
-            <Search className="mr-2 h-5 w-5 text-green-600" />
+      <div className="w-full">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
+            <Search className="h-5 w-5" />
             Search Kinray (Cardinal Health) Portal
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-start space-x-2">
-              <AlertCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-green-800">
-                <p className="font-medium">Live Kinray Portal Search</p>
-                <p className="text-green-700">Search for medications with real-time pricing from Kinray</p>
-              </div>
-            </div>
-          </div>
+          </h2>
+          <p className="text-gray-600 text-sm">Search for medications with real-time pricing from Kinray</p>
+        </div>
+        <div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -161,8 +153,8 @@ export default function SearchInterface() {
               </Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {searchId && !showResults && (
         <SearchSuccessIndicator 

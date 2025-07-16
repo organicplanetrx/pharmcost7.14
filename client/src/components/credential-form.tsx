@@ -100,14 +100,15 @@ export default function CredentialForm() {
   };
 
   return (
-    <Card className="bg-white shadow-sm border-slate-200">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-200">
-        <CardTitle className="flex items-center text-slate-800">
-          <Shield className="mr-2 h-5 w-5 text-blue-600" />
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold flex items-center gap-2 mb-2">
+          <Shield className="h-5 w-5" />
           Kinray Portal Credentials
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
+        </h2>
+        <p className="text-gray-600 text-sm">Enter your kinrayweblink.cardinalhealth.com credentials</p>
+      </div>
+      <div>
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start space-x-2">
             <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -199,7 +200,7 @@ export default function CredentialForm() {
             </div>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
