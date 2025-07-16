@@ -102,7 +102,14 @@ export default function SearchInterface() {
         <div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form 
+              onSubmit={(e) => {
+                console.log("📝 Form onSubmit triggered");
+                e.preventDefault();
+                form.handleSubmit(onSubmit)(e);
+              }} 
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="searchType"
@@ -150,8 +157,27 @@ export default function SearchInterface() {
                 disabled={searchMutation.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"
                 onClick={(e) => {
-                  console.log("Search button clicked");
-                  // Don't prevent default - let form handle submission
+                  console.log("🔍 Search button clicked!");
+                  console.log("Form state:", form.formState);
+                  console.log("Form errors:", form.formState.errors);
+                  console.log("Form values:", form.getValues());
+                  
+                  // Force form validation and submission
+                  const formData = form.getValues();
+                  console.log("Manual form data:", formData);
+                  
+                  // Manual submission if form doesn't trigger
+                  if (formData.searchTerm && formData.searchTerm.trim()) {
+                    console.log("Manually triggering search...");
+                    onSubmit(formData);
+                  } else {
+                    console.log("❌ No search term provided");
+                    toast({
+                      title: "Search Term Required",
+                      description: "Please enter a medication name to search for.",
+                      variant: "destructive",
+                    });
+                  }
                 }}
               >
                 {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
