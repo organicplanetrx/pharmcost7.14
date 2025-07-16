@@ -673,14 +673,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/search/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`=== API: Getting search results for ID ${id} ===`);
+      
       const searchWithResults = await storage.getSearchWithResults(id);
+      console.log(`Search found: ${searchWithResults ? 'YES' : 'NO'}`);
+      
+      if (searchWithResults) {
+        console.log(`Search status: ${searchWithResults.status}`);
+        console.log(`Results count: ${searchWithResults.results?.length || 0}`);
+        if (searchWithResults.results?.length > 0) {
+          console.log(`First result: ${JSON.stringify(searchWithResults.results[0], null, 2)}`);
+        }
+      }
       
       if (!searchWithResults) {
+        console.log(`Search ${id} not found in storage`);
         return res.status(404).json({ message: "Search not found" });
       }
 
       res.json(searchWithResults);
     } catch (error) {
+      console.error(`Error fetching search ${req.params.id}:`, error);
       res.status(500).json({ message: "Failed to fetch search results" });
     }
   });
@@ -907,21 +920,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Save results
+      console.log(`=== SAVING ${results.length} RESULTS TO STORAGE ===`);
       for (const result of results) {
+        console.log(`Saving result: ${result.medication.name} - ${result.cost}`);
+        
         // Create or find medication
         let medication = await storage.getMedicationByNdc(result.medication.ndc || '');
         if (!medication) {
+          console.log(`Creating new medication: ${result.medication.name}`);
           medication = await storage.createMedication(result.medication);
+        } else {
+          console.log(`Found existing medication: ${medication.name}`);
         }
 
         // Create search result
-        await storage.createSearchResult({
+        const searchResult = await storage.createSearchResult({
           searchId,
           medicationId: medication.id,
           vendorId: searchData.vendorId,
           cost: result.cost,
           availability: result.availability,
         });
+        console.log(`Created search result with ID: ${searchResult.id}`);
       }
 
       // Update search completion
