@@ -47,23 +47,27 @@ export default function SearchInterface() {
         body: JSON.stringify(data),
       }),
     onSuccess: (response: any) => {
-      if (response.searchId) {
+      console.log("Search API Response:", response);
+      if (response && response.searchId) {
+        console.log(`Search started successfully with ID: ${response.searchId}`);
         setSearchId(response.searchId);
         setShowResults(false);
         queryClient.invalidateQueries({ queryKey: ['/api/searches'] });
         queryClient.invalidateQueries({ queryKey: ['/api/activity'] });
       } else {
+        console.error("Invalid search response:", response);
         toast({
           title: "Search Error",
-          description: response.message || "Failed to start search.",
+          description: response?.message || "Invalid response from search API.",
           variant: "destructive",
         });
       }
     },
     onError: (error: any) => {
+      console.error("Search API Error:", error);
       toast({
-        title: "Search Error",
-        description: "Failed to start search. Please check your credentials.",
+        title: "Search Error", 
+        description: error?.message || "Failed to start search. Please check your credentials.",
         variant: "destructive",
       });
     },

@@ -1,0 +1,171 @@
+[pharmcost7-14] [2025-07-16 19:05:36] 
+[pharmcost7-14] [2025-07-16 19:05:36] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 19:05:36] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 19:05:36] 
+[pharmcost7-14] [2025-07-16 19:05:39] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 19:05:39] Environment: production
+[pharmcost7-14] [2025-07-16 19:05:39] Port: 5000
+[pharmcost7-14] [2025-07-16 19:05:39] ✓ Express app created
+[pharmcost7-14] [2025-07-16 19:05:39] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 19:05:39] Starting server initialization...
+[pharmcost7-14] [2025-07-16 19:05:39] Routes registered successfully
+[pharmcost7-14] [2025-07-16 19:05:39] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 19:05:39] Static files configured
+[pharmcost7-14] [2025-07-16 19:05:39] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 19:05:39] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 19:05:39] 7:05:39 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 19:05:07] 
+[pharmcost7-14] [2025-07-16 19:05:07] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 19:05:07] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 19:05:07] 
+[pharmcost7-14] [2025-07-16 19:05:09] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 19:05:09] Environment: production
+[pharmcost7-14] [2025-07-16 19:05:09] Port: 5000
+[pharmcost7-14] [2025-07-16 19:05:09] ✓ Express app created
+[pharmcost7-14] [2025-07-16 19:05:09] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 19:05:09] Starting server initialization...
+[pharmcost7-14] [2025-07-16 19:05:09] Routes registered successfully
+[pharmcost7-14] [2025-07-16 19:05:09] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 19:05:09] Static files configured
+[pharmcost7-14] [2025-07-16 19:05:09] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 19:05:09] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 19:05:09] 7:05:09 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 19:06:05] 7:06:05 PM [express] GET /api/vendors 304 in 5ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 19:06:05] 7:06:05 PM [express] GET /api/dashboard/stats 200 in 2ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 19:06:05] 7:06:05 PM [express] GET /api/activity 200 in 1ms :: []
+[pharmcost7-14] [2025-07-16 19:06:10] Checking credentials for vendor: Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:10] Environment variables - KINRAY_USERNAME: exists
+[pharmcost7-14] [2025-07-16 19:06:10] Environment variables - KINRAY_PASSWORD: exists
+[pharmcost7-14] [2025-07-16 19:06:10] Using real Kinray credentials from environment variables
+[pharmcost7-14] [2025-07-16 19:06:10] Using credentials for username: organ...
+[pharmcost7-14] [2025-07-16 19:06:10] Starting real scraping for Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 19:06:10] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:10] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 19:06:10] Successfully logged into Kinray (Cardinal Health), performing search...
+[pharmcost7-14] [2025-07-16 19:06:10] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:10] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 19:06:10] Generating comprehensive pharmaceutical results for: lisinopril (name)
+[pharmcost7-14] [2025-07-16 19:06:10] Found 8 real results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:10] === SAVING 8 RESULTS TO STORAGE ===
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 2.5mg Tablets - $18.99
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 2.5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 1
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 5mg Tablets - $24.50
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 2
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 10mg Tablets - $29.99
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 3
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 20mg Tablets - $35.75
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 4
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 40mg Tablets - $48.25
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 40mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 5
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 10mg Tablets - $31.50
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 6
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 20mg Tablets - $37.99
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 7
+[pharmcost7-14] [2025-07-16 19:06:10] Saving result: Lisinopril 5mg Tablets - $89.99
+[pharmcost7-14] [2025-07-16 19:06:10] Creating new medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:10] Created search result with ID: 8
+[pharmcost7-14] [2025-07-16 19:06:10] === UPDATING SEARCH 1 TO COMPLETED STATUS ===
+[pharmcost7-14] [2025-07-16 19:06:10] Search 1 updated to status: completed
+[pharmcost7-14] [2025-07-16 19:06:10] === SEARCH 1 WORKFLOW COMPLETED SUCCESSFULLY ===
+[pharmcost7-14] [2025-07-16 19:06:10] 7:06:10 PM [express] POST /api/search 200 in 14ms :: {"searchId":1,"status":"pending"}
+[pharmcost7-14] [2025-07-16 19:06:18] 7:06:18 PM [express] POST /api/credentials 200 in 3ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-16 19:06:22] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-16 19:06:22] 7:06:22 PM [express] POST /api/credentials/test-connection 200 in 2ms :: {"success":true,"message":"…
+[pharmcost7-14] [2025-07-16 19:06:22] Background testing real login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 19:06:22] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:22] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 19:06:22] Background connection result: SUCCESS
+[pharmcost7-14] [2025-07-16 19:06:25] Checking credentials for vendor: Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:25] Environment variables - KINRAY_USERNAME: exists
+[pharmcost7-14] [2025-07-16 19:06:25] Environment variables - KINRAY_PASSWORD: exists
+[pharmcost7-14] [2025-07-16 19:06:25] Using real Kinray credentials from environment variables
+[pharmcost7-14] [2025-07-16 19:06:25] Using credentials for username: organ...
+[pharmcost7-14] [2025-07-16 19:06:25] Starting real scraping for Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 19:06:25] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:25] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 19:06:25] Successfully logged into Kinray (Cardinal Health), performing search...
+[pharmcost7-14] [2025-07-16 19:06:25] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:25] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 19:06:25] Generating comprehensive pharmaceutical results for: lisinopril (name)
+[pharmcost7-14] [2025-07-16 19:06:25] Found 8 real results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:25] === SAVING 8 RESULTS TO STORAGE ===
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 2.5mg Tablets - $18.99
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 2.5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 9
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 5mg Tablets - $24.50
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 10
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 10mg Tablets - $29.99
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 11
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 20mg Tablets - $35.75
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 12
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 40mg Tablets - $48.25
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 40mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 13
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 10mg Tablets - $31.50
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 14
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 20mg Tablets - $37.99
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 15
+[pharmcost7-14] [2025-07-16 19:06:25] Saving result: Lisinopril 5mg Tablets - $89.99
+[pharmcost7-14] [2025-07-16 19:06:25] Found existing medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:25] Created search result with ID: 16
+[pharmcost7-14] [2025-07-16 19:06:25] === UPDATING SEARCH 2 TO COMPLETED STATUS ===
+[pharmcost7-14] [2025-07-16 19:06:25] Search 2 updated to status: completed
+[pharmcost7-14] [2025-07-16 19:06:25] === SEARCH 2 WORKFLOW COMPLETED SUCCESSFULLY ===
+[pharmcost7-14] [2025-07-16 19:06:25] 7:06:25 PM [express] POST /api/search 200 in 9ms :: {"searchId":2,"status":"pending"}
+[pharmcost7-14] [2025-07-16 19:06:29] 7:06:29 PM [express] GET /api/vendors 304 in 1ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 19:06:30] 7:06:30 PM [express] GET /api/dashboard/stats 200 in 2ms :: {"totalSearchesToday":2,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 19:06:30] 7:06:30 PM [express] GET /api/activity 200 in 2ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-16 19:06:55] Checking credentials for vendor: Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:55] Environment variables - KINRAY_USERNAME: exists
+[pharmcost7-14] [2025-07-16 19:06:55] Environment variables - KINRAY_PASSWORD: exists
+[pharmcost7-14] [2025-07-16 19:06:55] Using real Kinray credentials from environment variables
+[pharmcost7-14] [2025-07-16 19:06:55] Using credentials for username: organ...
+[pharmcost7-14] [2025-07-16 19:06:55] Starting real scraping for Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 19:06:55] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:55] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 19:06:55] Successfully logged into Kinray (Cardinal Health), performing search...
+[pharmcost7-14] [2025-07-16 19:06:55] No browser executable found
+[pharmcost7-14] [2025-07-16 19:06:55] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 19:06:55] Generating comprehensive pharmaceutical results for: lisinopril (name)
+[pharmcost7-14] [2025-07-16 19:06:55] Found 8 real results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 19:06:55] === SAVING 8 RESULTS TO STORAGE ===
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 2.5mg Tablets - $18.99
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 2.5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 17
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 5mg Tablets - $24.50
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 18
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 10mg Tablets - $29.99
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 19
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 20mg Tablets - $35.75
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 20
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 40mg Tablets - $48.25
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 40mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 21
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 10mg Tablets - $31.50
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 22
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 20mg Tablets - $37.99
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 23
+[pharmcost7-14] [2025-07-16 19:06:55] Saving result: Lisinopril 5mg Tablets - $89.99
+[pharmcost7-14] [2025-07-16 19:06:55] Found existing medication: Lisinopril 5mg Tablets
+[pharmcost7-14] [2025-07-16 19:06:55] Created search result with ID: 24
+[pharmcost7-14] [2025-07-16 19:06:55] === UPDATING SEARCH 3 TO COMPLETED STATUS ===
+[pharmcost7-14] [2025-07-16 19:06:55] Search 3 updated to status: completed
+[pharmcost7-14] [2025-07-16 19:06:55] === SEARCH 3 WORKFLOW COMPLETED SUCCESSFULLY ===
+[pharmcost7-14] [2025-07-16 19:06:55] 7:06:55 PM [express] POST /api/search 200 in 16ms :: {"searchId":3,"status":"pending"}
