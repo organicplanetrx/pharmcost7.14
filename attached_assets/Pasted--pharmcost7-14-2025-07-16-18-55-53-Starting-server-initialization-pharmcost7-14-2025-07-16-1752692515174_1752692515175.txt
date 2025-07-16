@@ -1,0 +1,23 @@
+[pharmcost7-14] [2025-07-16 18:55:53] Starting server initialization...
+[pharmcost7-14] [2025-07-16 18:55:53] Routes registered successfully
+[pharmcost7-14] [2025-07-16 18:55:53] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 18:55:53] Static files configured
+[pharmcost7-14] [2025-07-16 18:55:53] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 18:55:53] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 18:55:53] 6:55:53 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 19:00:10] 7:00:10 PM [express] GET /api/dashboard/stats 200 in 2ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 19:00:17] 7:00:17 PM [express] POST /api/credentials 200 in 3ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-16 19:00:19] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-16 19:00:19] 7:00:19 PM [express] POST /api/credentials/test-connection 200 in 5ms :: {"success":true,"message":"…
+[pharmcost7-14] [2025-07-16 19:01:20] 7:01:20 PM [express] POST /api/search 200 in 5ms :: {"searchId":2,"status":"pending"}
+[pharmcost7-14] [2025-07-16 19:01:27] 7:01:27 PM [express] GET /api/dashboard/stats 200 in 1ms :: {"totalSearchesToday":2,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 19:01:27] 7:01:27 PM [express] GET /api/activity 200 in 2ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-16 19:00:20] Background testing real login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 19:00:20] No browser executable found
+[pharmcost7-14] [2025-07-16 19:00:20] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 19:00:20] Background connection result: SUCCESS
+[pharmcost7-14] [2025-07-16 19:00:29] 7:00:29 PM [express] GET /api/vendors 304 in 2ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 19:00:29] 7:00:29 PM [express] GET /api/dashboard/stats 304 in 1ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 19:00:29] 7:00:29 PM [express] GET /api/activity 200 in 2ms :: [{"action":"credentials_added","status":"succes…
+[pharmcost7-14] [2025-07-16 19:01:11] 7:01:11 PM [express] GET /api/vendors 304 in 1ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 19:01:27] 7:01:27 PM [express] GET /api/vendors 304 in 0ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
