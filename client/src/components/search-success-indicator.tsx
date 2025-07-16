@@ -12,10 +12,13 @@ interface SearchSuccessIndicatorProps {
 export default function SearchSuccessIndicator({ searchId, onComplete }: SearchSuccessIndicatorProps) {
   // Poll for search completion
   const { data: searchResults, isLoading } = useQuery<SearchWithResults>({
-    queryKey: [`/api/search/${searchId}`],
+    queryKey: ['/api/search', searchId],
+    queryFn: () => fetch(`/api/search/${searchId}`).then(res => res.json()),
     refetchInterval: (data) => {
+      console.log(`Polling search ${searchId}, current status:`, data?.status);
       // Stop polling when search is completed or failed
       if (data?.status === 'completed' || data?.status === 'failed') {
+        console.log(`Stopping poll for search ${searchId} - status: ${data?.status}`);
         return false;
       }
       return 2000; // Poll every 2 seconds
@@ -32,12 +35,14 @@ export default function SearchSuccessIndicator({ searchId, onComplete }: SearchS
     }
   }, [searchResults, searchId, onComplete]);
 
+  console.log(`SearchSuccessIndicator for ID ${searchId}:`, { isLoading, searchResults });
+
   if (isLoading || !searchResults || searchResults.status === 'pending' || searchResults.status === 'in_progress') {
     return (
       <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
         <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />
         <AlertDescription className="text-blue-700 dark:text-blue-300">
-          Search initiated successfully. Connecting to Kinray portal...
+          Search initiated successfully. Connecting to Kinray portal... (Status: {searchResults?.status || 'loading'})
         </AlertDescription>
       </Alert>
     );
