@@ -154,7 +154,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("📝 Search API called with body:", req.body);
       
-      const searchData = insertSearchSchema.parse(req.body);
+      const searchFormData = z.object({
+        vendorId: z.number(),
+        searchTerm: z.string().min(1),
+        searchType: z.enum(['name', 'ndc', 'generic']),
+      }).parse(req.body);
+      
+      const searchData = {
+        ...searchFormData,
+        status: "pending",
+        resultCount: 0,
+      };
       console.log("✅ Search data validated:", searchData);
       
       // Create search record

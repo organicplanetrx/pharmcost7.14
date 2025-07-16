@@ -15,7 +15,9 @@ import { z } from "zod";
 import SearchSuccessIndicator from "./search-success-indicator";
 import ResultsTable from "./results-table";
 
-const searchFormSchema = insertSearchSchema.extend({
+const searchFormSchema = z.object({
+  vendorId: z.number(),
+  searchTerm: z.string().min(1, "Search term is required"),
   searchType: z.enum(['name', 'ndc', 'generic']),
 });
 
