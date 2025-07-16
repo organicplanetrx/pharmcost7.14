@@ -181,6 +181,10 @@ Changelog:
 - July 16, 2025: Enhanced browser availability detection with proper fallback handling for DigitalOcean Node.js buildpack
 - July 16, 2025: Added detailed debug logging throughout search workflow for production troubleshooting
 - July 16, 2025: Fixed frontend search flow to properly display results after backend completion
+- July 16, 2025: Resolved critical routing conflict preventing React app from loading - removed legacy HTML interface route
+- July 16, 2025: Fixed React Query polling configuration with explicit queryFn for proper search completion detection
+- July 16, 2025: Enhanced SearchSuccessIndicator component with comprehensive debugging and status tracking
+- July 16, 2025: Application now properly serves React frontend instead of conflicting legacy HTML interface
 ```
 
 ## User Preferences

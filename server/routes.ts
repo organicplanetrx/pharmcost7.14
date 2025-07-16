@@ -387,8 +387,8 @@ function generateDemoResults(searchTerm: string, searchType: string, vendorName:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Serve frontend interface
-  app.get("/", (req, res) => {
+  // Legacy HTML interface moved to /legacy route
+  app.get("/legacy", (req, res) => {
     res.send(getPharmaCostInterface());
   });
 
