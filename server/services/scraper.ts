@@ -14,8 +14,8 @@ export class PuppeteerScrapingService implements ScrapingService {
 
   private async checkBrowserAvailability(): Promise<boolean> {
     try {
-      // Try to detect available Chrome/Chromium installations
-      const fs = require('fs');
+      // Import fs dynamically to avoid bundling issues
+      const { existsSync } = await import('fs');
       const chromePaths = [
         process.env.PUPPETEER_EXECUTABLE_PATH,
         '/usr/bin/google-chrome',
@@ -28,7 +28,7 @@ export class PuppeteerScrapingService implements ScrapingService {
 
       for (const path of chromePaths) {
         try {
-          if (path && fs.existsSync(path)) {
+          if (path && existsSync(path)) {
             console.log(`Browser found at: ${path}`);
             return true;
           }

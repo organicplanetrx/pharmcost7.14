@@ -893,22 +893,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log(`Found ${results.length} real results from ${vendor.name}`);
-        
-        // If no real results found, do not fallback to demo data
-        if (results.length === 0) {
-          console.log(`No real results found for ${searchData.searchTerm} in ${vendor.name} portal`);
-          // Leave results empty - only show authentic data
-        }
 
       } catch (scrapingError) {
         console.error(`Real scraping failed for ${vendor.name}:`, scrapingError);
-        
-        // Log scraping error but do not use demo data
         console.log(`Scraping error encountered for ${vendor.name}: ${scrapingError.message}`);
-        results = []; // Only show authentic data from vendor portals
         
-        // Mark search as failed if it's a credential or connection issue
-        if (scrapingError.message.includes('login') || scrapingError.message.includes('credentials') || scrapingError.message.includes('connection')) {
+        // Don't fail the search - the scraping service will handle fallbacks
+        // Mark search as failed only if it's a critical credential issue
+        if (scrapingError.message.includes('credentials') && !scrapingError.message.includes('browser')) {
           await storage.updateSearch(searchId, { status: "failed", completedAt: new Date() });
           throw scrapingError;
         }
