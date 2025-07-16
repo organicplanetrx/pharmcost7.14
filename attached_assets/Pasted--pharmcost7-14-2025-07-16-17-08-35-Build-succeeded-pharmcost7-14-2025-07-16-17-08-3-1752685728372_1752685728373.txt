@@ -1,0 +1,29 @@
+[pharmcost7-14] [2025-07-16 17:08:35] │ -----> Build succeeded!
+[pharmcost7-14] [2025-07-16 17:08:36] │ Running custom build command: npm run build
+[pharmcost7-14] [2025-07-16 17:08:36] │ 
+[pharmcost7-14] [2025-07-16 17:08:36] │ > rest-express@1.0.0 build
+[pharmcost7-14] [2025-07-16 17:08:36] │ > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[pharmcost7-14] [2025-07-16 17:08:36] │ 
+[pharmcost7-14] [2025-07-16 17:08:36] │ failed to load config from /workspace/vite.config.ts
+[pharmcost7-14] [2025-07-16 17:08:36] │ error during build:
+[pharmcost7-14] [2025-07-16 17:08:36] │ Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@replit/vite-plugin-runtime-error-modal' imported from /workspace/node_modules/.vite-temp/vite.config.ts.timestamp-1752685716921-565a9604cd293.mjs
+[pharmcost7-14] [2025-07-16 17:08:36] │     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:256:9)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at packageResolve (node:internal/modules/esm/resolve:768:81)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+[pharmcost7-14] [2025-07-16 17:08:36] │     at ModuleJob._link (node:internal/modules/esm/module_job:137:49)
+[pharmcost7-14] [2025-07-16 17:08:36] │ npm notice
+[pharmcost7-14] [2025-07-16 17:08:36] │ npm notice New major version of npm available! 10.9.2 -> 11.4.2
+[pharmcost7-14] [2025-07-16 17:08:36] │ npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+[pharmcost7-14] [2025-07-16 17:08:36] │ npm notice To update run: npm install -g npm@11.4.2
+[pharmcost7-14] [2025-07-16 17:08:36] │ npm notice
+[pharmcost7-14] [2025-07-16 17:08:36] │ building: exit status 1
+[pharmcost7-14] [2025-07-16 17:08:36] │ Timer: Builder ran for 29.219950224s and ended at 2025-07-16T17:08:36Z
+[pharmcost7-14] [2025-07-16 17:08:36] │ ERROR: failed to build: exit status 1
+[pharmcost7-14] [2025-07-16 17:08:37] │ 
+[pharmcost7-14] [2025-07-16 17:08:37] │ 
+[pharmcost7-14] [2025-07-16 17:08:37] │  ✘ build failed
