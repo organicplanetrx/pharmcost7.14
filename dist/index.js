@@ -1824,6 +1824,7 @@ var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
 });
 
 // server/routes.ts
+import { z } from "zod";
 function generateDemoResults(searchTerm, searchType, vendorName) {
   const baseResults = [
     {
@@ -1953,7 +1954,16 @@ async function registerRoutes(app2) {
   app2.post("/api/search", async (req, res) => {
     try {
       console.log("\u{1F4DD} Search API called with body:", req.body);
-      const searchData = insertSearchSchema.parse(req.body);
+      const searchFormData = z.object({
+        vendorId: z.number(),
+        searchTerm: z.string().min(1),
+        searchType: z.enum(["name", "ndc", "generic"])
+      }).parse(req.body);
+      const searchData = {
+        ...searchFormData,
+        status: "pending",
+        resultCount: 0
+      };
       console.log("\u2705 Search data validated:", searchData);
       const search = await storage.createSearch({
         ...searchData,
@@ -1980,11 +1990,11 @@ async function registerRoutes(app2) {
   app2.get("/api/search/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const search = await storage.getSearch(id);
-      if (!search) {
+      const searchWithResults = await storage.getSearchWithResults(id);
+      if (!searchWithResults) {
         return res.status(404).json({ message: "Search not found" });
       }
-      res.json(search);
+      res.json(searchWithResults);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch search" });
     }
@@ -2094,7 +2104,7 @@ async function registerRoutes(app2) {
         results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
       }
       for (const result of results) {
-        let medication = await storage.getMedicationByNdc(result.medication.ndc);
+        let medication = await storage.getMedicationByNdc(result.medication.ndc || "");
         if (!medication) {
           medication = await storage.createMedication(result.medication);
         }
