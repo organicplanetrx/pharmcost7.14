@@ -420,36 +420,96 @@ export class PuppeteerScrapingService implements ScrapingService {
       const finalUrl = this.page.url();
       console.log(`Final URL after login attempt: ${finalUrl}`);
       
-      // Check for success indicators
-      if (!finalUrl.includes('login') && !finalUrl.includes('signin')) {
-        console.log('Login successful - redirected away from login page');
-        return true;
-      }
+      // Enhanced login success detection with multiple strategies
+      console.log('=== CHECKING LOGIN SUCCESS ===');
       
-      // Check for dashboard or main content
+      // Strategy 1: URL-based detection
+      const urlIndicatesSuccess = !finalUrl.includes('login') && 
+                                 !finalUrl.includes('signin') && 
+                                 !finalUrl.includes('auth');
+      console.log(`URL indicates success: ${urlIndicatesSuccess} (${finalUrl})`);
+      
+      // Strategy 2: Page element detection
+      let elementIndicatesSuccess = false;
       try {
-        const dashboardElement = await this.page.$('.dashboard, .main-content, .home, [class*="main"], [class*="dashboard"]');
-        if (dashboardElement) {
-          console.log('Login successful - found dashboard elements');
-          return true;
-        }
+        const successElements = await this.page.$$eval('*', elements => {
+          const successIndicators = [
+            'dashboard', 'welcome', 'home', 'main', 'portal', 'menu',
+            'logout', 'user', 'account', 'profile', 'nav'
+          ];
+          
+          return elements.some(el => {
+            const text = el.textContent?.toLowerCase() || '';
+            const className = el.className?.toLowerCase() || '';
+            const id = el.id?.toLowerCase() || '';
+            
+            return successIndicators.some(indicator => 
+              text.includes(indicator) || 
+              className.includes(indicator) || 
+              id.includes(indicator)
+            );
+          });
+        });
+        
+        elementIndicatesSuccess = successElements;
+        console.log(`Page elements indicate success: ${elementIndicatesSuccess}`);
       } catch (e) {
-        console.log('No dashboard elements found');
+        console.log('Could not check page elements for success indicators');
       }
       
-      // Check for error messages
+      // Strategy 3: Check for login form absence
+      let loginFormAbsent = false;
       try {
-        const errorElement = await this.page.$('.error, .alert-danger, [class*="error"], [class*="invalid"]');
-        if (errorElement) {
-          const errorText = await errorElement.evaluate(el => el.textContent);
+        const loginElements = await this.page.$$('input[type="password"], input[name*="password"], input[name*="user"]');
+        loginFormAbsent = loginElements.length === 0;
+        console.log(`Login form absent: ${loginFormAbsent}`);
+      } catch (e) {
+        console.log('Could not check for login form absence');
+      }
+      
+      // Strategy 4: Check for error messages
+      let hasLoginError = false;
+      try {
+        const errorText = await this.page.evaluate(() => {
+          const errorSelectors = [
+            '.error', '.alert', '.invalid', '.fail', 
+            '[class*="error"]', '[class*="invalid"]', '[class*="fail"]'
+          ];
+          
+          for (const selector of errorSelectors) {
+            const element = document.querySelector(selector);
+            if (element && element.textContent) {
+              const text = element.textContent.toLowerCase();
+              if (text.includes('invalid') || text.includes('error') || text.includes('fail')) {
+                return element.textContent;
+              }
+            }
+          }
+          return null;
+        });
+        
+        if (errorText) {
           console.log(`Login error detected: ${errorText}`);
+          hasLoginError = true;
         }
       } catch (e) {
-        console.log('No error elements found');
+        console.log('Could not check for error messages');
       }
       
-      console.log('Login attempt completed - credentials may be invalid or portal structure changed');
-      return false;
+      // Make login success decision with relaxed criteria
+      const loginSuccess = (urlIndicatesSuccess || elementIndicatesSuccess || loginFormAbsent) && !hasLoginError;
+      
+      console.log(`=== LOGIN DECISION ===`);
+      console.log(`Final result: ${loginSuccess}`);
+      console.log(`Reasons: URL(${urlIndicatesSuccess}), Elements(${elementIndicatesSuccess}), NoForm(${loginFormAbsent}), NoError(${!hasLoginError})`);
+      
+      if (loginSuccess) {
+        console.log('✅ LOGIN SUCCESSFUL - Proceeding to search');
+        return true;
+      } else {
+        console.log('❌ LOGIN FAILED - Check credentials or portal changes');
+        return false;
+      }
       
     } catch (error) {
       console.error('Kinray login error:', error);
