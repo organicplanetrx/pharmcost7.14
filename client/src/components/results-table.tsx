@@ -11,10 +11,15 @@ interface ResultsTableProps {
 }
 
 export default function ResultsTable({ searchId }: ResultsTableProps) {
-  const { data: searchResults, isLoading } = useQuery<SearchWithResults>({
+  const { data: searchResults, isLoading, error } = useQuery<SearchWithResults>({
     queryKey: [`/api/search/${searchId}`],
-    refetchInterval: (data) => data?.status === 'pending' || data?.status === 'in_progress' ? 2000 : false,
+    refetchInterval: (data) => {
+      console.log(`ResultsTable polling for search ${searchId}, status: ${data?.status}`);
+      return data?.status === 'pending' || data?.status === 'in_progress' ? 2000 : false;
+    },
   });
+
+  console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, data:`, searchResults);
 
   const handleExport = () => {
     window.open(`/api/search/${searchId}/export`, '_blank');

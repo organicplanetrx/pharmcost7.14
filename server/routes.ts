@@ -945,11 +945,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update search completion
-      await storage.updateSearch(searchId, {
+      console.log(`=== UPDATING SEARCH ${searchId} TO COMPLETED STATUS ===`);
+      const updatedSearch = await storage.updateSearch(searchId, {
         status: "completed",
         resultCount: results.length,
         completedAt: new Date(),
       });
+      console.log(`Search ${searchId} updated to status: ${updatedSearch?.status}`);
 
       // Log success
       await storage.createActivityLog({
@@ -959,6 +961,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vendorId: searchData.vendorId,
         searchId,
       });
+      
+      console.log(`=== SEARCH ${searchId} WORKFLOW COMPLETED SUCCESSFULLY ===`);
 
     } catch (error) {
       console.error("Search failed:", error);

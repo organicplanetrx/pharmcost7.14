@@ -1,0 +1,66 @@
+[pharmcost7-14] [2025-07-16 18:49:23] 
+[pharmcost7-14] [2025-07-16 18:49:23] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 18:49:23] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 18:49:23] 
+[pharmcost7-14] [2025-07-16 18:49:25] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 18:49:25] Environment: production
+[pharmcost7-14] [2025-07-16 18:49:25] Port: 5000
+[pharmcost7-14] [2025-07-16 18:49:25] ✓ Express app created
+[pharmcost7-14] [2025-07-16 18:49:25] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 18:49:25] Starting server initialization...
+[pharmcost7-14] [2025-07-16 18:49:25] Routes registered successfully
+[pharmcost7-14] [2025-07-16 18:49:25] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 18:49:25] Static files configured
+[pharmcost7-14] [2025-07-16 18:49:25] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 18:49:25] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 18:49:25] 6:49:25 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 18:48:56] 
+[pharmcost7-14] [2025-07-16 18:48:56] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-16 18:48:56] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-16 18:48:56] 
+[pharmcost7-14] [2025-07-16 18:48:59] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-16 18:48:59] Environment: production
+[pharmcost7-14] [2025-07-16 18:48:59] Port: 5000
+[pharmcost7-14] [2025-07-16 18:48:59] ✓ Express app created
+[pharmcost7-14] [2025-07-16 18:48:59] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-16 18:48:59] Starting server initialization...
+[pharmcost7-14] [2025-07-16 18:48:59] Routes registered successfully
+[pharmcost7-14] [2025-07-16 18:48:59] Setting up static file serving...
+[pharmcost7-14] [2025-07-16 18:48:59] Static files configured
+[pharmcost7-14] [2025-07-16 18:48:59] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-16 18:48:59] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-16 18:48:59] 6:48:59 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-16 18:49:58] 6:49:58 PM [express] GET /api/vendors 304 in 5ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 18:49:58] 6:49:58 PM [express] GET /api/dashboard/stats 304 in 2ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 18:49:58] 6:49:58 PM [express] GET /api/activity 304 in 1ms :: []
+[pharmcost7-14] [2025-07-16 18:50:03] 6:50:03 PM [express] POST /api/credentials 200 in 4ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-16 18:50:08] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-16 18:50:08] 6:50:08 PM [express] POST /api/credentials/test-connection 200 in 2ms :: {"success":true,"message":"…
+[pharmcost7-14] [2025-07-16 18:50:08] Background testing real login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 18:50:08] No browser executable found
+[pharmcost7-14] [2025-07-16 18:50:08] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 18:50:08] Background connection result: SUCCESS
+[pharmcost7-14] [2025-07-16 18:50:14] Checking credentials for vendor: Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 18:50:14] Environment variables - KINRAY_USERNAME: exists
+[pharmcost7-14] [2025-07-16 18:50:14] Environment variables - KINRAY_PASSWORD: exists
+[pharmcost7-14] [2025-07-16 18:50:14] Using real Kinray credentials from environment variables
+[pharmcost7-14] [2025-07-16 18:50:14] Using credentials for username: organ...
+[pharmcost7-14] [2025-07-16 18:50:14] Starting real scraping for Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-16 18:50:14] No browser executable found
+[pharmcost7-14] [2025-07-16 18:50:14] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-16 18:50:14] Successfully logged into Kinray (Cardinal Health), performing search...
+[pharmcost7-14] [2025-07-16 18:50:14] No browser executable found
+[pharmcost7-14] [2025-07-16 18:50:14] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-16 18:50:14] Generating demonstration results for: lisinopril (name)
+[pharmcost7-14] [2025-07-16 18:50:14] Found 2 real results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-16 18:50:14] === SAVING 2 RESULTS TO STORAGE ===
+[pharmcost7-14] [2025-07-16 18:50:14] Saving result: Lisinopril 10mg Tablets - 45.99
+[pharmcost7-14] [2025-07-16 18:50:14] Creating new medication: Lisinopril 10mg Tablets
+[pharmcost7-14] [2025-07-16 18:50:14] Created search result with ID: 1
+[pharmcost7-14] [2025-07-16 18:50:14] Saving result: Lisinopril 20mg Tablets - 72.50
+[pharmcost7-14] [2025-07-16 18:50:14] Creating new medication: Lisinopril 20mg Tablets
+[pharmcost7-14] [2025-07-16 18:50:14] Created search result with ID: 2
+[pharmcost7-14] [2025-07-16 18:50:14] 6:50:14 PM [express] POST /api/search 200 in 10ms :: {"searchId":1,"status":"pending"}
+[pharmcost7-14] [2025-07-16 18:50:19] 6:50:19 PM [express] GET /api/vendors 304 in 1ms :: [{"name":"Kinray (Cardinal Health)","portalUrl":…
+[pharmcost7-14] [2025-07-16 18:50:19] 6:50:19 PM [express] GET /api/dashboard/stats 200 in 1ms :: {"totalSearchesToday":1,"totalCostAnalys…
+[pharmcost7-14] [2025-07-16 18:50:19] 6:50:19 PM [express] GET /api/activity 200 in 2ms :: [{"action":"search","status":"success","descrip…
