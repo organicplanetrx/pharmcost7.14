@@ -1,0 +1,120 @@
+[2025-07-16 17:16:01] ╭──────────── git repo clone ───────────╼
+[2025-07-16 17:16:01] │  › fetching app source code
+[2025-07-16 17:16:01] │ => Selecting branch "main"
+[2025-07-16 17:16:02] │ => Checking out commit "897b68f8463594dd4bf1117616f0072c7f6b8169"
+[2025-07-16 17:16:02] │ 
+[2025-07-16 17:16:02] │  ✔ cloned repo to /workspace
+[2025-07-16 17:16:02] ╰────────────────────────────────────────╼
+[2025-07-16 17:16:02] 
+[2025-07-16 17:16:02]  › configuring build-time app environment variables:
+[2025-07-16 17:16:02]      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD PUPPETEER_EXECUTABLE_PATH KINRAY_USERNAME KINRAY_PASSWORD NODE_ENV
+[2025-07-16 17:16:02] 
+[2025-07-16 17:16:02]  › configuring custom build command to be run at the end of the build:
+[2025-07-16 17:16:02]    │ npm run build
+[2025-07-16 17:16:02] 
+[2025-07-16 17:16:02] ╭──────────── buildpack detection ───────────╼
+[2025-07-16 17:16:02] │  › using Ubuntu 22.04 stack
+[2025-07-16 17:16:04] │ Detected the following buildpacks suitable to build your app:
+[2025-07-16 17:16:04] │ 
+[2025-07-16 17:16:04] │    digitalocean/nodejs-appdetect  v0.0.6    
+[2025-07-16 17:16:04] │    heroku/nodejs                  v0.296.5  (Node.js)
+[2025-07-16 17:16:04] │    digitalocean/procfile          v0.1.0    (Procfile)
+[2025-07-16 17:16:04] │    digitalocean/custom            v0.1.3    (Custom Build Command)
+[2025-07-16 17:16:04] ╰─────────────────────────────────────────────╼
+[2025-07-16 17:16:04] 
+[2025-07-16 17:16:04] ╭──────────── app build ───────────╼
+[2025-07-16 17:16:04] │ Warning: no analyzed metadata found at path '/layers/analyzed.toml'
+[2025-07-16 17:16:04] │ Timer: Builder started at 2025-07-16T17:16:04Z
+[2025-07-16 17:16:04] │        
+[2025-07-16 17:16:04] │ -----> Creating runtime environment
+[2025-07-16 17:16:04] │        
+[2025-07-16 17:16:04] │        NPM_CONFIG_LOGLEVEL=error
+[2025-07-16 17:16:04] │        NODE_VERBOSE=false
+[2025-07-16 17:16:04] │        NODE_ENV=production
+[2025-07-16 17:16:04] │        NODE_MODULES_CACHE=true
+[2025-07-16 17:16:04] │        
+[2025-07-16 17:16:04] │ -----> Installing binaries
+[2025-07-16 17:16:04] │        engines.node (package.json):   unspecified
+[2025-07-16 17:16:04] │        engines.npm (package.json):    unspecified (use default)
+[2025-07-16 17:16:04] │        
+[2025-07-16 17:16:05] │        Resolving node version 22.x...
+[2025-07-16 17:16:05] │        Downloading and installing node 22.16.0...
+[2025-07-16 17:16:08] │        Using default npm version: 10.9.2
+[2025-07-16 17:16:09] │        
+[2025-07-16 17:16:09] │ -----> Installing dependencies
+[2025-07-16 17:16:09] │        Installing node modules
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        added 490 packages, and audited 491 packages in 18s
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        52 packages are looking for funding
+[2025-07-16 17:16:27] │          run `npm fund` for details
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        5 moderate severity vulnerabilities
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        To address issues that do not require attention, run:
+[2025-07-16 17:16:27] │          npm audit fix
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        To address all issues (including breaking changes), run:
+[2025-07-16 17:16:27] │          npm audit fix --force
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │        Run `npm audit` for details.
+[2025-07-16 17:16:27] │        npm notice
+[2025-07-16 17:16:27] │        npm notice New major version of npm available! 10.9.2 -> 11.4.2
+[2025-07-16 17:16:27] │        npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+[2025-07-16 17:16:27] │        npm notice To update run: npm install -g npm@11.4.2
+[2025-07-16 17:16:27] │        npm notice
+[2025-07-16 17:16:27] │        
+[2025-07-16 17:16:27] │ -----> Build
+[2025-07-16 17:16:28] │        
+[2025-07-16 17:16:28] │ -----> Caching build
+[2025-07-16 17:16:28] │        - npm cache
+[2025-07-16 17:16:28] │        
+[2025-07-16 17:16:28] │ -----> Pruning devDependencies
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │        up to date, audited 444 packages in 1s
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │        50 packages are looking for funding
+[2025-07-16 17:16:29] │          run `npm fund` for details
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │        2 moderate severity vulnerabilities
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │        To address all issues, run:
+[2025-07-16 17:16:29] │          npm audit fix
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │        Run `npm audit` for details.
+[2025-07-16 17:16:29] │        npm notice
+[2025-07-16 17:16:29] │        npm notice New major version of npm available! 10.9.2 -> 11.4.2
+[2025-07-16 17:16:29] │        npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+[2025-07-16 17:16:29] │        npm notice To update run: npm install -g npm@11.4.2
+[2025-07-16 17:16:29] │        npm notice
+[2025-07-16 17:16:29] │        
+[2025-07-16 17:16:29] │ -----> Build succeeded!
+[2025-07-16 17:16:30] │ Running custom build command: npm run build
+[2025-07-16 17:16:30] │ 
+[2025-07-16 17:16:30] │ > rest-express@1.0.0 build
+[2025-07-16 17:16:30] │ > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[2025-07-16 17:16:30] │ 
+[2025-07-16 17:16:31] │ failed to load config from /workspace/vite.config.ts
+[2025-07-16 17:16:31] │ error during build:
+[2025-07-16 17:16:31] │ Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@replit/vite-plugin-runtime-error-modal' imported from /workspace/node_modules/.vite-temp/vite.config.ts.timestamp-1752686191096-fe8308b9d7d09.mjs
+[2025-07-16 17:16:31] │     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:256:9)
+[2025-07-16 17:16:31] │     at packageResolve (node:internal/modules/esm/resolve:768:81)
+[2025-07-16 17:16:31] │     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+[2025-07-16 17:16:31] │     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+[2025-07-16 17:16:31] │     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+[2025-07-16 17:16:31] │     at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+[2025-07-16 17:16:31] │     at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+[2025-07-16 17:16:31] │     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+[2025-07-16 17:16:31] │     at ModuleJob._link (node:internal/modules/esm/module_job:137:49)
+[2025-07-16 17:16:31] │ npm notice
+[2025-07-16 17:16:31] │ npm notice New major version of npm available! 10.9.2 -> 11.4.2
+[2025-07-16 17:16:31] │ npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.2
+[2025-07-16 17:16:31] │ npm notice To update run: npm install -g npm@11.4.2
+[2025-07-16 17:16:31] │ npm notice
+[2025-07-16 17:16:31] │ building: exit status 1
+[2025-07-16 17:16:31] │ Timer: Builder ran for 27.060888461s and ended at 2025-07-16T17:16:31Z
+[2025-07-16 17:16:31] │ ERROR: failed to build: exit status 1
+[2025-07-16 17:16:31] │ 
+[2025-07-16 17:16:31] │ 
+[2025-07-16 17:16:31] │  ✘ build failed
+[]
