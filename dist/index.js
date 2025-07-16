@@ -1952,18 +1952,29 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/search", async (req, res) => {
     try {
+      console.log("\u{1F4DD} Search API called with body:", req.body);
       const searchData = insertSearchSchema.parse(req.body);
+      console.log("\u2705 Search data validated:", searchData);
       const search = await storage.createSearch({
         ...searchData,
         status: "pending",
         resultCount: 0
       });
+      console.log("\u2705 Search record created with ID:", search.id);
       performSearch(search.id, searchData).catch((error) => {
         console.error(`Background search ${search.id} failed:`, error);
       });
+      console.log("\u{1F680} Returning search ID:", search.id);
       res.json({ searchId: search.id });
     } catch (error) {
-      res.status(500).json({ message: "Failed to start search" });
+      console.error("\u274C Search API error:", error);
+      console.error("Error details:", error.message);
+      console.error("Request body:", req.body);
+      res.status(500).json({
+        message: "Failed to start search",
+        error: error.message,
+        details: error
+      });
     }
   });
   app2.get("/api/search/:id", async (req, res) => {
@@ -2113,7 +2124,7 @@ async function registerRoutes(app2) {
       await storage.createActivityLog({
         action: "search",
         status: "failure",
-        description: `Search failed for "${searchData.searchTerm}": ${error}`,
+        description: `Search failed for "${searchData.searchTerm}": ${error.message || error}`,
         vendorId: searchData.vendorId,
         searchId
       });

@@ -131,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: `Failed to login to ${vendor.name} portal - please check credentials` 
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Connection test failed for ${vendor.name}:`, error);
         res.json({ 
           success: false, 
@@ -152,7 +152,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search endpoints
   app.post("/api/search", async (req, res) => {
     try {
+      console.log("📝 Search API called with body:", req.body);
+      
       const searchData = insertSearchSchema.parse(req.body);
+      console.log("✅ Search data validated:", searchData);
       
       // Create search record
       const search = await storage.createSearch({
@@ -160,15 +163,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         resultCount: 0,
       });
+      console.log("✅ Search record created with ID:", search.id);
 
       // Start search in background
       performSearch(search.id, searchData).catch(error => {
         console.error(`Background search ${search.id} failed:`, error);
       });
 
+      console.log("🚀 Returning search ID:", search.id);
       res.json({ searchId: search.id });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to start search" });
+    } catch (error: any) {
+      console.error("❌ Search API error:", error);
+      console.error("Error details:", error.message);
+      console.error("Request body:", req.body);
+      res.status(500).json({ 
+        message: "Failed to start search",
+        error: error.message,
+        details: error
+      });
     }
   });
 
@@ -315,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Search timed out, generating demo results...`);
           results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
         }
-      } catch (scrapingError) {
+      } catch (scrapingError: any) {
         console.log(`Scraping failed, generating demo results:`, scrapingError.message);
         results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
       }
@@ -323,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save results to storage
       for (const result of results) {
         // Create medication if it doesn't exist
-        let medication = await storage.getMedicationByNdc(result.medication.ndc);
+        let medication = await storage.getMedicationByNdc(result.medication.ndc || '');
         
         if (!medication) {
           medication = await storage.createMedication(result.medication);
@@ -355,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchId,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search failed:", error);
       
       // Update search status
@@ -365,7 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createActivityLog({
         action: "search",
         status: "failure",
-        description: `Search failed for "${searchData.searchTerm}": ${error}`,
+        description: `Search failed for "${searchData.searchTerm}": ${error.message || error}`,
         vendorId: searchData.vendorId,
         searchId,
       });
