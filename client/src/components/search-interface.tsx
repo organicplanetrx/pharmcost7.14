@@ -73,8 +73,15 @@ export default function SearchInterface() {
   });
 
   const onSubmit = (data: SearchFormData) => {
-    console.log("Starting search with data:", data);
+    console.log("Form submitted - Starting search with data:", data);
     console.log("Credentials available:", credentials);
+    
+    // Add explicit debugging
+    toast({
+      title: "Search Starting",
+      description: `Searching for ${data.searchTerm} (${data.searchType})`,
+    });
+    
     searchMutation.mutate(data);
   };
 
@@ -142,6 +149,10 @@ export default function SearchInterface() {
                 type="submit"
                 disabled={searchMutation.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"
+                onClick={(e) => {
+                  console.log("Search button clicked");
+                  // Don't prevent default - let form handle submission
+                }}
               >
                 {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
               </Button>
