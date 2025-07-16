@@ -106,9 +106,10 @@ export default function SearchInterface() {
           <Form {...form}>
             <form 
               onSubmit={(e) => {
-                console.log("📝 Form onSubmit triggered");
+                console.log("📝 Form onSubmit triggered - preventing default");
                 e.preventDefault();
-                form.handleSubmit(onSubmit)(e);
+                e.stopPropagation();
+                return false;
               }} 
               className="space-y-4"
             >
@@ -155,10 +156,13 @@ export default function SearchInterface() {
               />
 
               <Button
-                type="submit"
+                type="button"
                 disabled={searchMutation.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"
                 onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
                   console.log("🔍 Search button clicked!");
                   console.log("Form state:", form.formState);
                   console.log("Form errors:", form.formState.errors);
