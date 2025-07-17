@@ -168,6 +168,7 @@ export class MemStorage implements IStorage {
       packageSize: medication.packageSize ?? null,
       strength: medication.strength ?? null,
       dosageForm: medication.dosageForm ?? null,
+      manufacturer: medication.manufacturer ?? null,
     };
     this.medications.set(newMedication.id, newMedication);
     return newMedication;

@@ -29,19 +29,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
     window.open(`/api/search/${searchId}/export`, '_blank');
   };
 
-  const getStatusBadge = (availability: string) => {
-    switch (availability.toLowerCase()) {
-      case 'available':
-        return <Badge className="bg-green-100 text-green-800">Available</Badge>;
-      case 'limited':
-        return <Badge className="bg-yellow-100 text-yellow-800">Limited</Badge>;
-      case 'out_of_stock':
-      case 'out of stock':
-        return <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -199,12 +187,16 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
                 </th>
                 <th className="text-left py-3 px-6 font-medium text-slate-700">
                   <div className="flex items-center">
+                    Manufacturer
+                    <ArrowUpDown className="h-4 w-4 ml-2 text-slate-400" />
+                  </div>
+                </th>
+                <th className="text-left py-3 px-6 font-medium text-slate-700">
+                  <div className="flex items-center">
                     Cost
                     <ArrowUpDown className="h-4 w-4 ml-2 text-slate-400" />
                   </div>
                 </th>
-                <th className="text-left py-3 px-6 font-medium text-slate-700">Status</th>
-                <th className="text-left py-3 px-6 font-medium text-slate-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -228,23 +220,13 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
                   <td className="py-4 px-6 text-slate-700">
                     {result.medication.packageSize || 'N/A'}
                   </td>
+                  <td className="py-4 px-6 text-slate-700">
+                    {result.medication.manufacturer || 'N/A'}
+                  </td>
                   <td className="py-4 px-6">
                     <span className="font-semibold text-slate-900">
                       {result.cost.startsWith('$') ? result.cost : `$${result.cost}`}
                     </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    {getStatusBadge(result.availability || 'unknown')}
-                  </td>
-                  <td className="py-4 px-6">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-primary hover:text-primary/80"
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Details
-                    </Button>
                   </td>
                 </tr>
               ))}

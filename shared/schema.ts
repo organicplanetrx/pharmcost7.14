@@ -26,6 +26,7 @@ export const medications = pgTable("medications", {
   packageSize: text("package_size"),
   strength: text("strength"),
   dosageForm: text("dosage_form"),
+  manufacturer: text("manufacturer"),
 });
 
 export const searches = pgTable("searches", {

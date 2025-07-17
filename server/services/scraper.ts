@@ -66,7 +66,8 @@ export class PuppeteerScrapingService implements ScrapingService {
             ndc: '68180097901',
             packageSize: '100 EA',
             strength: '40mg',
-            dosageForm: 'Tablet'
+            dosageForm: 'Tablet',
+            manufacturer: 'Lupin Pharmaceuticals'
           },
           cost: '$3.20',
           availability: 'In Stock',
@@ -213,7 +214,8 @@ export class PuppeteerScrapingService implements ScrapingService {
             ndc: '68180085603',
             packageSize: '1000 EA',
             strength: '500mg',
-            dosageForm: 'Tablet'
+            dosageForm: 'Tablet',
+            manufacturer: 'Lupin Pharmaceuticals'
           },
           cost: '$12.45',
           availability: 'In Stock',
@@ -308,7 +310,8 @@ export class PuppeteerScrapingService implements ScrapingService {
         ndc: item.ndc,
         packageSize: item.name.includes('500') ? '500 EA' : '100 EA',
         strength: item.name.includes('20MG') ? '20mg' : item.name.includes('10MG') ? '10mg' : '5mg',
-        dosageForm: 'Tablet'
+        dosageForm: 'Tablet',
+        manufacturer: 'Lupin Pharmaceuticals'
       },
       cost: item.cost,
       availability: 'In Stock',
