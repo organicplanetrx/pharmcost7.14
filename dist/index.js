@@ -643,18 +643,26 @@ var PuppeteerScrapingService = class {
           delete fallbackConfig.executablePath;
           try {
             console.log("\u{1F4E6} Downloading Puppeteer bundled browser (first time may take a moment)...");
-            this.browser = await puppeteer.launch(fallbackConfig);
+            process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "false";
+            process.env.PUPPETEER_EXECUTABLE_PATH = "";
+            const puppeteerFresh = await import("puppeteer");
+            this.browser = await puppeteerFresh.default.launch(fallbackConfig);
             console.log("\u2705 Successfully launched with Puppeteer bundled browser");
             return;
           } catch (fallbackError) {
             console.log("\u274C Bundled browser also failed:", fallbackError.message);
-            console.log("\u{1F504} Trying minimal browser configuration...");
+            console.log("\u{1F504} Trying completely clean browser configuration...");
             try {
+              const cleanEnv = { ...process.env };
+              delete cleanEnv.PUPPETEER_EXECUTABLE_PATH;
+              delete cleanEnv.CHROME_BIN;
+              delete cleanEnv.GOOGLE_CHROME_BIN;
               this.browser = await puppeteer.launch({
                 headless: true,
-                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+                args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+                env: cleanEnv
               });
-              console.log("\u2705 Minimal browser configuration successful");
+              console.log("\u2705 Clean browser configuration successful");
               return;
             } catch (minimalError) {
               console.log("\u274C All browser launch attempts failed:", minimalError.message);

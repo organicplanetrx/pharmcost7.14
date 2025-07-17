@@ -472,20 +472,34 @@ export class PuppeteerScrapingService implements ScrapingService {
           
           try {
             console.log('📦 Downloading Puppeteer bundled browser (first time may take a moment)...');
-            this.browser = await puppeteer.launch(fallbackConfig);
+            
+            // Force Puppeteer to download its own browser by setting specific env vars
+            process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'false';
+            process.env.PUPPETEER_EXECUTABLE_PATH = '';
+            
+            // Import puppeteer fresh to trigger browser download
+            const puppeteerFresh = await import('puppeteer');
+            this.browser = await puppeteerFresh.default.launch(fallbackConfig);
             console.log('✅ Successfully launched with Puppeteer bundled browser');
             return;
           } catch (fallbackError) {
             console.log('❌ Bundled browser also failed:', fallbackError.message);
             
-            // Final fallback: try with minimal args
-            console.log('🔄 Trying minimal browser configuration...');
+            // Final fallback: try with completely clean configuration
+            console.log('🔄 Trying completely clean browser configuration...');
             try {
+              // Clear all environment variables that might interfere
+              const cleanEnv = { ...process.env };
+              delete cleanEnv.PUPPETEER_EXECUTABLE_PATH;
+              delete cleanEnv.CHROME_BIN;
+              delete cleanEnv.GOOGLE_CHROME_BIN;
+              
               this.browser = await puppeteer.launch({
                 headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+                env: cleanEnv
               });
-              console.log('✅ Minimal browser configuration successful');
+              console.log('✅ Clean browser configuration successful');
               return;
             } catch (minimalError) {
               console.log('❌ All browser launch attempts failed:', minimalError.message);

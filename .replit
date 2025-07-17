@@ -2,7 +2,7 @@ modules = ["nodejs-20"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["postgresql", "chromium"]
+packages = ["postgresql", "chromium", "glib", "gtk3", "atk", "pango", "cairo", "gdk-pixbuf", "nss", "nspr"]
 
 [[ports]]
 localPort = 5000
