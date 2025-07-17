@@ -492,7 +492,9 @@ export class PuppeteerScrapingService implements ScrapingService {
               console.log('✅ Successfully launched with Puppeteer bundled browser');
               return;
             } catch (bundledError) {
-              if (bundledError.message.includes('Could not find browser') && !downloadAttempted) {
+              if ((bundledError.message.includes('Could not find browser') || 
+                   bundledError.message.includes('Tried to find the browser') ||
+                   bundledError.message.includes('no executable was found')) && !downloadAttempted) {
                 console.log('🔄 Browser not found, attempting download...');
                 downloadAttempted = true;
                 
@@ -544,6 +546,12 @@ export class PuppeteerScrapingService implements ScrapingService {
             }
           } catch (fallbackError) {
             console.log('❌ Bundled browser also failed:', fallbackError.message);
+            console.log('🔍 Error details for debugging:', {
+              message: fallbackError.message,
+              includesCouldNotFind: fallbackError.message.includes('Could not find browser'),
+              includesTriedToFind: fallbackError.message.includes('Tried to find the browser'),
+              includesNoExecutable: fallbackError.message.includes('no executable was found')
+            });
             
             // Final fallback: minimal configuration
             console.log('🔄 Trying minimal browser configuration...');

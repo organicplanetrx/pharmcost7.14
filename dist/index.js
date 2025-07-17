@@ -662,7 +662,7 @@ var PuppeteerScrapingService = class {
               console.log("\u2705 Successfully launched with Puppeteer bundled browser");
               return;
             } catch (bundledError) {
-              if (bundledError.message.includes("Could not find browser") && !downloadAttempted) {
+              if ((bundledError.message.includes("Could not find browser") || bundledError.message.includes("Tried to find the browser") || bundledError.message.includes("no executable was found")) && !downloadAttempted) {
                 console.log("\u{1F504} Browser not found, attempting download...");
                 downloadAttempted = true;
                 try {
@@ -708,6 +708,12 @@ var PuppeteerScrapingService = class {
             }
           } catch (fallbackError) {
             console.log("\u274C Bundled browser also failed:", fallbackError.message);
+            console.log("\u{1F50D} Error details for debugging:", {
+              message: fallbackError.message,
+              includesCouldNotFind: fallbackError.message.includes("Could not find browser"),
+              includesTriedToFind: fallbackError.message.includes("Tried to find the browser"),
+              includesNoExecutable: fallbackError.message.includes("no executable was found")
+            });
             console.log("\u{1F504} Trying minimal browser configuration...");
             try {
               this.browser = await puppeteer.launch({
