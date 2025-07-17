@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+// Removed Form components to prevent navigation issues
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, AlertCircle } from "lucide-react";
@@ -26,6 +26,7 @@ type SearchFormData = z.infer<typeof searchFormSchema>;
 export default function SearchInterface() {
   const [searchId, setSearchId] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,7 +75,8 @@ export default function SearchInterface() {
     },
   });
 
-  const onSubmit = (data: SearchFormData) => {
+  const handleSearch = (data: SearchFormData) => {
+    console.log("🔍 handleSearch called with data:", data);
     toast({
       title: "Search Starting",
       description: `Searching for ${data.searchTerm}`,
@@ -99,75 +101,60 @@ export default function SearchInterface() {
         </div>
         <div>
 
-          <Form {...form}>
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="searchType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-700">Search Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="border-slate-300 focus:border-green-500">
-                          <SelectValue placeholder="Select search type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="name">Medication Name</SelectItem>
-                        <SelectItem value="ndc">NDC Code</SelectItem>
-                        <SelectItem value="generic">Generic Name</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="searchTerm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-slate-700">Search Term</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        placeholder="Enter medication name, NDC, or generic name"
-                        className="border-slate-300 focus:border-green-500"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="button"
-                disabled={searchMutation.isPending}
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  
-                  const formData = form.getValues();
-                  
-                  if (formData.searchTerm && formData.searchTerm.trim()) {
-                    onSubmit(formData);
-                  } else {
-                    toast({
-                      title: "Search Term Required",
-                      description: "Please enter a medication name to search for.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-              >
-                {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
-              </Button>
+          <div className="space-y-4">
+            <div>
+              <label className="text-slate-700 text-sm font-medium mb-2 block">Search Type</label>
+              <Select onValueChange={(value) => form.setValue('searchType', value as any)} defaultValue="name">
+                <SelectTrigger className="border-slate-300 focus:border-green-500">
+                  <SelectValue placeholder="Select search type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Medication Name</SelectItem>
+                  <SelectItem value="ndc">NDC Code</SelectItem>
+                  <SelectItem value="generic">Generic Name</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </Form>
+
+            <div>
+              <label className="text-slate-700 text-sm font-medium mb-2 block">Search Term</label>
+              <Input
+                type="text"
+                placeholder="Enter medication name, NDC, or generic name"
+                className="border-slate-300 focus:border-green-500"
+                value={form.watch('searchTerm')}
+                onChange={(e) => form.setValue('searchTerm', e.target.value)}
+              />
+            </div>
+
+            <Button
+              type="button"
+              disabled={searchMutation.isPending}
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={(e) => {
+                console.log("🚀 Search button clicked");
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const formData = form.getValues();
+                console.log("📋 Form data:", formData);
+                
+                if (formData.searchTerm && formData.searchTerm.trim()) {
+                  console.log("✅ Starting search for:", formData.searchTerm);
+                  handleSearch(formData);
+                } else {
+                  console.log("❌ Search term missing");
+                  toast({
+                    title: "Search Term Required",
+                    description: "Please enter a medication name to search for.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
+            </Button>
+          </div>
         </div>
       </div>
 
