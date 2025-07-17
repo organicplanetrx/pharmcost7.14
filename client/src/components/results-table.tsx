@@ -14,10 +14,12 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
   const { data: searchResults, isLoading, error } = useQuery<SearchWithResults>({
     queryKey: [`/api/search/${searchId}`],
     refetchInterval: (data) => {
-      console.log(`ResultsTable polling for search ${searchId}, status: ${data?.status}`);
+      console.log(`ResultsTable polling for search ${searchId}, status: ${data?.status}, results: ${data?.results?.length || 0}`);
       return data?.status === 'pending' || data?.status === 'in_progress' ? 2000 : false;
     },
   });
+
+  console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, data:`, searchResults);
 
   // Results table for search ID: ${searchId}
 
@@ -56,8 +58,31 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
     );
   }
 
+  if (error) {
+    console.error('ResultsTable error:', error);
+    return (
+      <div className="border border-red-200 rounded-lg overflow-hidden">
+        <div className="bg-red-50 px-6 py-4 border-b border-red-200">
+          <h3 className="text-lg font-semibold text-red-800">Error Loading Results</h3>
+        </div>
+        <div className="p-6">
+          <p className="text-red-600">Failed to load search results. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!searchResults) {
-    return null;
+    return (
+      <div className="border border-slate-200 rounded-lg overflow-hidden">
+        <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-800">Search Results</h3>
+        </div>
+        <div className="p-6">
+          <p className="text-slate-600">No search data available.</p>
+        </div>
+      </div>
+    );
   }
 
   if (searchResults.status === 'failed') {
@@ -203,7 +228,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
                   </td>
                   <td className="py-4 px-6">
                     <span className="font-semibold text-slate-900">
-                      ${result.cost}
+                      {result.cost.startsWith('$') ? result.cost : `$${result.cost}`}
                     </span>
                   </td>
                   <td className="py-4 px-6">

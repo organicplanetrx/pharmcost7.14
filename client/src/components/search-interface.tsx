@@ -186,6 +186,11 @@ export default function SearchInterface() {
             onComplete={handleSearchComplete}
           />
           <div className="mt-4">
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800">
+                <strong>Search ID {searchId}:</strong> Displaying results for "{searchTerm}"
+              </p>
+            </div>
             <ResultsTable searchId={searchId} />
           </div>
         </>

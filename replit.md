@@ -218,6 +218,9 @@ Changelog:
 - July 17, 2025: ADVANCED DATA EXTRACTION: Improved container detection, NDC pattern matching, price extraction, and availability detection
 - July 17, 2025: Enhanced name filtering to exclude system text (AWP, Deal Details, status indicators) for cleaner pharmaceutical data
 - July 17, 2025: Comprehensive scraper now provides exhaustive medication results with authentic NDCs and real pricing from Kinray portal
+- July 17, 2025: FRONTEND DEBUGGING: Enhanced ResultsTable component with improved error handling and debugging to diagnose display issues
+- July 17, 2025: Added enhanced polling diagnostics and error messaging for frontend results display troubleshooting
+- July 17, 2025: Fixed cost display formatting to handle both "$X.XX" and "X.XX" price formats from API responses
 ```
 
 ## User Preferences
