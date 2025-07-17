@@ -15,6 +15,22 @@ export class PuppeteerScrapingService implements ScrapingService {
   private async findChromiumPath(): Promise<string | null> {
     try {
       const { existsSync } = await import('fs');
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
+      
+      // First try to find chromium using which command
+      try {
+        const { stdout } = await execAsync('which chromium');
+        const whichPath = stdout.trim();
+        if (whichPath && existsSync(whichPath)) {
+          console.log(`Browser found via which command: ${whichPath}`);
+          return whichPath;
+        }
+      } catch (e) {
+        // which command failed, continue to manual paths
+      }
+      
       const chromePaths = [
         process.env.PUPPETEER_EXECUTABLE_PATH,
         '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
@@ -23,8 +39,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         '/usr/bin/chromium-browser',
         '/usr/bin/google-chrome',
         '/usr/bin/google-chrome-stable',
-        '/snap/bin/chromium',
-        '/usr/bin/chromium-browser'
+        '/snap/bin/chromium'
       ].filter(Boolean);
 
       for (const path of chromePaths) {
@@ -38,7 +53,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         }
       }
       
-      console.log('No browser executable found');
+      console.log('No browser executable found in known paths');
       return null;
     } catch (error) {
       console.log('Browser path detection failed:', error.message);
