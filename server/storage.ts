@@ -78,6 +78,7 @@ export class MemStorage implements IStorage {
   private activityLogId = 1;
 
   constructor() {
+    console.log(`🔍 MemStorage constructor called - instance creation`);
     // Initialize with default vendors
     this.initializeDefaultVendors();
   }
@@ -196,6 +197,7 @@ export class MemStorage implements IStorage {
 
   async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
     console.log(`🔍 getSearchWithResults called for searchId: ${id}`);
+    console.log(`📊 Storage instance: ${this.constructor.name}`);
     console.log(`📊 Available searches: ${this.searches.size}`);
     console.log(`📊 Available results: ${this.searchResults.size}`);
     console.log(`📊 Available medications: ${this.medications.size}`);
@@ -227,6 +229,7 @@ export class MemStorage implements IStorage {
       resultCount: search.resultCount ?? null,
     };
     this.searches.set(newSearch.id, newSearch);
+    console.log(`🔄 Created search ${newSearch.id} - Total searches: ${this.searches.size}`);
     return newSearch;
   }
 
@@ -256,6 +259,7 @@ export class MemStorage implements IStorage {
       availability: result.availability ?? null,
     };
     this.searchResults.set(newResult.id, newResult);
+    console.log(`🔄 Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
     return newResult;
   }
 
@@ -304,15 +308,19 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Create a singleton storage instance to ensure consistency
-let storageInstance: MemStorage | null = null;
+// Create a singleton storage instance to ensure consistency across the application
+declare global {
+  var __storage_instance__: MemStorage | undefined;
+}
 
-export const storage = (() => {
-  if (!storageInstance) {
+export const getStorage = (): MemStorage => {
+  if (!global.__storage_instance__) {
     console.log('🗄️ Creating new MemStorage instance');
-    storageInstance = new MemStorage();
+    global.__storage_instance__ = new MemStorage();
   } else {
     console.log('🔄 Using existing MemStorage instance');
   }
-  return storageInstance;
-})();
+  return global.__storage_instance__;
+};
+
+export const storage = getStorage();

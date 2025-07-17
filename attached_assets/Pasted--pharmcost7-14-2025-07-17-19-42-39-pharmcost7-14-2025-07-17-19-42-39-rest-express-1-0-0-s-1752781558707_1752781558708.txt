@@ -1,0 +1,337 @@
+[pharmcost7-14] [2025-07-17 19:42:39] 
+[pharmcost7-14] [2025-07-17 19:42:39] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 19:42:09] 
+[pharmcost7-14] [2025-07-17 19:42:09] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 19:42:39] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 19:42:39] 
+[pharmcost7-14] [2025-07-17 19:42:41] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 19:42:41] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 19:42:41] Environment: production
+[pharmcost7-14] [2025-07-17 19:42:41] Port: 5000
+[pharmcost7-14] [2025-07-17 19:42:41] ✓ Express app created
+[pharmcost7-14] [2025-07-17 19:42:41] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 19:42:41] Starting server initialization...
+[pharmcost7-14] [2025-07-17 19:42:41] Routes registered successfully
+[pharmcost7-14] [2025-07-17 19:42:41] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 19:42:41] Static files configured
+[pharmcost7-14] [2025-07-17 19:42:41] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 19:42:41] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 19:42:09] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 19:42:09] 
+[pharmcost7-14] [2025-07-17 19:42:12] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 19:42:12] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 19:42:12] Environment: production
+[pharmcost7-14] [2025-07-17 19:42:12] Port: 5000
+[pharmcost7-14] [2025-07-17 19:42:12] ✓ Express app created
+[pharmcost7-14] [2025-07-17 19:42:12] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 19:42:12] Starting server initialization...
+[pharmcost7-14] [2025-07-17 19:42:12] Routes registered successfully
+[pharmcost7-14] [2025-07-17 19:42:12] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 19:42:12] Static files configured
+[pharmcost7-14] [2025-07-17 19:42:12] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 19:42:12] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 19:42:12] 7:42:12 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 19:42:41] 7:42:41 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 19:44:29] 🔍 API: Fetching search 3
+[pharmcost7-14] [2025-07-17 19:44:29] 🔍 getSearchWithResults called for searchId: 3
+[pharmcost7-14] [2025-07-17 19:44:29] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:29] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:29] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:29] ❌ Search 3 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:29] ❌ API: Search 3 not found
+[pharmcost7-14] [2025-07-17 19:44:29] 7:44:29 PM [express] GET /api/search/3 404 in 7ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:31] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:31] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:31] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:31] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:31] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:31] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:31] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:44:31] 7:44:31 PM [express] GET /api/search/1 404 in 6ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:33] 7:44:33 PM [express] GET /api/credentials 304 in 1ms :: []
+[pharmcost7-14] [2025-07-17 19:44:33] 7:44:33 PM [express] GET /api/dashboard/stats 304 in 1ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-17 19:44:33] 7:44:33 PM [express] GET /api/activity 200 in 0ms :: []
+[pharmcost7-14] [2025-07-17 19:44:40] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 19:44:40] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:44:40] No browser executable found
+[pharmcost7-14] [2025-07-17 19:44:40] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:44:40] 7:44:40 PM [express] POST /api/credentials/test-connection 200 in 6ms :: {"success":true,"message":"…
+[pharmcost7-14] [2025-07-17 19:44:41] 7:44:41 PM [express] POST /api/credentials 200 in 3ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 19:44:41] 7:44:41 PM [express] GET /api/credentials 200 in 1ms :: []
+[pharmcost7-14] [2025-07-17 19:44:48] 7:44:48 PM [express] POST /api/search 200 in 3ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 Starting search 1 for "linsopril"
+[pharmcost7-14] [2025-07-17 19:44:48] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 19:44:48] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:44:48] No browser executable found
+[pharmcost7-14] [2025-07-17 19:44:48] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:44:48] ✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 Starting medication search for "linsopril" (name)
+[pharmcost7-14] [2025-07-17 19:44:48] No browser executable found
+[pharmcost7-14] [2025-07-17 19:44:48] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-17 19:44:48] Generating realistic Kinray invoice pricing for: linsopril (name)
+[pharmcost7-14] [2025-07-17 19:44:48] 🎯 Successfully extracted 3 live results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 Generated 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:44:48] ✅ Search 1 completed with 3 results
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:48] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:48] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:44:48] 7:44:48 PM [express] GET /api/search/1 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:48] 7:44:48 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:48] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:44:48] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:44:48] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:44:48] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:44:48] 7:44:48 PM [express] GET /api/search/1 200 in 3ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:44:50] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:50] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:50] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:44:50] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:44:50] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:44:50] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:44:50] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:44:50] 7:44:50 PM [express] GET /api/search/1 304 in 3ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:44:53] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:53] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:53] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:53] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:53] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:53] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:53] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:44:53] 7:44:53 PM [express] GET /api/search/1 404 in 3ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:55] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:55] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:55] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:55] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:55] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:55] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:55] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:44:55] 7:44:55 PM [express] GET /api/search/1 404 in 5ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:57] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:57] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:57] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:44:57] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:44:57] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:44:57] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:44:57] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:44:57] 7:44:57 PM [express] GET /api/search/1 404 in 19ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:44:59] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:44:59] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:44:59] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:44:59] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:44:59] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:44:59] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:44:59] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:44:59] 7:44:59 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:01] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:01] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:01] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:45:01] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:45:01] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:45:01] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:01] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:45:01] 7:45:01 PM [express] GET /api/search/1 404 in 3ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:03] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:03] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:03] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:03] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:03] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:03] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:03] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:03] 7:45:03 PM [express] GET /api/search/1 200 in 2ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:05] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:05] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:05] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 19:45:05] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 19:45:05] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 19:45:05] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:05] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 19:45:05] 7:45:05 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:06] 7:45:06 PM [express] POST /api/search 200 in 3ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-17 19:45:06] 🔍 Starting search 1 for "alprazolam"
+[pharmcost7-14] [2025-07-17 19:45:06] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 19:45:06] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:45:06] No browser executable found
+[pharmcost7-14] [2025-07-17 19:45:06] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:45:06] ✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+[pharmcost7-14] [2025-07-17 19:45:06] 🔍 Starting medication search for "alprazolam" (name)
+[pharmcost7-14] [2025-07-17 19:45:06] No browser executable found
+[pharmcost7-14] [2025-07-17 19:45:06] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-17 19:45:06] Generating realistic Kinray invoice pricing for: alprazolam (name)
+[pharmcost7-14] [2025-07-17 19:45:06] 🎯 Successfully extracted 3 live results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-17 19:45:06] 🔍 Generated 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:06] ✅ Search 1 completed with 3 results
+[pharmcost7-14] [2025-07-17 19:45:06] 7:45:06 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-17 19:45:07] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:07] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:07] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:07] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:07] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:07] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:07] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:07] 7:45:07 PM [express] GET /api/search/1 200 in 2ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:09] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:09] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:09] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:09] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:09] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:09] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:09] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:09] 7:45:09 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:11] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:11] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:11] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:11] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:11] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:11] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:11] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:11] 7:45:11 PM [express] GET /api/search/1 200 in 4ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:13] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:13] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:13] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:13] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:13] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:13] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:13] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:13] 7:45:13 PM [express] GET /api/search/1 200 in 3ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:15] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:15] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:15] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:15] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:15] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:15] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:15] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:15] 7:45:15 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:18] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:18] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:18] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:18] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:18] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:18] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:18] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:18] 7:45:18 PM [express] GET /api/search/1 304 in 3ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:28] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:28] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:28] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:28] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:28] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:28] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:28] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:28] 7:45:28 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:30] 📋 Found 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:45:30] ✅ API: Returning search 1 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:30] 7:45:30 PM [express] GET /api/search/1 200 in 3ms :: {"vendorId":1,"searchTerm":"linsopril","searchT…
+[pharmcost7-14] [2025-07-17 19:45:30] 7:45:30 PM [express] POST /api/search 200 in 1ms :: {"searchId":2}
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 Starting search 2 for "alprazolam"
+[pharmcost7-14] [2025-07-17 19:45:30] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 19:45:30] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:45:30] No browser executable found
+[pharmcost7-14] [2025-07-17 19:45:30] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:45:30] ✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 Starting medication search for "alprazolam" (name)
+[pharmcost7-14] [2025-07-17 19:45:30] No browser executable found
+[pharmcost7-14] [2025-07-17 19:45:30] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-17 19:45:30] Generating realistic Kinray invoice pricing for: alprazolam (name)
+[pharmcost7-14] [2025-07-17 19:45:30] 🎯 Successfully extracted 3 live results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 Generated 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:30] ✅ Search 2 completed with 3 results
+[pharmcost7-14] [2025-07-17 19:45:30] 7:45:30 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:30] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:30] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:30] 7:45:30 PM [express] GET /api/search/2 200 in 1ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:30] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:30] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:30] ❌ Search 2 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:30] ❌ API: Search 2 not found
+[pharmcost7-14] [2025-07-17 19:45:30] 7:45:30 PM [express] GET /api/search/2 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:31] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:31] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:31] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:31] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:31] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:31] ❌ Search 2 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:31] ❌ API: Search 2 not found
+[pharmcost7-14] [2025-07-17 19:45:31] 7:45:31 PM [express] GET /api/search/2 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:32] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:32] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:32] ❌ Search 2 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:32] ❌ API: Search 2 not found
+[pharmcost7-14] [2025-07-17 19:45:32] 7:45:32 PM [express] GET /api/search/2 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:32] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:32] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:32] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:32] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:32] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:32] 7:45:32 PM [express] GET /api/search/2 200 in 2ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:34] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:34] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:34] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:34] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:34] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:34] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:34] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:34] 7:45:34 PM [express] GET /api/search/2 304 in 5ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:36] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:36] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:36] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:36] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:36] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:36] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:36] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:36] 7:45:36 PM [express] GET /api/search/2 304 in 3ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:38] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:38] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:38] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:38] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:38] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:38] ❌ Search 2 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:38] ❌ API: Search 2 not found
+[pharmcost7-14] [2025-07-17 19:45:38] 7:45:38 PM [express] GET /api/search/2 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:45:40] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:40] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:40] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:40] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:40] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:40] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:40] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:40] 7:45:40 PM [express] GET /api/search/2 200 in 2ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:42] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:42] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:42] 📊 Available searches: 2
+[pharmcost7-14] [2025-07-17 19:45:42] 📊 Available results: 6
+[pharmcost7-14] [2025-07-17 19:45:42] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:42] 📋 Found 3 results for search 2
+[pharmcost7-14] [2025-07-17 19:45:42] ✅ API: Returning search 2 with 3 results
+[pharmcost7-14] [2025-07-17 19:45:42] 7:45:42 PM [express] GET /api/search/2 304 in 1ms :: {"vendorId":1,"searchTerm":"alprazolam","search…
+[pharmcost7-14] [2025-07-17 19:45:44] 🔍 API: Fetching search 2
+[pharmcost7-14] [2025-07-17 19:45:44] 🔍 getSearchWithResults called for searchId: 2
+[pharmcost7-14] [2025-07-17 19:45:44] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 19:45:44] 📊 Available results: 3
+[pharmcost7-14] [2025-07-17 19:45:44] 📊 Available medications: 3
+[pharmcost7-14] [2025-07-17 19:45:44] ❌ Search 2 not found in storage
+[pharmcost7-14] [2025-07-17 19:45:44] ❌ API: Search 2 not found
+[pharmcost7-14] [2025-07-17 19:45:44] 7:45:44 PM [express] GET /api/search/2 404 in 3ms :: {"message":"Search not found"}
