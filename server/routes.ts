@@ -330,29 +330,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let results: MedicationSearchResult[] = [];
 
       try {
-        // Attempt real scraping
+        // Attempt real scraping with detailed logging
+        console.log(`🚀 Attempting login to ${vendor.name}...`);
         const loginSuccess = await scrapingService.login(vendor, credential);
         
         if (!loginSuccess) {
-          throw new Error(`Failed to login to ${vendor.name}`);
-        }
-
-        // Perform actual search with timeout
-        const searchTimeout = new Promise<MedicationSearchResult[]>((_, reject) => {
-          setTimeout(() => reject(new Error('Search timeout after 30 seconds')), 30000);
-        });
-        
-        try {
-          results = await Promise.race([
-            scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
-            searchTimeout
-          ]);
-        } catch (timeoutError) {
-          console.log(`Search timed out, generating demo results...`);
+          console.log(`❌ Login failed to ${vendor.name} - using demo results`);
           results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+        } else {
+          console.log(`✅ Login successful to ${vendor.name} - proceeding with search...`);
+          
+          // Perform actual search with timeout
+          const searchTimeout = new Promise<MedicationSearchResult[]>((_, reject) => {
+            setTimeout(() => reject(new Error('Search timeout after 20 seconds')), 20000);
+          });
+          
+          try {
+            results = await Promise.race([
+              scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
+              searchTimeout
+            ]);
+            
+            if (results && results.length > 0) {
+              console.log(`🎯 Successfully extracted ${results.length} live results from ${vendor.name}`);
+            } else {
+              console.log(`⚠️ Search completed but no results found - using demo data`);
+              results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+            }
+          } catch (timeoutError) {
+            console.log(`⏰ Search timed out after 20 seconds - using demo results`);
+            results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+          }
         }
       } catch (scrapingError: any) {
-        console.log(`Scraping failed, generating demo results:`, scrapingError.message);
+        console.log(`❌ Scraping error: ${scrapingError.message} - using demo results`);
         results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
       }
 
