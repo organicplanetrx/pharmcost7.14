@@ -461,6 +461,38 @@ export class PuppeteerScrapingService implements ScrapingService {
         this.browser = await puppeteer.launch(launchConfig);
       } catch (error) {
         console.log('Browser launch failed:', error.message);
+        
+        // Try alternative approaches for containerized environments
+        if (error.message.includes('Browser was not found') || error.message.includes('executablePath')) {
+          console.log('🔄 System browser failed, trying Puppeteer bundled browser...');
+          
+          // Remove executablePath and let Puppeteer use its bundled browser
+          const fallbackConfig = { ...launchConfig };
+          delete fallbackConfig.executablePath;
+          
+          try {
+            console.log('📦 Downloading Puppeteer bundled browser (first time may take a moment)...');
+            this.browser = await puppeteer.launch(fallbackConfig);
+            console.log('✅ Successfully launched with Puppeteer bundled browser');
+            return;
+          } catch (fallbackError) {
+            console.log('❌ Bundled browser also failed:', fallbackError.message);
+            
+            // Final fallback: try with minimal args
+            console.log('🔄 Trying minimal browser configuration...');
+            try {
+              this.browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+              });
+              console.log('✅ Minimal browser configuration successful');
+              return;
+            } catch (minimalError) {
+              console.log('❌ All browser launch attempts failed:', minimalError.message);
+            }
+          }
+        }
+        
         throw new Error('Browser automation not available in this environment');
       }
     }

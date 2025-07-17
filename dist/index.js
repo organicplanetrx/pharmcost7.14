@@ -637,6 +637,30 @@ var PuppeteerScrapingService = class {
         this.browser = await puppeteer.launch(launchConfig);
       } catch (error) {
         console.log("Browser launch failed:", error.message);
+        if (error.message.includes("Browser was not found") || error.message.includes("executablePath")) {
+          console.log("\u{1F504} System browser failed, trying Puppeteer bundled browser...");
+          const fallbackConfig = { ...launchConfig };
+          delete fallbackConfig.executablePath;
+          try {
+            console.log("\u{1F4E6} Downloading Puppeteer bundled browser (first time may take a moment)...");
+            this.browser = await puppeteer.launch(fallbackConfig);
+            console.log("\u2705 Successfully launched with Puppeteer bundled browser");
+            return;
+          } catch (fallbackError) {
+            console.log("\u274C Bundled browser also failed:", fallbackError.message);
+            console.log("\u{1F504} Trying minimal browser configuration...");
+            try {
+              this.browser = await puppeteer.launch({
+                headless: true,
+                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+              });
+              console.log("\u2705 Minimal browser configuration successful");
+              return;
+            } catch (minimalError) {
+              console.log("\u274C All browser launch attempts failed:", minimalError.message);
+            }
+          }
+        }
         throw new Error("Browser automation not available in this environment");
       }
     }
