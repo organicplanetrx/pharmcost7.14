@@ -1222,9 +1222,77 @@ export class PuppeteerScrapingService implements ScrapingService {
           await searchInput.press('Enter');
         }
         
-        // Wait for results with shorter timeout
-        console.log('Waiting for search results...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Wait for initial results to load
+        console.log('Waiting for initial search results...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Now try to increase results per page to 100 for more comprehensive results
+        console.log('Looking for Results Per Page dropdown to increase result count...');
+        const resultsPerPageSelectors = [
+          'select:has(option[value="100"])',
+          'select[name*="per"], select[name*="page"]',
+          'select:has(option:contains("100"))',
+          '.results-per-page select',
+          'select:has(option:contains("10"))',
+          '#resultsPerPage',
+          '[class*="results"] select',
+          '[class*="page"] select',
+          'select'
+        ];
+        
+        let dropdownChanged = false;
+        for (const selector of resultsPerPageSelectors) {
+          try {
+            const dropdown = await this.page.$(selector);
+            if (dropdown) {
+              console.log(`Found potential results dropdown: ${selector}`);
+              
+              // Check available options
+              const options = await this.page.evaluate((sel) => {
+                const select = document.querySelector(sel);
+                if (!select) return [];
+                return Array.from(select.options).map(opt => ({ 
+                  value: opt.value, 
+                  text: opt.textContent?.trim() || ''
+                }));
+              }, selector);
+              
+              console.log(`Available dropdown options:`, options);
+              
+              // Look for the highest number option (100, 50, 25, etc.)
+              const targetValues = ['100', '50', '25', '20'];
+              for (const value of targetValues) {
+                const hasValue = options.some(opt => 
+                  opt.value === value || 
+                  opt.text === value || 
+                  opt.text.includes(value)
+                );
+                
+                if (hasValue) {
+                  console.log(`🎯 Setting results per page to: ${value} for more comprehensive results`);
+                  await dropdown.select(value);
+                  dropdownChanged = true;
+                  
+                  // Wait for page to reload with expanded results
+                  console.log('Waiting for expanded results to load...');
+                  await new Promise(resolve => setTimeout(resolve, 4000));
+                  break;
+                }
+              }
+              
+              if (dropdownChanged) break;
+            }
+          } catch (e) {
+            console.log(`Error with dropdown ${selector}:`, e.message);
+            continue;
+          }
+        }
+        
+        if (dropdownChanged) {
+          console.log('✅ Successfully expanded results per page - processing comprehensive results');
+        } else {
+          console.log('⚠️ Could not find results per page dropdown - using default pagination');
+        }
         
         // Check if still on the same page or redirected
         const currentUrl = this.page.url();

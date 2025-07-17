@@ -212,6 +212,9 @@ Changelog:
 - July 17, 2025: Fixed storage singleton pattern to ensure consistent data persistence between API calls
 - July 17, 2025: Streamlined search workflow with clean, professional interface and proper error handling
 - July 17, 2025: Implemented authentic Kinray pricing data ($3.20, $28.80, $17.52) with real NDC codes and contract information
+- July 17, 2025: ENHANCED SCRAPER: Added automatic "Results Per Page" dropdown detection to expand from 10 to 100 results for comprehensive searches
+- July 17, 2025: Implemented intelligent dropdown selection targeting highest available result count (100, 50, 25, 20) for maximum data extraction
+- July 17, 2025: Enhanced browser automation to detect and modify portal pagination settings automatically during search workflow
 ```
 
 ## User Preferences
