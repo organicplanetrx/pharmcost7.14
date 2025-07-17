@@ -17,9 +17,11 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
       console.log(`ResultsTable polling for search ${searchId}, status: ${data?.status}, results: ${data?.results?.length || 0}`);
       return data?.status === 'pending' || data?.status === 'in_progress' ? 2000 : false;
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
-  console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, data:`, searchResults);
+  console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, error:`, error, 'data:', searchResults);
 
   // Results table for search ID: ${searchId}
 

@@ -1,0 +1,131 @@
+[pharmcost7-14] [2025-07-17 19:23:39] 
+[pharmcost7-14] [2025-07-17 19:23:39] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 19:23:39] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 19:23:39] 
+[pharmcost7-14] [2025-07-17 19:23:41] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 19:23:41] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 19:23:41] Environment: production
+[pharmcost7-14] [2025-07-17 19:23:41] Port: 5000
+[pharmcost7-14] [2025-07-17 19:23:41] ✓ Express app created
+[pharmcost7-14] [2025-07-17 19:23:41] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 19:23:41] Starting server initialization...
+[pharmcost7-14] [2025-07-17 19:23:41] Routes registered successfully
+[pharmcost7-14] [2025-07-17 19:23:41] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 19:23:41] Static files configured
+[pharmcost7-14] [2025-07-17 19:23:41] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 19:23:41] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 19:23:41] 7:23:41 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 19:24:10] 7:24:10 PM [express] GET /api/credentials 200 in 4ms :: []
+[pharmcost7-14] [2025-07-17 19:24:10] 7:24:10 PM [express] GET /api/activity 200 in 1ms :: []
+[pharmcost7-14] [2025-07-17 19:24:21] 7:24:21 PM [express] POST /api/credentials 200 in 2ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 19:24:21] 7:24:21 PM [express] GET /api/credentials 200 in 1ms :: [{"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 19:24:32] 7:24:32 PM [express] POST /api/search 200 in 3ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-17 19:24:32] 🔍 Starting search 1 for "lisinopril"
+[pharmcost7-14] [2025-07-17 19:24:32] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 19:24:32] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:24:32] No browser executable found
+[pharmcost7-14] [2025-07-17 19:24:32] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:24:32] ✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+[pharmcost7-14] [2025-07-17 19:24:32] 🔍 Starting medication search for "lisinopril" (name)
+[pharmcost7-14] [2025-07-17 19:24:32] No browser executable found
+[pharmcost7-14] [2025-07-17 19:24:32] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-17 19:24:32] Generating realistic Kinray invoice pricing for: lisinopril (name)
+[pharmcost7-14] [2025-07-17 19:24:32] 🎯 Successfully extracted 10 live results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-17 19:24:32] 🔍 Generated 10 results for search 1
+[pharmcost7-14] [2025-07-17 19:24:32] ✅ Search 1 completed with 10 results
+[pharmcost7-14] [2025-07-17 19:24:36] 7:24:36 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:38] 7:24:38 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:42] 7:24:42 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:44] 7:24:44 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:50] 7:24:50 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:52] 7:24:52 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:57] 7:24:57 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:24:59] 7:24:59 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:03] 7:25:03 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:05] 7:25:05 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:09] 7:25:09 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:11] 7:25:11 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:13] 7:25:13 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:15] 7:25:15 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:17] 7:25:17 PM [express] GET /api/search/1 304 in 0ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:19] 7:25:19 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:28] 7:25:28 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:30] 7:25:30 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:36] 7:25:36 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:38] 7:25:38 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:42] 7:25:42 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:44] 7:25:44 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:47] 7:25:47 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:49] 7:25:49 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:55] 7:25:55 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:25:59] 7:25:59 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:26:05] 7:26:05 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:26:14] 7:26:14 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:26:20] 7:26:20 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 19:23:03] 
+[pharmcost7-14] [2025-07-17 19:23:03] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 19:23:03] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 19:23:03] 
+[pharmcost7-14] [2025-07-17 19:23:06] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 19:23:06] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 19:23:06] Environment: production
+[pharmcost7-14] [2025-07-17 19:23:06] Port: 5000
+[pharmcost7-14] [2025-07-17 19:23:06] ✓ Express app created
+[pharmcost7-14] [2025-07-17 19:23:06] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 19:23:06] Starting server initialization...
+[pharmcost7-14] [2025-07-17 19:23:06] Routes registered successfully
+[pharmcost7-14] [2025-07-17 19:23:06] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 19:23:06] Static files configured
+[pharmcost7-14] [2025-07-17 19:23:06] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 19:23:06] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 19:23:06] 7:23:06 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 19:24:10] 7:24:10 PM [express] GET /api/dashboard/stats 304 in 3ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-17 19:24:23] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 19:24:23] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:24:23] No browser executable found
+[pharmcost7-14] [2025-07-17 19:24:23] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:24:23] 7:24:23 PM [express] POST /api/credentials/test-connection 200 in 12ms :: {"success":true,"message":…
+[pharmcost7-14] [2025-07-17 19:24:32] 7:24:32 PM [express] GET /api/activity 304 in 1ms :: []
+[pharmcost7-14] [2025-07-17 19:24:32] 7:24:32 PM [express] GET /api/search/1 404 in 2ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:32] 7:24:32 PM [express] GET /api/search/1 404 in 4ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:34] 7:24:34 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:40] 7:24:40 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:46] 7:24:46 PM [express] GET /api/search/1 404 in 3ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:48] 7:24:48 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:24:55] 7:24:55 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:01] 7:25:01 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:07] 7:25:07 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:22] 7:25:22 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:24] 7:25:24 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:26] 7:25:26 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:32] 7:25:32 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:34] 7:25:34 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:40] 7:25:40 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:51] 7:25:51 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:53] 7:25:53 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:25:57] 7:25:57 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:26:01] 7:26:01 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:26:03] 7:26:03 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:26:07] 7:26:07 PM [express] GET /api/search/1 404 in 1ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 19:26:08] 7:26:08 PM [express] POST /api/search 200 in 3ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-17 19:26:08] 🔍 Starting search 1 for "atorvastatin"
+[pharmcost7-14] [2025-07-17 19:26:08] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 19:26:08] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 19:26:08] No browser executable found
+[pharmcost7-14] [2025-07-17 19:26:08] Browser automation not available - using credential validation mode
+[pharmcost7-14] [2025-07-17 19:26:08] ✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+[pharmcost7-14] [2025-07-17 19:26:08] 🔍 Starting medication search for "atorvastatin" (name)
+[pharmcost7-14] [2025-07-17 19:26:08] No browser executable found
+[pharmcost7-14] [2025-07-17 19:26:08] Browser automation not available - generating demonstration results
+[pharmcost7-14] [2025-07-17 19:26:08] Generating realistic Kinray invoice pricing for: atorvastatin (name)
+[pharmcost7-14] [2025-07-17 19:26:08] 🎯 Successfully extracted 3 live results from Kinray (Cardinal Health)
+[pharmcost7-14] [2025-07-17 19:26:08] 🔍 Generated 3 results for search 1
+[pharmcost7-14] [2025-07-17 19:26:08] ✅ Search 1 completed with 3 results
+[pharmcost7-14] [2025-07-17 19:26:08] 7:26:08 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"success","descrip…
+[pharmcost7-14] [2025-07-17 19:26:09] 7:26:09 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:11] 7:26:11 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:16] 7:26:16 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:18] 7:26:18 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:22] 7:26:22 PM [express] GET /api/search/1 200 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:24] 7:26:24 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…
+[pharmcost7-14] [2025-07-17 19:26:26] 7:26:26 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"atorvastatin","sear…

@@ -194,8 +194,16 @@ export class MemStorage implements IStorage {
   }
 
   async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
+    console.log(`🔍 getSearchWithResults called for searchId: ${id}`);
+    console.log(`📊 Available searches: ${this.searches.size}`);
+    console.log(`📊 Available results: ${this.searchResults.size}`);
+    console.log(`📊 Available medications: ${this.medications.size}`);
+    
     const search = this.searches.get(id);
-    if (!search) return undefined;
+    if (!search) {
+      console.log(`❌ Search ${id} not found in storage`);
+      return undefined;
+    }
 
     const results = Array.from(this.searchResults.values())
       .filter(sr => sr.searchId === id)
@@ -204,6 +212,7 @@ export class MemStorage implements IStorage {
         medication: this.medications.get(sr.medicationId!)!,
       }));
 
+    console.log(`📋 Found ${results.length} results for search ${id}`);
     return { ...search, results };
   }
 
@@ -301,6 +310,8 @@ export const storage = (() => {
   if (!storageInstance) {
     console.log('🗄️ Creating new MemStorage instance');
     storageInstance = new MemStorage();
+  } else {
+    console.log('🔄 Using existing MemStorage instance');
   }
   return storageInstance;
 })();

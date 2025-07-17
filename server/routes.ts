@@ -210,14 +210,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/search/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`🔍 API: Fetching search ${id}`);
       const searchWithResults = await storage.getSearchWithResults(id);
       
       if (!searchWithResults) {
+        console.log(`❌ API: Search ${id} not found`);
         return res.status(404).json({ message: "Search not found" });
       }
 
+      console.log(`✅ API: Returning search ${id} with ${searchWithResults.results.length} results`);
       res.json(searchWithResults);
     } catch (error) {
+      console.error(`❌ API: Failed to fetch search ${id}:`, error);
       res.status(500).json({ message: "Failed to fetch search" });
     }
   });
