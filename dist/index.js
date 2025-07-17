@@ -695,6 +695,7 @@ var PuppeteerScrapingService = class {
                       "--disable-renderer-backgrounding",
                       "--disable-web-security"
                     ]
+                    // No executablePath - let Puppeteer find the downloaded browser automatically
                   });
                   console.log("\u2705 Successfully launched after download");
                   return;

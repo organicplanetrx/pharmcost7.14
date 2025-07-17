@@ -519,7 +519,7 @@ export class PuppeteerScrapingService implements ScrapingService {
                     console.log('✅ Browser downloaded successfully');
                   }
                   
-                  // Retry launch after download
+                  // Retry launch after download - use clean configuration without executablePath
                   this.browser = await puppeteer.launch({
                     headless: true,
                     args: [
@@ -533,6 +533,7 @@ export class PuppeteerScrapingService implements ScrapingService {
                       '--disable-renderer-backgrounding',
                       '--disable-web-security'
                     ]
+                    // No executablePath - let Puppeteer find the downloaded browser automatically
                   });
                   console.log('✅ Successfully launched after download');
                   return;
