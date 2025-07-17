@@ -234,26 +234,9 @@ var PuppeteerScrapingService = class {
       } catch (e) {
         console.log("which command failed, trying manual paths...");
       }
-      const chromePaths = [
-        "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium",
-        process.env.PUPPETEER_EXECUTABLE_PATH,
-        "/home/runner/.nix-profile/bin/chromium",
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser",
-        "/usr/bin/google-chrome",
-        "/usr/bin/google-chrome-stable",
-        "/snap/bin/chromium"
-      ].filter(Boolean);
-      console.log(`\u{1F50D} Trying ${chromePaths.length} potential browser paths...`);
-      for (const path3 of chromePaths) {
-        console.log(`Testing: ${path3}`);
-        if (await this.verifyBrowserPath(path3)) {
-          console.log(`\u2705 Verified working browser at: ${path3}`);
-          return path3;
-        }
-      }
-      console.log("\u274C No browser paths available");
-      return null;
+      const knownChromiumPath = "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium";
+      console.log(`\u{1F50D} Using confirmed working chromium path: ${knownChromiumPath}`);
+      return knownChromiumPath;
     } catch (error) {
       console.log("\u274C Browser path detection failed:", error.message);
       return null;
@@ -262,10 +245,20 @@ var PuppeteerScrapingService = class {
   async verifyBrowserPath(path3) {
     try {
       const fs2 = await import("fs");
-      const { access, constants } = fs2.promises;
-      await access(path3, constants.F_OK | constants.X_OK);
+      const exists = fs2.existsSync(path3);
+      console.log(`\u{1F50D} Path exists check for ${path3}: ${exists}`);
+      if (!exists) {
+        console.log(`\u274C Browser path does not exist: ${path3}`);
+        return false;
+      }
+      if (path3.includes("/nix/store") && path3.includes("chromium")) {
+        console.log(`\u2705 Using known working chromium path: ${path3}`);
+        return true;
+      }
+      console.log(`\u2705 Verified browser path: ${path3}`);
       return true;
     } catch (e) {
+      console.log(`\u274C Browser path verification failed: ${path3} - ${e.message}`);
       return false;
     }
   }

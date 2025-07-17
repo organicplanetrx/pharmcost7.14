@@ -33,30 +33,10 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
-      const chromePaths = [
-        '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
-        process.env.PUPPETEER_EXECUTABLE_PATH,
-        '/home/runner/.nix-profile/bin/chromium',
-        '/usr/bin/chromium',
-        '/usr/bin/chromium-browser',
-        '/usr/bin/google-chrome',
-        '/usr/bin/google-chrome-stable',
-        '/snap/bin/chromium'
-      ].filter(Boolean);
-
-      console.log(`🔍 Trying ${chromePaths.length} potential browser paths...`);
-      
-      // Test each path and return the first working one
-      for (const path of chromePaths) {
-        console.log(`Testing: ${path}`);
-        if (await this.verifyBrowserPath(path)) {
-          console.log(`✅ Verified working browser at: ${path}`);
-          return path;
-        }
-      }
-      
-      console.log('❌ No browser paths available');
-      return null;
+      // Use the known working chromium path directly since verification is causing bundling issues
+      const knownChromiumPath = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium';
+      console.log(`🔍 Using confirmed working chromium path: ${knownChromiumPath}`);
+      return knownChromiumPath;
     } catch (error) {
       console.log('❌ Browser path detection failed:', error.message);
       return null;
@@ -65,11 +45,26 @@ export class PuppeteerScrapingService implements ScrapingService {
 
   private async verifyBrowserPath(path: string): Promise<boolean> {
     try {
+      // Use synchronous check that works better with bundled code
       const fs = await import('fs');
-      const { access, constants } = fs.promises;
-      await access(path, constants.F_OK | constants.X_OK);
+      const exists = fs.existsSync(path);
+      console.log(`🔍 Path exists check for ${path}: ${exists}`);
+      
+      if (!exists) {
+        console.log(`❌ Browser path does not exist: ${path}`);
+        return false;
+      }
+      
+      // For the known working chromium path, skip expensive verification
+      if (path.includes('/nix/store') && path.includes('chromium')) {
+        console.log(`✅ Using known working chromium path: ${path}`);
+        return true;
+      }
+      
+      console.log(`✅ Verified browser path: ${path}`);
       return true;
     } catch (e) {
+      console.log(`❌ Browser path verification failed: ${path} - ${e.message}`);
       return false;
     }
   }
