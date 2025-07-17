@@ -15,10 +15,8 @@ export default function SearchSuccessIndicator({ searchId, onComplete }: SearchS
     queryKey: ['/api/search', searchId],
     queryFn: () => fetch(`/api/search/${searchId}`).then(res => res.json()),
     refetchInterval: (data) => {
-      console.log(`Polling search ${searchId}, current status:`, data?.status);
       // Stop polling when search is completed or failed
       if (data?.status === 'completed' || data?.status === 'failed') {
-        console.log(`Stopping poll for search ${searchId} - status: ${data?.status}`);
         return false;
       }
       return 2000; // Poll every 2 seconds
@@ -28,16 +26,13 @@ export default function SearchSuccessIndicator({ searchId, onComplete }: SearchS
   // Call onComplete when search finishes
   useEffect(() => {
     if (searchResults && searchResults.status === 'completed') {
-      console.log(`Search ${searchId} completed with status: ${searchResults.status}, results count: ${searchResults.results?.length || 0}`);
-      console.log('Search results data structure:', searchResults);
       if (onComplete) {
-        console.log("Calling onComplete callback...");
         onComplete();
       }
     }
   }, [searchResults, searchId, onComplete]);
 
-  console.log(`SearchSuccessIndicator for ID ${searchId}:`, { isLoading, searchResults });
+  // Cleaned up debug logging
 
   if (isLoading || !searchResults || searchResults.status === 'pending' || searchResults.status === 'in_progress') {
     return (

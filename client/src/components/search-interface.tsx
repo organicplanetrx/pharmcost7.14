@@ -75,20 +75,15 @@ export default function SearchInterface() {
   });
 
   const onSubmit = (data: SearchFormData) => {
-    console.log("Form submitted - Starting search with data:", data);
-    console.log("Credentials available:", credentials);
-    
-    // Add explicit debugging
     toast({
       title: "Search Starting",
-      description: `Searching for ${data.searchTerm} (${data.searchType})`,
+      description: `Searching for ${data.searchTerm}`,
     });
     
     searchMutation.mutate(data);
   };
 
   const handleSearchComplete = () => {
-    console.log("Search completed, showing results...");
     setShowResults(true);
   };
 
@@ -164,21 +159,11 @@ export default function SearchInterface() {
                   e.preventDefault();
                   e.stopPropagation();
                   
-                  console.log("🔍 Search button clicked!");
-                  console.log("Form state:", form.formState);
-                  console.log("Form errors:", form.formState.errors);
-                  console.log("Form values:", form.getValues());
-                  
-                  // Force form validation and submission
                   const formData = form.getValues();
-                  console.log("Manual form data:", formData);
                   
-                  // Manual submission if form doesn't trigger
                   if (formData.searchTerm && formData.searchTerm.trim()) {
-                    console.log("Manually triggering search...");
                     onSubmit(formData);
                   } else {
-                    console.log("❌ No search term provided");
                     toast({
                       title: "Search Term Required",
                       description: "Please enter a medication name to search for.",

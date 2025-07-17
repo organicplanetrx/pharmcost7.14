@@ -152,8 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search endpoints
   app.post("/api/search", async (req, res) => {
     try {
-      console.log("📝 Search API called with body:", req.body);
-      
       const searchFormData = z.object({
         vendorId: z.number(),
         searchTerm: z.string().min(1),
@@ -165,7 +163,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         resultCount: 0,
       };
-      console.log("✅ Search data validated:", searchData);
       
       // Create search record
       const search = await storage.createSearch({
@@ -173,31 +170,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         resultCount: 0,
       });
-      console.log("✅ Search record created with ID:", search.id);
 
       // Start search in background
-      console.log(`🚀 Starting background search for ID: ${search.id}`);
       performSearch(search.id, searchData).catch(error => {
         console.error(`Background search ${search.id} failed:`, error);
-        // Ensure search status is updated even on failure
         storage.updateSearch(search.id, { 
           status: 'failed', 
           completedAt: new Date() 
-        }).catch(updateError => {
-          console.error(`Failed to update search status:`, updateError);
-        });
+        }).catch(() => {});
       });
 
-      console.log("🚀 Returning search ID:", search.id);
       res.json({ searchId: search.id });
     } catch (error: any) {
-      console.error("❌ Search API error:", error);
-      console.error("Error details:", error.message);
-      console.error("Request body:", req.body);
       res.status(500).json({ 
         message: "Failed to start search",
-        error: error.message,
-        details: error
+        error: error.message
       });
     }
   });
@@ -205,19 +192,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/search/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      console.log(`🔍 API: Getting search with ID: ${id}`);
-      
       const searchWithResults = await storage.getSearchWithResults(id);
       
       if (!searchWithResults) {
-        console.log(`❌ API: Search ${id} not found, returning 404`);
         return res.status(404).json({ message: "Search not found" });
       }
 
-      console.log(`✅ API: Returning search ${id} with ${searchWithResults.results?.length || 0} results`);
       res.json(searchWithResults);
     } catch (error) {
-      console.error(`❌ API: Error fetching search ${id}:`, error);
       res.status(500).json({ message: "Failed to fetch search" });
     }
   });
