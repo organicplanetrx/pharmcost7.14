@@ -270,6 +270,9 @@ Changelog:
 - July 17, 2025: Implemented multi-tier solution: build-time installation, runtime CLI installation, programmatic download fallbacks
 - July 17, 2025: Added postinstall.js for automatic browser setup and install-browser.js for manual installation
 - July 17, 2025: Created complete browser automation solution addressing all containerized deployment issues
+- July 17, 2025: FINAL BROWSER FIX: Added explicit downloaded browser path usage after successful CLI installation
+- July 17, 2025: Browser downloads correctly but needed direct path specification instead of auto-detection
+- July 17, 2025: Implemented comprehensive fallback system with environment cleanup for reliable browser launch
 ```
 
 ## User Preferences

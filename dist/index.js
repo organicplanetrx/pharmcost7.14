@@ -715,16 +715,36 @@ var PuppeteerScrapingService = class {
               includesTriedToFind: fallbackError.message.includes("Tried to find the browser"),
               includesNoExecutable: fallbackError.message.includes("no executable was found")
             });
-            console.log("\u{1F504} Trying minimal browser configuration...");
+            console.log("\u{1F504} Trying to use downloaded browser directly...");
             try {
+              const downloadedBrowserPath = "/workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome";
+              console.log(`\u{1F50D} Attempting to use downloaded browser at: ${downloadedBrowserPath}`);
               this.browser = await puppeteer.launch({
+                executablePath: downloadedBrowserPath,
                 headless: true,
-                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+                args: [
+                  "--no-sandbox",
+                  "--disable-setuid-sandbox",
+                  "--disable-dev-shm-usage",
+                  "--disable-gpu"
+                ]
               });
-              console.log("\u2705 Minimal browser configuration successful");
+              console.log("\u2705 Successfully launched with downloaded browser");
               return;
-            } catch (minimalError) {
-              console.log("\u274C All browser launch attempts failed:", minimalError.message);
+            } catch (downloadedPathError) {
+              console.log("\u274C Downloaded browser path failed:", downloadedPathError.message);
+              console.log("\u{1F504} Final attempt without executablePath...");
+              try {
+                delete process.env.PUPPETEER_EXECUTABLE_PATH;
+                this.browser = await puppeteer.launch({
+                  headless: true,
+                  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+                });
+                console.log("\u2705 Final fallback successful");
+                return;
+              } catch (finalError) {
+                console.log("\u274C All browser launch attempts failed:", finalError.message);
+              }
             }
           }
         }

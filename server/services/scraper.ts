@@ -554,17 +554,43 @@ export class PuppeteerScrapingService implements ScrapingService {
               includesNoExecutable: fallbackError.message.includes('no executable was found')
             });
             
-            // Final fallback: minimal configuration
-            console.log('🔄 Trying minimal browser configuration...');
+            // Final fallback: use downloaded browser explicitly
+            console.log('🔄 Trying to use downloaded browser directly...');
             try {
+              // Try to find the downloaded browser
+              const downloadedBrowserPath = '/workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome';
+              console.log(`🔍 Attempting to use downloaded browser at: ${downloadedBrowserPath}`);
+              
               this.browser = await puppeteer.launch({
+                executablePath: downloadedBrowserPath,
                 headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                args: [
+                  '--no-sandbox',
+                  '--disable-setuid-sandbox',
+                  '--disable-dev-shm-usage',
+                  '--disable-gpu'
+                ]
               });
-              console.log('✅ Minimal browser configuration successful');
+              console.log('✅ Successfully launched with downloaded browser');
               return;
-            } catch (minimalError) {
-              console.log('❌ All browser launch attempts failed:', minimalError.message);
+            } catch (downloadedPathError) {
+              console.log('❌ Downloaded browser path failed:', downloadedPathError.message);
+              
+              // Ultimate fallback: try without any executablePath
+              console.log('🔄 Final attempt without executablePath...');
+              try {
+                // Clear any environment variables that might interfere
+                delete process.env.PUPPETEER_EXECUTABLE_PATH;
+                
+                this.browser = await puppeteer.launch({
+                  headless: true,
+                  args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+                console.log('✅ Final fallback successful');
+                return;
+              } catch (finalError) {
+                console.log('❌ All browser launch attempts failed:', finalError.message);
+              }
             }
           }
         }
