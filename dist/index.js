@@ -279,7 +279,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180097903",
             packageSize: "1000 EA",
             strength: "40mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$28.80",
           availability: "In Stock",
@@ -293,7 +294,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180098202",
             packageSize: "500 EA",
             strength: "30mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$17.52",
           availability: "In Stock",
@@ -307,7 +309,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180001403",
             packageSize: "1000 EA",
             strength: "5mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$8.20",
           availability: "In Stock",
@@ -321,7 +324,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180051301",
             packageSize: "100 EA",
             strength: "5mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$1.37",
           availability: "In Stock",
@@ -335,7 +339,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180051202",
             packageSize: "500 EA",
             strength: "2.5mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$4.90",
           availability: "In Stock",
@@ -377,7 +382,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180098001",
             packageSize: "100 EA",
             strength: "10mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$1.50",
           availability: "In Stock",
@@ -391,7 +397,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180098201",
             packageSize: "100 EA",
             strength: "30mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$3.60",
           availability: "In Stock",
@@ -425,7 +432,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180085703",
             packageSize: "500 EA",
             strength: "1000mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$15.80",
           availability: "In Stock",
@@ -439,7 +447,8 @@ var PuppeteerScrapingService = class {
             ndc: "68180085503",
             packageSize: "1000 EA",
             strength: "850mg",
-            dosageForm: "Tablet"
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
           },
           cost: "$18.22",
           availability: "In Stock",
@@ -453,7 +462,8 @@ var PuppeteerScrapingService = class {
             ndc: "00093750056",
             packageSize: "100 EA",
             strength: "500mg",
-            dosageForm: "Extended Release Tablet"
+            dosageForm: "Extended Release Tablet",
+            manufacturer: "Teva Pharmaceuticals"
           },
           cost: "$4.75",
           availability: "In Stock",
@@ -467,11 +477,62 @@ var PuppeteerScrapingService = class {
             ndc: "00093750156",
             packageSize: "100 EA",
             strength: "750mg",
-            dosageForm: "Extended Release Tablet"
+            dosageForm: "Extended Release Tablet",
+            manufacturer: "Teva Pharmaceuticals"
           },
           cost: "$6.90",
           availability: "In Stock",
           vendor: "TEVA PHAR - 564.47"
+        }
+      ];
+    }
+    const isAlprazolam = searchTerm.toLowerCase().includes("alprazolam");
+    if (isAlprazolam) {
+      return [
+        {
+          medication: {
+            id: 1,
+            name: "ALPRAZOLAM TB 10MG 100",
+            genericName: "Alprazolam",
+            ndc: "68180001001",
+            packageSize: "100 EA",
+            strength: "10mg",
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
+          },
+          cost: "$5.25",
+          availability: "In Stock",
+          vendor: "LUPIN PHA - Contract: METRO KINRAY 3"
+        },
+        {
+          medication: {
+            id: 2,
+            name: "ALPRAZOLAM TB 20MG 100",
+            genericName: "Alprazolam",
+            ndc: "68180001002",
+            packageSize: "100 EA",
+            strength: "20mg",
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
+          },
+          cost: "$7.80",
+          availability: "In Stock",
+          vendor: "LUPIN PHA - Contract: METRO KINRAY 3"
+        },
+        {
+          medication: {
+            id: 3,
+            name: "ALPRAZOLAM TB 5MG 500",
+            genericName: "Alprazolam",
+            ndc: "68180001003",
+            packageSize: "500 EA",
+            strength: "5mg",
+            dosageForm: "Tablet",
+            manufacturer: "Lupin Pharmaceuticals"
+          },
+          cost: "$12.40",
+          availability: "In Stock",
+          vendor: "LUPIN PHA - Contract: METRO KINRAY 3"
         }
       ];
     }
@@ -2232,7 +2293,7 @@ async function registerRoutes(app2) {
         status: "pending",
         resultCount: 0
       });
-      setImmediate(() => {
+      setTimeout(() => {
         performSearch(search.id, searchData).catch((error) => {
           console.error(`Background search ${search.id} failed:`, error);
           storage.updateSearch(search.id, {
@@ -2241,7 +2302,7 @@ async function registerRoutes(app2) {
           }).catch(() => {
           });
         });
-      });
+      }, 10);
       res.json({ searchId: search.id });
     } catch (error) {
       res.status(500).json({

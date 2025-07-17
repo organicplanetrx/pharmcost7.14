@@ -190,8 +190,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         resultCount: 0,
       });
 
-      // Start search in background immediately
-      setImmediate(() => {
+      // Start search in background immediately - use setTimeout for better stability
+      setTimeout(() => {
         performSearch(search.id, searchData).catch(error => {
           console.error(`Background search ${search.id} failed:`, error);
           storage.updateSearch(search.id, { 
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             completedAt: new Date() 
           }).catch(() => {});
         });
-      });
+      }, 10);
 
       res.json({ searchId: search.id });
     } catch (error: any) {
