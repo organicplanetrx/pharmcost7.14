@@ -470,7 +470,7 @@ export class PuppeteerScrapingService implements ScrapingService {
           try {
             console.log('📦 Using Puppeteer bundled browser...');
             
-            // Completely clean configuration without executablePath
+            // FIXED: Completely clean configuration without executablePath - July 17 2025
             this.browser = await puppeteer.launch({
               headless: true,
               args: [

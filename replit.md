@@ -263,6 +263,9 @@ Changelog:
 - July 17, 2025: ✅ LIVE SCRAPING OPERATIONAL: System successfully launches browser, authenticates with real Kinray credentials, and accesses actual portal
 - July 17, 2025: Browser automation now working perfectly - transitioned from demo data to authentic pharmaceutical portal scraping
 - July 17, 2025: PharmaCost Pro fully operational for live medication price extraction from Kinray (Cardinal Health) portal with real-time data
+- July 17, 2025: DEPLOYMENT DISCONNECT IDENTIFIED: DigitalOcean running old build with broken browser config while local environment has working fixes
+- July 17, 2025: Created FORCE_DEPLOY.md to trigger DigitalOcean rebuild with corrected Puppeteer bundled browser fallback configuration
+- July 17, 2025: Browser automation fix ready for production deployment - expecting full functionality after DigitalOcean redeploys latest code
 ```
 
 ## User Preferences
