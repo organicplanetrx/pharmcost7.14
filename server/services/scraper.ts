@@ -16,7 +16,7 @@ export class PuppeteerScrapingService implements ScrapingService {
     try {
       console.log('🔍 Starting browser path detection...');
       
-      // First try to find chromium using which command
+      // First try to find chromium using which command  
       try {
         const { exec } = await import('child_process');
         const { promisify } = await import('util');
@@ -25,7 +25,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         const { stdout } = await execAsync('which chromium');
         const whichPath = stdout.trim();
         console.log(`✅ which chromium returned: ${whichPath}`);
-        if (whichPath) {
+        if (whichPath && await this.verifyBrowserPath(whichPath)) {
           console.log(`✅ Browser found via which command: ${whichPath}`);
           return whichPath;
         }
@@ -33,9 +33,8 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
-      // Try known working paths first
       const chromePaths = [
-        '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium', // Known working path
+        '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
         process.env.PUPPETEER_EXECUTABLE_PATH,
         '/home/runner/.nix-profile/bin/chromium',
         '/usr/bin/chromium',
@@ -47,10 +46,13 @@ export class PuppeteerScrapingService implements ScrapingService {
 
       console.log(`🔍 Trying ${chromePaths.length} potential browser paths...`);
       
-      // Return the first path (chromium nix store path)
+      // Test each path and return the first working one
       for (const path of chromePaths) {
-        console.log(`Trying: ${path}`);
-        return path; // Return first path which should be the working chromium
+        console.log(`Testing: ${path}`);
+        if (await this.verifyBrowserPath(path)) {
+          console.log(`✅ Verified working browser at: ${path}`);
+          return path;
+        }
       }
       
       console.log('❌ No browser paths available');
@@ -58,6 +60,17 @@ export class PuppeteerScrapingService implements ScrapingService {
     } catch (error) {
       console.log('❌ Browser path detection failed:', error.message);
       return null;
+    }
+  }
+
+  private async verifyBrowserPath(path: string): Promise<boolean> {
+    try {
+      const fs = await import('fs');
+      const { access, constants } = fs.promises;
+      await access(path, constants.F_OK | constants.X_OK);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

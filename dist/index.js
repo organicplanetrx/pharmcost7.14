@@ -227,7 +227,7 @@ var PuppeteerScrapingService = class {
         const { stdout } = await execAsync("which chromium");
         const whichPath = stdout.trim();
         console.log(`\u2705 which chromium returned: ${whichPath}`);
-        if (whichPath) {
+        if (whichPath && await this.verifyBrowserPath(whichPath)) {
           console.log(`\u2705 Browser found via which command: ${whichPath}`);
           return whichPath;
         }
@@ -236,7 +236,6 @@ var PuppeteerScrapingService = class {
       }
       const chromePaths = [
         "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium",
-        // Known working path
         process.env.PUPPETEER_EXECUTABLE_PATH,
         "/home/runner/.nix-profile/bin/chromium",
         "/usr/bin/chromium",
@@ -247,14 +246,27 @@ var PuppeteerScrapingService = class {
       ].filter(Boolean);
       console.log(`\u{1F50D} Trying ${chromePaths.length} potential browser paths...`);
       for (const path3 of chromePaths) {
-        console.log(`Trying: ${path3}`);
-        return path3;
+        console.log(`Testing: ${path3}`);
+        if (await this.verifyBrowserPath(path3)) {
+          console.log(`\u2705 Verified working browser at: ${path3}`);
+          return path3;
+        }
       }
       console.log("\u274C No browser paths available");
       return null;
     } catch (error) {
       console.log("\u274C Browser path detection failed:", error.message);
       return null;
+    }
+  }
+  async verifyBrowserPath(path3) {
+    try {
+      const fs2 = await import("fs");
+      const { access, constants } = fs2.promises;
+      await access(path3, constants.F_OK | constants.X_OK);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
   async checkBrowserAvailability() {
