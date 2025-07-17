@@ -100,15 +100,7 @@ export default function SearchInterface() {
         <div>
 
           <Form {...form}>
-            <form 
-              onSubmit={(e) => {
-                console.log("📝 Form onSubmit triggered - preventing default");
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-              }} 
-              className="space-y-4"
-            >
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="searchType"
@@ -174,7 +166,7 @@ export default function SearchInterface() {
               >
                 {searchMutation.isPending ? "Searching Kinray Portal..." : "Search Medications"}
               </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </div>
