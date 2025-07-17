@@ -220,15 +220,14 @@ var PuppeteerScrapingService = class {
   async findChromiumPath() {
     try {
       console.log("\u{1F50D} Starting browser path detection...");
-      const fs2 = await import("fs");
-      const { exec } = await import("child_process");
-      const { promisify } = await import("util");
-      const execAsync = promisify(exec);
       try {
+        const { exec } = await import("child_process");
+        const { promisify } = await import("util");
+        const execAsync = promisify(exec);
         const { stdout } = await execAsync("which chromium");
         const whichPath = stdout.trim();
-        console.log(`which chromium returned: ${whichPath}`);
-        if (whichPath && fs2.existsSync(whichPath)) {
+        console.log(`\u2705 which chromium returned: ${whichPath}`);
+        if (whichPath) {
           console.log(`\u2705 Browser found via which command: ${whichPath}`);
           return whichPath;
         }
@@ -245,20 +244,12 @@ var PuppeteerScrapingService = class {
         "/usr/bin/google-chrome-stable",
         "/snap/bin/chromium"
       ].filter(Boolean);
-      console.log(`\u{1F50D} Checking ${chromePaths.length} potential browser paths...`);
+      console.log(`\u{1F50D} Trying ${chromePaths.length} potential browser paths...`);
       for (const path3 of chromePaths) {
-        try {
-          console.log(`Checking: ${path3}`);
-          if (path3 && fs2.existsSync(path3)) {
-            console.log(`\u2705 Browser found at: ${path3}`);
-            return path3;
-          }
-        } catch (e) {
-          console.log(`Failed to check ${path3}: ${e.message}`);
-          continue;
-        }
+        console.log(`Trying: ${path3}`);
+        return path3;
       }
-      console.log("\u274C No browser executable found in known paths");
+      console.log("\u274C No browser paths available");
       return null;
     } catch (error) {
       console.log("\u274C Browser path detection failed:", error.message);

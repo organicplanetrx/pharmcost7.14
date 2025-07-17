@@ -16,18 +16,16 @@ export class PuppeteerScrapingService implements ScrapingService {
     try {
       console.log('🔍 Starting browser path detection...');
       
-      // Use static imports instead of dynamic requires
-      const fs = await import('fs');
-      const { exec } = await import('child_process');
-      const { promisify } = await import('util');
-      const execAsync = promisify(exec);
-      
       // First try to find chromium using which command
       try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        
         const { stdout } = await execAsync('which chromium');
         const whichPath = stdout.trim();
-        console.log(`which chromium returned: ${whichPath}`);
-        if (whichPath && fs.existsSync(whichPath)) {
+        console.log(`✅ which chromium returned: ${whichPath}`);
+        if (whichPath) {
           console.log(`✅ Browser found via which command: ${whichPath}`);
           return whichPath;
         }
@@ -35,6 +33,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
+      // Try common paths without fs.existsSync (causes bundling issues)
       const chromePaths = [
         process.env.PUPPETEER_EXECUTABLE_PATH,
         '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
@@ -46,22 +45,15 @@ export class PuppeteerScrapingService implements ScrapingService {
         '/snap/bin/chromium'
       ].filter(Boolean);
 
-      console.log(`🔍 Checking ${chromePaths.length} potential browser paths...`);
+      console.log(`🔍 Trying ${chromePaths.length} potential browser paths...`);
       
+      // Return the first path - if chromium is installed via nix it should work
       for (const path of chromePaths) {
-        try {
-          console.log(`Checking: ${path}`);
-          if (path && fs.existsSync(path)) {
-            console.log(`✅ Browser found at: ${path}`);
-            return path;
-          }
-        } catch (e) {
-          console.log(`Failed to check ${path}: ${e.message}`);
-          continue;
-        }
+        console.log(`Trying: ${path}`);
+        return path; // Return the first path found, let Puppeteer handle validation
       }
       
-      console.log('❌ No browser executable found in known paths');
+      console.log('❌ No browser paths available');
       return null;
     } catch (error) {
       console.log('❌ Browser path detection failed:', error.message);
