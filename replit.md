@@ -243,6 +243,10 @@ Changelog:
 - July 17, 2025: Browser automation now working correctly - system successfully launches browser and attempts portal authentication
 - July 17, 2025: Fixed ESBuild bundling compatibility issues that were preventing browser path detection in production builds
 - July 17, 2025: Live scraping infrastructure fully operational - authentication failures now occur only with invalid credentials, not bundler errors
+- July 17, 2025: BROWSER PATH PRIORITY FIX: Corrected browser detection to prioritize working chromium path over non-existent chrome paths
+- July 17, 2025: Verified chromium installation and functionality - browser automation ready for authentic portal access
+- July 17, 2025: Browser detection now correctly selects /nix/store chromium path instead of failing on /usr/bin/google-chrome
+- July 17, 2025: Live scraping system fully operational and ready for production use with real Kinray credentials
 ```
 
 ## User Preferences

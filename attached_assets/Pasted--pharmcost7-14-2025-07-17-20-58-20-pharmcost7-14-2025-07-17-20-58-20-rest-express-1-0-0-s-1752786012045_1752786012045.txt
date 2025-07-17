@@ -1,0 +1,56 @@
+[pharmcost7-14] [2025-07-17 20:58:20] 
+[pharmcost7-14] [2025-07-17 20:58:20] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:58:20] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:58:20] 
+[pharmcost7-14] [2025-07-17 20:57:51] 
+[pharmcost7-14] [2025-07-17 20:57:51] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:57:51] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:57:51] 
+[pharmcost7-14] [2025-07-17 20:57:53] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:57:53] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:57:53] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:57:53] Environment: production
+[pharmcost7-14] [2025-07-17 20:57:53] Port: 5000
+[pharmcost7-14] [2025-07-17 20:57:53] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:57:53] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:57:53] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:57:53] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:57:53] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:57:53] Static files configured
+[pharmcost7-14] [2025-07-17 20:57:53] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:57:53] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:57:53] 8:57:53 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:58:22] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:58:22] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:58:22] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:58:22] Environment: production
+[pharmcost7-14] [2025-07-17 20:58:22] Port: 5000
+[pharmcost7-14] [2025-07-17 20:58:22] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:58:22] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:58:22] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:58:22] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:58:22] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:58:22] Static files configured
+[pharmcost7-14] [2025-07-17 20:58:22] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:58:22] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:58:22] 8:58:22 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:59:45] 8:59:45 PM [express] GET /api/activity 304 in 3ms :: []
+[pharmcost7-14] [2025-07-17 20:59:45] 8:59:45 PM [express] GET /api/dashboard/stats 304 in 5ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-17 20:59:45] 8:59:45 PM [express] GET /api/credentials 200 in 0ms :: []
+[pharmcost7-14] [2025-07-17 20:59:52] 8:59:52 PM [express] POST /api/credentials 200 in 3ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 20:59:52] 8:59:52 PM [express] GET /api/credentials 200 in 1ms :: [{"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 20:59:54] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 20:59:55] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 20:59:55] 🔍 Starting browser path detection...
+[pharmcost7-14] [2025-07-17 20:59:55] which command failed, trying manual paths...
+[pharmcost7-14] [2025-07-17 20:59:55] 🔍 Trying 8 potential browser paths...
+[pharmcost7-14] [2025-07-17 20:59:55] Trying: /usr/bin/google-chrome
+[pharmcost7-14] [2025-07-17 20:59:55] ✅ Browser automation available - attempting real portal login
+[pharmcost7-14] [2025-07-17 20:59:55] 🔍 Starting browser path detection...
+[pharmcost7-14] [2025-07-17 20:59:55] which command failed, trying manual paths...
+[pharmcost7-14] [2025-07-17 20:59:55] 🔍 Trying 8 potential browser paths...
+[pharmcost7-14] [2025-07-17 20:59:55] Trying: /usr/bin/google-chrome
+[pharmcost7-14] [2025-07-17 20:59:55] Using browser at: /usr/bin/google-chrome
+[pharmcost7-14] [2025-07-17 20:59:55] Browser launch failed: Browser was not found at the configured executablePath (/usr/bin/google-chrome)
+[pharmcost7-14] [2025-07-17 20:59:55] ❌ Browser initialization failed: Browser automation not available in this environment
+[pharmcost7-14] [2025-07-17 20:59:55] 8:59:55 PM [express] POST /api/credentials/test-connection 200 in 77ms :: {"success":false,"message"…

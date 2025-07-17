@@ -235,8 +235,9 @@ var PuppeteerScrapingService = class {
         console.log("which command failed, trying manual paths...");
       }
       const chromePaths = [
-        process.env.PUPPETEER_EXECUTABLE_PATH,
         "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium",
+        // Known working path
+        process.env.PUPPETEER_EXECUTABLE_PATH,
         "/home/runner/.nix-profile/bin/chromium",
         "/usr/bin/chromium",
         "/usr/bin/chromium-browser",

@@ -33,10 +33,10 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
-      // Try common paths without fs.existsSync (causes bundling issues)
+      // Try known working paths first
       const chromePaths = [
+        '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium', // Known working path
         process.env.PUPPETEER_EXECUTABLE_PATH,
-        '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
         '/home/runner/.nix-profile/bin/chromium',
         '/usr/bin/chromium',
         '/usr/bin/chromium-browser',
@@ -47,10 +47,10 @@ export class PuppeteerScrapingService implements ScrapingService {
 
       console.log(`🔍 Trying ${chromePaths.length} potential browser paths...`);
       
-      // Return the first path - if chromium is installed via nix it should work
+      // Return the first path (chromium nix store path)
       for (const path of chromePaths) {
         console.log(`Trying: ${path}`);
-        return path; // Return the first path found, let Puppeteer handle validation
+        return path; // Return first path which should be the working chromium
       }
       
       console.log('❌ No browser paths available');
