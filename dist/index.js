@@ -213,6 +213,7 @@ var storage = getStorage();
 
 // server/services/scraper.ts
 import puppeteer from "puppeteer";
+import { execSync } from "child_process";
 var PuppeteerScrapingService = class {
   browser = null;
   page = null;
@@ -642,22 +643,69 @@ var PuppeteerScrapingService = class {
           console.log("\u{1F504} System browser failed, trying Puppeteer bundled browser...");
           try {
             console.log("\u{1F4E6} Using Puppeteer bundled browser...");
-            this.browser = await puppeteer.launch({
-              headless: true,
-              args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-software-rasterizer",
-                "--disable-background-timer-throttling",
-                "--disable-backgrounding-occluded-windows",
-                "--disable-renderer-backgrounding",
-                "--disable-web-security"
-              ]
-            });
-            console.log("\u2705 Successfully launched with Puppeteer bundled browser");
-            return;
+            let downloadAttempted = false;
+            try {
+              this.browser = await puppeteer.launch({
+                headless: true,
+                args: [
+                  "--no-sandbox",
+                  "--disable-setuid-sandbox",
+                  "--disable-dev-shm-usage",
+                  "--disable-gpu",
+                  "--disable-software-rasterizer",
+                  "--disable-background-timer-throttling",
+                  "--disable-backgrounding-occluded-windows",
+                  "--disable-renderer-backgrounding",
+                  "--disable-web-security"
+                ]
+              });
+              console.log("\u2705 Successfully launched with Puppeteer bundled browser");
+              return;
+            } catch (bundledError) {
+              if (bundledError.message.includes("Could not find browser") && !downloadAttempted) {
+                console.log("\u{1F504} Browser not found, attempting download...");
+                downloadAttempted = true;
+                try {
+                  console.log("\u{1F4E5} Installing browser using puppeteer install command...");
+                  try {
+                    execSync("npx puppeteer browsers install chrome", {
+                      stdio: "inherit",
+                      timeout: 6e4
+                      // 1 minute timeout
+                    });
+                    console.log("\u2705 Browser installed successfully via CLI");
+                  } catch (cliError) {
+                    console.log("CLI install failed, trying programmatic download...");
+                    const puppeteerCore = await import("puppeteer-core");
+                    const fetcher = puppeteerCore.default.createBrowserFetcher();
+                    console.log("\u{1F4E5} Downloading Chromium browser programmatically...");
+                    await fetcher.download("1127108");
+                    console.log("\u2705 Browser downloaded successfully");
+                  }
+                  this.browser = await puppeteer.launch({
+                    headless: true,
+                    args: [
+                      "--no-sandbox",
+                      "--disable-setuid-sandbox",
+                      "--disable-dev-shm-usage",
+                      "--disable-gpu",
+                      "--disable-software-rasterizer",
+                      "--disable-background-timer-throttling",
+                      "--disable-backgrounding-occluded-windows",
+                      "--disable-renderer-backgrounding",
+                      "--disable-web-security"
+                    ]
+                  });
+                  console.log("\u2705 Successfully launched after download");
+                  return;
+                } catch (downloadError) {
+                  console.log("\u274C Browser download failed:", downloadError.message);
+                  throw bundledError;
+                }
+              } else {
+                throw bundledError;
+              }
+            }
           } catch (fallbackError) {
             console.log("\u274C Bundled browser also failed:", fallbackError.message);
             console.log("\u{1F504} Trying minimal browser configuration...");

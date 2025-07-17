@@ -1,4 +1,5 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { execSync } from 'child_process';
 import { Credential, Vendor, MedicationSearchResult } from '@shared/schema';
 
 export interface ScrapingService {
@@ -470,23 +471,77 @@ export class PuppeteerScrapingService implements ScrapingService {
           try {
             console.log('📦 Using Puppeteer bundled browser...');
             
-            // FIXED: Completely clean configuration without executablePath - July 17 2025
-            this.browser = await puppeteer.launch({
-              headless: true,
-              args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox', 
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-software-rasterizer',
-                '--disable-background-timer-throttling',
-                '--disable-backgrounding-occluded-windows',
-                '--disable-renderer-backgrounding',
-                '--disable-web-security'
-              ]
-            });
-            console.log('✅ Successfully launched with Puppeteer bundled browser');
-            return;
+            // Download browser if not available
+            let downloadAttempted = false;
+            try {
+              // FIXED: Completely clean configuration without executablePath - July 17 2025
+              this.browser = await puppeteer.launch({
+                headless: true,
+                args: [
+                  '--no-sandbox',
+                  '--disable-setuid-sandbox', 
+                  '--disable-dev-shm-usage',
+                  '--disable-gpu',
+                  '--disable-software-rasterizer',
+                  '--disable-background-timer-throttling',
+                  '--disable-backgrounding-occluded-windows',
+                  '--disable-renderer-backgrounding',
+                  '--disable-web-security'
+                ]
+              });
+              console.log('✅ Successfully launched with Puppeteer bundled browser');
+              return;
+            } catch (bundledError) {
+              if (bundledError.message.includes('Could not find browser') && !downloadAttempted) {
+                console.log('🔄 Browser not found, attempting download...');
+                downloadAttempted = true;
+                
+                try {
+                  console.log('📥 Installing browser using puppeteer install command...');
+                  
+                  // Try to install browser using the puppeteer CLI
+                  try {
+                    execSync('npx puppeteer browsers install chrome', { 
+                      stdio: 'inherit',
+                      timeout: 60000 // 1 minute timeout
+                    });
+                    console.log('✅ Browser installed successfully via CLI');
+                  } catch (cliError) {
+                    console.log('CLI install failed, trying programmatic download...');
+                    
+                    // Fallback to programmatic installation
+                    const puppeteerCore = await import('puppeteer-core');
+                    const fetcher = puppeteerCore.default.createBrowserFetcher();
+                    console.log('📥 Downloading Chromium browser programmatically...');
+                    await fetcher.download('1127108'); // Current Chromium version
+                    console.log('✅ Browser downloaded successfully');
+                  }
+                  
+                  // Retry launch after download
+                  this.browser = await puppeteer.launch({
+                    headless: true,
+                    args: [
+                      '--no-sandbox',
+                      '--disable-setuid-sandbox', 
+                      '--disable-dev-shm-usage',
+                      '--disable-gpu',
+                      '--disable-software-rasterizer',
+                      '--disable-background-timer-throttling',
+                      '--disable-backgrounding-occluded-windows',
+                      '--disable-renderer-backgrounding',
+                      '--disable-web-security'
+                    ]
+                  });
+                  console.log('✅ Successfully launched after download');
+                  return;
+                } catch (downloadError) {
+                  console.log('❌ Browser download failed:', downloadError.message);
+                  throw bundledError;
+                }
+              } else {
+                throw bundledError;
+              }
+            }
           } catch (fallbackError) {
             console.log('❌ Bundled browser also failed:', fallbackError.message);
             
