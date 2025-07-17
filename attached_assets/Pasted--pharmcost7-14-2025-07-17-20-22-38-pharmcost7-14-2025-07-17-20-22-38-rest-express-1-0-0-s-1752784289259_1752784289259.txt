@@ -1,0 +1,51 @@
+[pharmcost7-14] [2025-07-17 20:22:38] 
+[pharmcost7-14] [2025-07-17 20:22:38] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:22:38] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:22:38] 
+[pharmcost7-14] [2025-07-17 20:22:40] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:22:40] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:22:40] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:22:40] Environment: production
+[pharmcost7-14] [2025-07-17 20:22:40] Port: 5000
+[pharmcost7-14] [2025-07-17 20:22:40] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:22:40] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:22:40] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:22:40] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:22:40] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:22:40] Static files configured
+[pharmcost7-14] [2025-07-17 20:22:40] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:22:40] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:22:06] 
+[pharmcost7-14] [2025-07-17 20:22:06] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:22:06] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:22:06] 
+[pharmcost7-14] [2025-07-17 20:22:09] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:22:09] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:22:09] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:22:09] Environment: production
+[pharmcost7-14] [2025-07-17 20:22:09] Port: 5000
+[pharmcost7-14] [2025-07-17 20:22:09] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:22:09] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:22:09] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:22:09] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:22:09] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:22:09] Static files configured
+[pharmcost7-14] [2025-07-17 20:22:09] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:22:09] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:22:09] 8:22:09 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:25:39] 8:25:39 PM [express] GET /api/dashboard/stats 304 in 3ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-17 20:25:39] 8:25:39 PM [express] GET /api/activity 200 in 1ms :: []
+[pharmcost7-14] [2025-07-17 20:25:39] 8:25:39 PM [express] GET /api/credentials 200 in 1ms :: []
+[pharmcost7-14] [2025-07-17 20:31:07] 8:31:07 PM [express] GET /api/credentials 200 in 1ms :: []
+[pharmcost7-14] [2025-07-17 20:31:10] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 20:31:10] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 20:31:10] No browser executable found in known paths
+[pharmcost7-14] [2025-07-17 20:31:10] Browser automation not available - cannot perform live scraping
+[pharmcost7-14] [2025-07-17 20:31:10] 8:31:10 PM [express] POST /api/credentials/test-connection 200 in 34ms :: {"success":false,"message"…
+[pharmcost7-14] [2025-07-17 20:22:40] 8:22:40 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:31:03] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 20:31:03] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 20:31:03] No browser executable found in known paths
+[pharmcost7-14] [2025-07-17 20:31:03] Browser automation not available - cannot perform live scraping
+[pharmcost7-14] [2025-07-17 20:31:03] 8:31:03 PM [express] POST /api/credentials/test-connection 200 in 48ms :: {"success":false,"message"…
+[pharmcost7-14] [2025-07-17 20:31:07] 8:31:07 PM [express] POST /api/credentials 200 in 17ms :: {"vendorId":1,"username":"organicplanetrx@…

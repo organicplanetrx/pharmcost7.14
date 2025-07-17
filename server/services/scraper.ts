@@ -14,21 +14,24 @@ export class PuppeteerScrapingService implements ScrapingService {
 
   private async findChromiumPath(): Promise<string | null> {
     try {
-      const { existsSync } = await import('fs');
-      const { exec } = await import('child_process');
-      const { promisify } = await import('util');
+      const fs = require('fs');
+      const { exec } = require('child_process');
+      const { promisify } = require('util');
       const execAsync = promisify(exec);
+      
+      console.log('🔍 Starting browser path detection...');
       
       // First try to find chromium using which command
       try {
         const { stdout } = await execAsync('which chromium');
         const whichPath = stdout.trim();
-        if (whichPath && existsSync(whichPath)) {
-          console.log(`Browser found via which command: ${whichPath}`);
+        console.log(`which chromium returned: ${whichPath}`);
+        if (whichPath && fs.existsSync(whichPath)) {
+          console.log(`✅ Browser found via which command: ${whichPath}`);
           return whichPath;
         }
       } catch (e) {
-        // which command failed, continue to manual paths
+        console.log('which command failed, trying manual paths...');
       }
       
       const chromePaths = [
@@ -42,21 +45,25 @@ export class PuppeteerScrapingService implements ScrapingService {
         '/snap/bin/chromium'
       ].filter(Boolean);
 
+      console.log(`🔍 Checking ${chromePaths.length} potential browser paths...`);
+      
       for (const path of chromePaths) {
         try {
-          if (path && existsSync(path)) {
-            console.log(`Browser found at: ${path}`);
+          console.log(`Checking: ${path}`);
+          if (path && fs.existsSync(path)) {
+            console.log(`✅ Browser found at: ${path}`);
             return path;
           }
         } catch (e) {
+          console.log(`Failed to check ${path}: ${e.message}`);
           continue;
         }
       }
       
-      console.log('No browser executable found in known paths');
+      console.log('❌ No browser executable found in known paths');
       return null;
     } catch (error) {
-      console.log('Browser path detection failed:', error.message);
+      console.log('❌ Browser path detection failed:', error.message);
       return null;
     }
   }
@@ -555,8 +562,14 @@ export class PuppeteerScrapingService implements ScrapingService {
       
       console.log('✅ Browser automation available - attempting real portal login');
       
-      await this.initBrowser();
-      if (!this.page) throw new Error('Failed to initialize browser page');
+      try {
+        await this.initBrowser();
+        if (!this.page) throw new Error('Failed to initialize browser page');
+        console.log('✅ Browser initialized successfully');
+      } catch (browserError: any) {
+        console.log(`❌ Browser initialization failed: ${browserError.message}`);
+        return false;
+      }
 
       this.currentVendor = vendor;
       
@@ -567,7 +580,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('🚀 Launching browser navigation...');
         const response = await this.page.goto(vendor.portalUrl, { 
           waitUntil: 'domcontentloaded', 
-          timeout: 10000 
+          timeout: 15000 
         });
         
         if (!response || !response.ok()) {
@@ -608,7 +621,14 @@ export class PuppeteerScrapingService implements ScrapingService {
           return await this.loginCardinal(credential);
         case 'Kinray (Cardinal Health)':
           console.log('🔑 Starting Kinray-specific login process...');
-          return await this.loginKinray(credential);
+          try {
+            const loginResult = await this.loginKinray(credential);
+            console.log(`🔑 Kinray login result: ${loginResult}`);
+            return loginResult;
+          } catch (kinrayError: any) {
+            console.log(`❌ Kinray login error: ${kinrayError.message}`);
+            return false;
+          }
         case 'AmerisourceBergen':
           return await this.loginAmerisource(credential);
         case 'Morris & Dickson':

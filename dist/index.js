@@ -1,3 +1,10 @@
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined") return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + x + '" is not supported');
+});
+
 // server/index.ts
 import express2 from "express";
 
@@ -219,18 +226,21 @@ var PuppeteerScrapingService = class {
   currentVendor = null;
   async findChromiumPath() {
     try {
-      const { existsSync } = await import("fs");
-      const { exec } = await import("child_process");
-      const { promisify } = await import("util");
+      const fs2 = __require("fs");
+      const { exec } = __require("child_process");
+      const { promisify } = __require("util");
       const execAsync = promisify(exec);
+      console.log("\u{1F50D} Starting browser path detection...");
       try {
         const { stdout } = await execAsync("which chromium");
         const whichPath = stdout.trim();
-        if (whichPath && existsSync(whichPath)) {
-          console.log(`Browser found via which command: ${whichPath}`);
+        console.log(`which chromium returned: ${whichPath}`);
+        if (whichPath && fs2.existsSync(whichPath)) {
+          console.log(`\u2705 Browser found via which command: ${whichPath}`);
           return whichPath;
         }
       } catch (e) {
+        console.log("which command failed, trying manual paths...");
       }
       const chromePaths = [
         process.env.PUPPETEER_EXECUTABLE_PATH,
@@ -242,20 +252,23 @@ var PuppeteerScrapingService = class {
         "/usr/bin/google-chrome-stable",
         "/snap/bin/chromium"
       ].filter(Boolean);
+      console.log(`\u{1F50D} Checking ${chromePaths.length} potential browser paths...`);
       for (const path3 of chromePaths) {
         try {
-          if (path3 && existsSync(path3)) {
-            console.log(`Browser found at: ${path3}`);
+          console.log(`Checking: ${path3}`);
+          if (path3 && fs2.existsSync(path3)) {
+            console.log(`\u2705 Browser found at: ${path3}`);
             return path3;
           }
         } catch (e) {
+          console.log(`Failed to check ${path3}: ${e.message}`);
           continue;
         }
       }
-      console.log("No browser executable found in known paths");
+      console.log("\u274C No browser executable found in known paths");
       return null;
     } catch (error) {
-      console.log("Browser path detection failed:", error.message);
+      console.log("\u274C Browser path detection failed:", error.message);
       return null;
     }
   }
@@ -705,15 +718,21 @@ var PuppeteerScrapingService = class {
         return false;
       }
       console.log("\u2705 Browser automation available - attempting real portal login");
-      await this.initBrowser();
-      if (!this.page) throw new Error("Failed to initialize browser page");
+      try {
+        await this.initBrowser();
+        if (!this.page) throw new Error("Failed to initialize browser page");
+        console.log("\u2705 Browser initialized successfully");
+      } catch (browserError) {
+        console.log(`\u274C Browser initialization failed: ${browserError.message}`);
+        return false;
+      }
       this.currentVendor = vendor;
       console.log(`\u{1F310} Connecting to ${vendor.name} at ${vendor.portalUrl}`);
       try {
         console.log("\u{1F680} Launching browser navigation...");
         const response = await this.page.goto(vendor.portalUrl, {
           waitUntil: "domcontentloaded",
-          timeout: 1e4
+          timeout: 15e3
         });
         if (!response || !response.ok()) {
           throw new Error(`HTTP ${response?.status() || "No response"} - Portal unreachable`);
@@ -737,7 +756,14 @@ var PuppeteerScrapingService = class {
           return await this.loginCardinal(credential);
         case "Kinray (Cardinal Health)":
           console.log("\u{1F511} Starting Kinray-specific login process...");
-          return await this.loginKinray(credential);
+          try {
+            const loginResult = await this.loginKinray(credential);
+            console.log(`\u{1F511} Kinray login result: ${loginResult}`);
+            return loginResult;
+          } catch (kinrayError) {
+            console.log(`\u274C Kinray login error: ${kinrayError.message}`);
+            return false;
+          }
         case "AmerisourceBergen":
           return await this.loginAmerisource(credential);
         case "Morris & Dickson":
