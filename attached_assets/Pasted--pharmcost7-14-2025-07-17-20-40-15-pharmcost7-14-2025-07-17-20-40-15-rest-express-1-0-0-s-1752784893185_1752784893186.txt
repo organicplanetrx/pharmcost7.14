@@ -1,0 +1,122 @@
+[pharmcost7-14] [2025-07-17 20:40:15] 
+[pharmcost7-14] [2025-07-17 20:40:15] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:40:15] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:39:41] 
+[pharmcost7-14] [2025-07-17 20:39:41] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-17 20:39:41] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-17 20:39:41] 
+[pharmcost7-14] [2025-07-17 20:39:44] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:39:44] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:39:44] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:39:44] Environment: production
+[pharmcost7-14] [2025-07-17 20:39:44] Port: 5000
+[pharmcost7-14] [2025-07-17 20:39:44] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:39:44] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:39:44] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:39:44] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:39:44] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:39:44] Static files configured
+[pharmcost7-14] [2025-07-17 20:39:44] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:39:44] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:39:44] 8:39:44 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:40:15] 
+[pharmcost7-14] [2025-07-17 20:40:18] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-17 20:40:18] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-17 20:40:18] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-17 20:40:18] Environment: production
+[pharmcost7-14] [2025-07-17 20:40:18] Port: 5000
+[pharmcost7-14] [2025-07-17 20:40:18] ✓ Express app created
+[pharmcost7-14] [2025-07-17 20:40:18] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-17 20:40:18] Starting server initialization...
+[pharmcost7-14] [2025-07-17 20:40:18] Routes registered successfully
+[pharmcost7-14] [2025-07-17 20:40:18] Setting up static file serving...
+[pharmcost7-14] [2025-07-17 20:40:18] Static files configured
+[pharmcost7-14] [2025-07-17 20:40:18] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-17 20:40:18] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-17 20:40:18] 8:40:18 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-17 20:40:50] 8:40:50 PM [express] GET /api/credentials 304 in 5ms :: []
+[pharmcost7-14] [2025-07-17 20:40:51] 8:40:51 PM [express] GET /api/dashboard/stats 304 in 2ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-17 20:40:51] 8:40:51 PM [express] GET /api/activity 304 in 1ms :: []
+[pharmcost7-14] [2025-07-17 20:40:56] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-17 20:40:56] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 20:40:56] ❌ Browser path detection failed: Dynamic require of "fs" is not supported
+[pharmcost7-14] [2025-07-17 20:40:56] Browser automation not available - cannot perform live scraping
+[pharmcost7-14] [2025-07-17 20:40:56] 8:40:56 PM [express] POST /api/credentials/test-connection 200 in 4ms :: {"success":false,"message":…
+[pharmcost7-14] [2025-07-17 20:40:58] 8:40:58 PM [express] POST /api/credentials 200 in 4ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 20:40:58] 8:40:58 PM [express] GET /api/credentials 200 in 1ms :: [{"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-17 20:41:12] 🔄 Created search 1 - Total searches: 1
+[pharmcost7-14] [2025-07-17 20:41:12] 8:41:12 PM [express] POST /api/search 200 in 4ms :: {"searchId":1}
+[pharmcost7-14] [2025-07-17 20:41:12] 🔍 Starting search 1 for "lisinopril"
+[pharmcost7-14] [2025-07-17 20:41:12] 🚀 Attempting login to Kinray (Cardinal Health)...
+[pharmcost7-14] [2025-07-17 20:41:12] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-17 20:41:12] ❌ Browser path detection failed: Dynamic require of "fs" is not supported
+[pharmcost7-14] [2025-07-17 20:41:12] Browser automation not available - cannot perform live scraping
+[pharmcost7-14] [2025-07-17 20:41:12] ❌ Login failed to Kinray (Cardinal Health) - cannot perform live scraping
+[pharmcost7-14] [2025-07-17 20:41:12] ❌ Scraping error: Login failed to Kinray (Cardinal Health). Please check credentials and try again.
+[pharmcost7-14] [2025-07-17 20:41:12] Search failed: Error: Live scraping failed: Login failed to Kinray (Cardinal Health). Please check credentials and try again.
+[pharmcost7-14] [2025-07-17 20:41:12]     at performSearch (file:///workspace/dist/index.js:2409:15)
+[pharmcost7-14] [2025-07-17 20:41:12]     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[pharmcost7-14] [2025-07-17 20:41:12] 8:41:12 PM [express] GET /api/activity 200 in 1ms :: [{"action":"search","status":"failure","descrip…
+[pharmcost7-14] [2025-07-17 20:41:12] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:12] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:12] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 20:41:12] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 20:41:12] 8:41:12 PM [express] GET /api/search/1 404 in 3ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 20:41:12] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:12] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:12] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:12] 📋 Found 0 results for search 1
+[pharmcost7-14] [2025-07-17 20:41:12] ✅ API: Returning search 1 with 0 results
+[pharmcost7-14] [2025-07-17 20:41:12] 8:41:12 PM [express] GET /api/search/1 200 in 3ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 20:41:14] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:14] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:14] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:14] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 20:41:14] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:14] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:14] 📋 Found 0 results for search 1
+[pharmcost7-14] [2025-07-17 20:41:14] ✅ API: Returning search 1 with 0 results
+[pharmcost7-14] [2025-07-17 20:41:14] 8:41:14 PM [express] GET /api/search/1 304 in 3ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 20:41:16] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:16] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:16] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:16] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 20:41:16] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:16] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:16] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 20:41:16] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 20:41:16] 8:41:16 PM [express] GET /api/search/1 404 in 4ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 20:41:18] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:18] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:18] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:18] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 20:41:18] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:18] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:18] 📋 Found 0 results for search 1
+[pharmcost7-14] [2025-07-17 20:41:18] ✅ API: Returning search 1 with 0 results
+[pharmcost7-14] [2025-07-17 20:41:18] 8:41:18 PM [express] GET /api/search/1 200 in 5ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+[pharmcost7-14] [2025-07-17 20:41:20] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:20] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:20] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:20] 📊 Available searches: 0
+[pharmcost7-14] [2025-07-17 20:41:20] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:20] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:20] ❌ Search 1 not found in storage
+[pharmcost7-14] [2025-07-17 20:41:20] ❌ API: Search 1 not found
+[pharmcost7-14] [2025-07-17 20:41:20] 8:41:20 PM [express] GET /api/search/1 404 in 5ms :: {"message":"Search not found"}
+[pharmcost7-14] [2025-07-17 20:41:22] 🔍 API: Fetching search 1
+[pharmcost7-14] [2025-07-17 20:41:22] 🔍 getSearchWithResults called for searchId: 1
+[pharmcost7-14] [2025-07-17 20:41:22] 📊 Storage instance: MemStorage
+[pharmcost7-14] [2025-07-17 20:41:22] 📊 Available searches: 1
+[pharmcost7-14] [2025-07-17 20:41:22] 📊 Available results: 0
+[pharmcost7-14] [2025-07-17 20:41:22] 📊 Available medications: 0
+[pharmcost7-14] [2025-07-17 20:41:22] 📋 Found 0 results for search 1
+[pharmcost7-14] [2025-07-17 20:41:22] ✅ API: Returning search 1 with 0 results
+[pharmcost7-14] [2025-07-17 20:41:22] 8:41:22 PM [express] GET /api/search/1 200 in 4ms :: {"vendorId":1,"searchTerm":"lisinopril","search…

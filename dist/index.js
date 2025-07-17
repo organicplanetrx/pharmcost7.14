@@ -1,10 +1,3 @@
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
-
 // server/index.ts
 import express2 from "express";
 
@@ -226,11 +219,11 @@ var PuppeteerScrapingService = class {
   currentVendor = null;
   async findChromiumPath() {
     try {
-      const fs2 = __require("fs");
-      const { exec } = __require("child_process");
-      const { promisify } = __require("util");
-      const execAsync = promisify(exec);
       console.log("\u{1F50D} Starting browser path detection...");
+      const fs2 = await import("fs");
+      const { exec } = await import("child_process");
+      const { promisify } = await import("util");
+      const execAsync = promisify(exec);
       try {
         const { stdout } = await execAsync("which chromium");
         const whichPath = stdout.trim();

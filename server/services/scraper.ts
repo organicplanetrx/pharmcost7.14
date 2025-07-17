@@ -14,12 +14,13 @@ export class PuppeteerScrapingService implements ScrapingService {
 
   private async findChromiumPath(): Promise<string | null> {
     try {
-      const fs = require('fs');
-      const { exec } = require('child_process');
-      const { promisify } = require('util');
-      const execAsync = promisify(exec);
-      
       console.log('🔍 Starting browser path detection...');
+      
+      // Use static imports instead of dynamic requires
+      const fs = await import('fs');
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
       
       // First try to find chromium using which command
       try {
