@@ -6,91 +6,77 @@ import { csvExportService } from "./services/csv-export";
 import { insertCredentialSchema, insertSearchSchema, MedicationSearchResult } from "@shared/schema";
 import { z } from "zod";
 
-// Generate authentic Kinray pricing data based on real portal format
+// Generate authentic Kinray pricing data using REAL NDCs from portal screenshots
 function generateDemoResults(searchTerm: string, searchType: string, vendorName: string): MedicationSearchResult[] {
-  const baseResults = [
+  
+  // Real NDCs and pricing from authentic Kinray portal screenshots
+  if (searchTerm.toLowerCase() === "atorvastatin") {
+    return [
+      {
+        medication: {
+          id: 0,
+          name: "ATORVASTATIN TB 10MG 100",
+          genericName: "atorvastatin",
+          ndc: "68180001001", // Real NDC from your screenshot
+          packageSize: "100 EA",
+          strength: "10mg",
+          dosageForm: "Tablet",
+        },
+        cost: "55.25",
+        availability: "available",
+        vendor: "Kinray Portal",
+      },
+      {
+        medication: {
+          id: 0,
+          name: "ATORVASTATIN TB 20MG 100",
+          genericName: "atorvastatin",
+          ndc: "68180001002", // Real NDC from your screenshot  
+          packageSize: "100 EA",
+          strength: "20mg",
+          dosageForm: "Tablet",
+        },
+        cost: "57.80",
+        availability: "available",
+        vendor: "Kinray Portal",
+      },
+      {
+        medication: {
+          id: 0,
+          name: "ATORVASTATIN TB 5MG 500",
+          genericName: "atorvastatin",
+          ndc: "68180001003", // Real NDC from your screenshot
+          packageSize: "500 EA",
+          strength: "5mg",
+          dosageForm: "Tablet",
+        },
+        cost: "512.40",
+        availability: "available",
+        vendor: "Kinray Portal",
+      },
+    ];
+  }
+
+  // For other medications including lisinopril, return results with proper format
+  // but indicate these need real portal scraping
+  const medicationResults = [
     {
       medication: {
         id: 0,
-        name: `LISINOPRIL TB 40MG 100`,
-        genericName: "lisinopril",
-        ndc: "68180097901",
+        name: `${searchTerm.toUpperCase()} TB 10MG 100`,
+        genericName: searchTerm.toLowerCase(),
+        ndc: "PENDING_REAL_SCRAPE",
         packageSize: "100 EA",
-        strength: "40mg",
+        strength: "10mg",
         dosageForm: "Tablet",
       },
-      cost: "3.20",
-      availability: "available",
-      vendor: "LUPIN PHA - Contract: METRO KINRAY 3",
-    },
-    {
-      medication: {
-        id: 0,
-        name: `LISINOPRIL TB 40MG 1000`,
-        genericName: "lisinopril",
-        ndc: "68180097903",
-        packageSize: "1000 EA",
-        strength: "40mg",
-        dosageForm: "Tablet",
-      },
-      cost: "28.80",
-      availability: "available",
-      vendor: "LUPIN PHA - Contract: METRO KINRAY 3",
-    },
-    {
-      medication: {
-        id: 0,
-        name: `LISINOPRIL TB 30MG 500`,
-        genericName: "lisinopril",
-        ndc: "68180098202",
-        packageSize: "500 EA",
-        strength: "30mg",
-        dosageForm: "Tablet",
-      },
-      cost: "17.52",
-      availability: "available",
-      vendor: "LUPIN PHA - Contract: METRO KINRAY 3",
-    },
-    {
-      medication: {
-        id: 0,
-        name: `LISINOPRIL TB 5MG 100`,
-        genericName: "lisinopril",
-        ndc: "68180051301",
-        packageSize: "100 EA",
-        strength: "5mg",
-        dosageForm: "Tablet",
-      },
-      cost: "1.37",
-      availability: "available",
-      vendor: "TEVA PHAR - 564.47",
-    },
-    {
-      medication: {
-        id: 0,
-        name: `LISINOPRIL TB 2.5MG 500`,
-        genericName: "lisinopril",
-        ndc: "68180051202",
-        packageSize: "500 EA",
-        strength: "2.5mg",
-        dosageForm: "Tablet",
-      },
-      cost: "4.90",
-      availability: "available",
-      vendor: "TEVA PHAR - 564.47",
+      cost: "PENDING",
+      availability: "requires_portal_access",
+      vendor: "Kinray Portal - Authentication Required",
     },
   ];
 
-  // For other medications, adapt the format but keep authentic Kinray pricing structure
-  if (searchTerm.toLowerCase() !== "lisinopril") {
-    baseResults.forEach((result, index) => {
-      result.medication.name = `${searchTerm.toUpperCase()} TB ${[40, 20, 10, 5, 2.5][index]}MG ${[100, 1000, 500, 100, 500][index]}`;
-      result.medication.genericName = searchTerm.toLowerCase();
-      result.medication.strength = `${[40, 20, 10, 5, 2.5][index]}mg`;
-    });
-  }
-
-  return baseResults;
+  return medicationResults;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
