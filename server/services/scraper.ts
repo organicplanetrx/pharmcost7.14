@@ -1314,11 +1314,11 @@ export class PuppeteerScrapingService implements ScrapingService {
         
         console.log('Processing search results from portal...');
         
-        // Try to extract results from various result containers
+        // Try to extract results from various result containers with enhanced detection
         const results = await this.page.evaluate((vendorName) => {
           const results: MedicationSearchResult[] = [];
           
-          // Try multiple result container selectors
+          // Enhanced result container selectors for comprehensive extraction
           const containerSelectors = [
             '.search-results',
             '.product-results', 
@@ -1327,7 +1327,12 @@ export class PuppeteerScrapingService implements ScrapingService {
             '.product-list',
             '.item-list',
             '[class*="result"]',
-            '[class*="product"]'
+            '[class*="product"]',
+            '[class*="grid"]',
+            '[class*="table"]',
+            '.data-table tbody',
+            '#results tbody',
+            '.search-grid'
           ];
           
           let rows: NodeListOf<Element> | null = null;
@@ -1351,23 +1356,40 @@ export class PuppeteerScrapingService implements ScrapingService {
           if (rows) {
             rows.forEach((row, index) => {
               try {
-                // Try to extract product information from various patterns
+                // Enhanced product information extraction
                 const textContent = row.textContent || '';
                 
-                // Look for NDC pattern
-                const ndcMatch = textContent.match(/\b\d{5}-\d{4}-\d{2}\b|\b\d{11}\b/);
+                // Enhanced NDC pattern matching
+                const ndcMatch = textContent.match(/\b\d{5}[-\s]?\d{4}[-\s]?\d{2}\b|\b\d{11}\b/);
                 
-                // Look for price pattern
-                const priceMatch = textContent.match(/\$[\d,]+\.?\d*/);
+                // Enhanced price pattern matching
+                const priceMatch = textContent.match(/\$[\d,]+\.?\d*|USD\s*[\d,]+\.?\d*|[\d,]+\.?\d*\s*USD/);
                 
-                // Try to find name - look for meaningful text that's not just numbers/symbols
-                const nameElements = row.querySelectorAll('td, .name, .product-name, .drug-name, span, div');
+                // Enhanced name extraction with better filtering
+                const nameElements = row.querySelectorAll('td, .name, .product-name, .drug-name, span, div, .description, .title');
                 let productName = '';
                 
                 for (const el of nameElements) {
                   const text = el.textContent?.trim() || '';
-                  if (text.length > 3 && !text.match(/^\$?[\d,.-]+$/) && !text.match(/^\d{5}-\d{4}-\d{2}$/)) {
+                  // More sophisticated filtering for product names
+                  if (text.length > 3 && 
+                      !text.match(/^\$?[\d,.-]+$/) && 
+                      !text.match(/^\d{5}[-\s]?\d{4}[-\s]?\d{2}$/) &&
+                      !text.match(/^(In Stock|Out of Stock|Available|Unavailable)$/i) &&
+                      !text.includes('AWP') &&
+                      !text.includes('Deal Details')) {
                     productName = text;
+                    break;
+                  }
+                }
+                
+                // Enhanced availability detection
+                let availability = 'Available';
+                const availabilityElements = row.querySelectorAll('td, .status, .availability, .stock, span');
+                for (const el of availabilityElements) {
+                  const text = el.textContent?.trim() || '';
+                  if (text.match(/^(In Stock|Out of Stock|Available|Unavailable|Limited|Backordered)$/i)) {
+                    availability = text;
                     break;
                   }
                 }

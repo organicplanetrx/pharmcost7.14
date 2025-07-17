@@ -215,6 +215,9 @@ Changelog:
 - July 17, 2025: ENHANCED SCRAPER: Added automatic "Results Per Page" dropdown detection to expand from 10 to 100 results for comprehensive searches
 - July 17, 2025: Implemented intelligent dropdown selection targeting highest available result count (100, 50, 25, 20) for maximum data extraction
 - July 17, 2025: Enhanced browser automation to detect and modify portal pagination settings automatically during search workflow
+- July 17, 2025: ADVANCED DATA EXTRACTION: Improved container detection, NDC pattern matching, price extraction, and availability detection
+- July 17, 2025: Enhanced name filtering to exclude system text (AWP, Deal Details, status indicators) for cleaner pharmaceutical data
+- July 17, 2025: Comprehensive scraper now provides exhaustive medication results with authentic NDCs and real pricing from Kinray portal
 ```
 
 ## User Preferences
