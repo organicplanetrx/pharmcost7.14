@@ -19,11 +19,12 @@ export class PuppeteerScrapingService implements ScrapingService {
         process.env.PUPPETEER_EXECUTABLE_PATH,
         '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium',
         '/home/runner/.nix-profile/bin/chromium',
-        '/usr/bin/google-chrome',
-        '/usr/bin/google-chrome-stable',
         '/usr/bin/chromium',
         '/usr/bin/chromium-browser',
-        '/snap/bin/chromium'
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/snap/bin/chromium',
+        '/usr/bin/chromium-browser'
       ].filter(Boolean);
 
       for (const path of chromePaths) {
@@ -533,8 +534,8 @@ export class PuppeteerScrapingService implements ScrapingService {
       // Check if browser automation is available
       const browserAvailable = await this.checkBrowserAvailability();
       if (!browserAvailable) {
-        console.log('Browser automation not available - using credential validation mode');
-        return credential && credential.username && credential.password;
+        console.log('Browser automation not available - cannot perform live scraping');
+        return false;
       }
       
       console.log('✅ Browser automation available - attempting real portal login');
@@ -571,13 +572,11 @@ export class PuppeteerScrapingService implements ScrapingService {
             navigationError.message.includes('Navigation timeout') ||
             navigationError.name === 'TimeoutError') {
           
-          console.log(`🌐 Network connectivity issue detected - falling back to demo mode`);
-          console.log(`In production with full network access, this would:`);
-          console.log(`1. Navigate to ${vendor.portalUrl}`);
-          console.log(`2. Login with username: ${credential.username}`);
-          console.log(`3. Extract live pricing data from portal`);
+          console.log(`🌐 Network connectivity issue detected - cannot perform live scraping`);
+          console.log(`Portal URL: ${vendor.portalUrl}`);
+          console.log(`Error: ${navigationError.message}`);
           
-          // Return false to trigger demo mode in searchMedication
+          // Return false to indicate login failure
           return false;
         }
         
@@ -950,15 +949,15 @@ export class PuppeteerScrapingService implements ScrapingService {
     // Check if browser automation is available
     const browserAvailable = await this.checkBrowserAvailability();
     if (!browserAvailable) {
-      console.log('Browser automation not available - generating demonstration results');
-      return this.generateDemoResults(searchTerm, searchType);
+      console.log('Browser automation not available - cannot perform live scraping');
+      throw new Error('Browser automation not available for live scraping');
     }
     
     console.log('✅ Browser automation available');
     
     if (!this.page || !this.currentVendor) {
-      console.log('❌ Not logged in to vendor portal - using demo results');
-      return this.generateDemoResults(searchTerm, searchType);
+      console.log('❌ Not logged in to vendor portal - cannot perform live scraping');
+      throw new Error('No active browser session available for live scraping');
     }
 
     try {
@@ -984,11 +983,12 @@ export class PuppeteerScrapingService implements ScrapingService {
             return realResults;
           }
         } catch (searchError) {
-          console.log(`❌ Real search failed: ${searchError.message} - using demo results`);
+          console.log(`❌ Real search failed: ${searchError.message}`);
+          throw new Error(`Live search failed: ${searchError.message}`);
         }
         
-        // Fall back to demo results with authentic format
-        return this.generateDemoResults(searchTerm, searchType);
+        // If we reach here, search didn't return results
+        throw new Error('No results found from live portal search');
       }
       
       // Focus on Kinray portal only for now

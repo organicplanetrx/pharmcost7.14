@@ -224,11 +224,12 @@ var PuppeteerScrapingService = class {
         process.env.PUPPETEER_EXECUTABLE_PATH,
         "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium",
         "/home/runner/.nix-profile/bin/chromium",
-        "/usr/bin/google-chrome",
-        "/usr/bin/google-chrome-stable",
         "/usr/bin/chromium",
         "/usr/bin/chromium-browser",
-        "/snap/bin/chromium"
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/snap/bin/chromium",
+        "/usr/bin/chromium-browser"
       ].filter(Boolean);
       for (const path3 of chromePaths) {
         try {
@@ -689,8 +690,8 @@ var PuppeteerScrapingService = class {
       console.log(`\u{1F510} Attempting login to ${vendor.name} with username: ${credential.username}`);
       const browserAvailable = await this.checkBrowserAvailability();
       if (!browserAvailable) {
-        console.log("Browser automation not available - using credential validation mode");
-        return credential && credential.username && credential.password;
+        console.log("Browser automation not available - cannot perform live scraping");
+        return false;
       }
       console.log("\u2705 Browser automation available - attempting real portal login");
       await this.initBrowser();
@@ -710,11 +711,9 @@ var PuppeteerScrapingService = class {
       } catch (navigationError) {
         console.log(`\u274C Navigation failed: ${navigationError.message}`);
         if (navigationError.message.includes("ERR_NAME_NOT_RESOLVED") || navigationError.message.includes("ERR_INTERNET_DISCONNECTED") || navigationError.message.includes("net::ERR_") || navigationError.message.includes("Could not resolve host") || navigationError.message.includes("Navigation timeout") || navigationError.name === "TimeoutError") {
-          console.log(`\u{1F310} Network connectivity issue detected - falling back to demo mode`);
-          console.log(`In production with full network access, this would:`);
-          console.log(`1. Navigate to ${vendor.portalUrl}`);
-          console.log(`2. Login with username: ${credential.username}`);
-          console.log(`3. Extract live pricing data from portal`);
+          console.log(`\u{1F310} Network connectivity issue detected - cannot perform live scraping`);
+          console.log(`Portal URL: ${vendor.portalUrl}`);
+          console.log(`Error: ${navigationError.message}`);
           return false;
         }
         console.error(`Connection error for ${vendor.name}:`, navigationError.message);
@@ -1019,13 +1018,13 @@ var PuppeteerScrapingService = class {
     console.log(`\u{1F50D} Starting medication search for "${searchTerm}" (${searchType})`);
     const browserAvailable = await this.checkBrowserAvailability();
     if (!browserAvailable) {
-      console.log("Browser automation not available - generating demonstration results");
-      return this.generateDemoResults(searchTerm, searchType);
+      console.log("Browser automation not available - cannot perform live scraping");
+      throw new Error("Browser automation not available for live scraping");
     }
     console.log("\u2705 Browser automation available");
     if (!this.page || !this.currentVendor) {
-      console.log("\u274C Not logged in to vendor portal - using demo results");
-      return this.generateDemoResults(searchTerm, searchType);
+      console.log("\u274C Not logged in to vendor portal - cannot perform live scraping");
+      throw new Error("No active browser session available for live scraping");
     }
     try {
       console.log(`\u{1F310} Attempting real search on ${this.currentVendor.name} portal`);
@@ -1042,9 +1041,10 @@ var PuppeteerScrapingService = class {
             return realResults;
           }
         } catch (searchError) {
-          console.log(`\u274C Real search failed: ${searchError.message} - using demo results`);
+          console.log(`\u274C Real search failed: ${searchError.message}`);
+          throw new Error(`Live search failed: ${searchError.message}`);
         }
-        return this.generateDemoResults(searchTerm, searchType);
+        throw new Error("No results found from live portal search");
       }
       if (this.currentVendor.name === "Kinray (Cardinal Health)") {
         return await this.searchKinray(searchTerm, searchType);
@@ -2131,77 +2131,6 @@ var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
 
 // server/routes.ts
 import { z } from "zod";
-function generateDemoResults(searchTerm, searchType, vendorName) {
-  if (searchTerm.toLowerCase() === "atorvastatin") {
-    return [
-      {
-        medication: {
-          id: 0,
-          name: "ATORVASTATIN TB 10MG 100",
-          genericName: "atorvastatin",
-          ndc: "68180001001",
-          // Real NDC from your screenshot
-          packageSize: "100 EA",
-          strength: "10mg",
-          dosageForm: "Tablet",
-          manufacturer: "Aurobindo Pharma"
-        },
-        cost: "55.25",
-        availability: "available",
-        vendor: "Kinray Portal"
-      },
-      {
-        medication: {
-          id: 0,
-          name: "ATORVASTATIN TB 20MG 100",
-          genericName: "atorvastatin",
-          ndc: "68180001002",
-          // Real NDC from your screenshot  
-          packageSize: "100 EA",
-          strength: "20mg",
-          dosageForm: "Tablet",
-          manufacturer: "Aurobindo Pharma"
-        },
-        cost: "57.80",
-        availability: "available",
-        vendor: "Kinray Portal"
-      },
-      {
-        medication: {
-          id: 0,
-          name: "ATORVASTATIN TB 5MG 500",
-          genericName: "atorvastatin",
-          ndc: "68180001003",
-          // Real NDC from your screenshot
-          packageSize: "500 EA",
-          strength: "5mg",
-          dosageForm: "Tablet",
-          manufacturer: "Aurobindo Pharma"
-        },
-        cost: "512.40",
-        availability: "available",
-        vendor: "Kinray Portal"
-      }
-    ];
-  }
-  const medicationResults = [
-    {
-      medication: {
-        id: 0,
-        name: `${searchTerm.toUpperCase()} TB 10MG 100`,
-        genericName: searchTerm.toLowerCase(),
-        ndc: "PENDING_REAL_SCRAPE",
-        packageSize: "100 EA",
-        strength: "10mg",
-        dosageForm: "Tablet"
-      },
-      cost: "PENDING",
-      availability: "requires_portal_access",
-      vendor: "Kinray Portal - Authentication Required"
-    }
-  ];
-  return medicationResults;
-}
 async function registerRoutes(app2) {
   app2.get("/api/vendors", async (req, res) => {
     try {
@@ -2415,8 +2344,8 @@ async function registerRoutes(app2) {
         console.log(`\u{1F680} Attempting login to ${vendor.name}...`);
         const loginSuccess = await scrapingService.login(vendor, credential);
         if (!loginSuccess) {
-          console.log(`\u274C Login failed to ${vendor.name} - using demo results`);
-          results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+          console.log(`\u274C Login failed to ${vendor.name} - cannot perform live scraping`);
+          throw new Error(`Login failed to ${vendor.name}. Please check credentials and try again.`);
         } else {
           console.log(`\u2705 Login successful to ${vendor.name} - proceeding with search...`);
           const searchTimeout = new Promise((_, reject) => {
@@ -2430,17 +2359,17 @@ async function registerRoutes(app2) {
             if (results && results.length > 0) {
               console.log(`\u{1F3AF} Successfully extracted ${results.length} live results from ${vendor.name}`);
             } else {
-              console.log(`\u26A0\uFE0F Search completed but no results found - using demo data`);
-              results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+              console.log(`\u26A0\uFE0F Search completed but no results found`);
+              results = [];
             }
           } catch (timeoutError) {
-            console.log(`\u23F0 Search timed out after 20 seconds - using demo results`);
-            results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+            console.log(`\u23F0 Search timed out after 20 seconds`);
+            throw new Error(`Search timed out after 20 seconds. Please try again.`);
           }
         }
       } catch (scrapingError) {
-        console.log(`\u274C Scraping error: ${scrapingError.message} - using demo results`);
-        results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+        console.log(`\u274C Scraping error: ${scrapingError.message}`);
+        throw new Error(`Live scraping failed: ${scrapingError.message}`);
       }
       console.log(`\u{1F50D} Generated ${results.length} results for search ${searchId}`);
       for (const result of results) {

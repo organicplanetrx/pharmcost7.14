@@ -342,8 +342,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const loginSuccess = await scrapingService.login(vendor, credential);
         
         if (!loginSuccess) {
-          console.log(`❌ Login failed to ${vendor.name} - using demo results`);
-          results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+          console.log(`❌ Login failed to ${vendor.name} - cannot perform live scraping`);
+          throw new Error(`Login failed to ${vendor.name}. Please check credentials and try again.`);
         } else {
           console.log(`✅ Login successful to ${vendor.name} - proceeding with search...`);
           
@@ -361,17 +361,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (results && results.length > 0) {
               console.log(`🎯 Successfully extracted ${results.length} live results from ${vendor.name}`);
             } else {
-              console.log(`⚠️ Search completed but no results found - using demo data`);
-              results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+              console.log(`⚠️ Search completed but no results found`);
+              results = [];
             }
           } catch (timeoutError) {
-            console.log(`⏰ Search timed out after 20 seconds - using demo results`);
-            results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+            console.log(`⏰ Search timed out after 20 seconds`);
+            throw new Error(`Search timed out after 20 seconds. Please try again.`);
           }
         }
       } catch (scrapingError: any) {
-        console.log(`❌ Scraping error: ${scrapingError.message} - using demo results`);
-        results = generateDemoResults(searchData.searchTerm, searchData.searchType, vendor.name);
+        console.log(`❌ Scraping error: ${scrapingError.message}`);
+        throw new Error(`Live scraping failed: ${scrapingError.message}`);
       }
 
       console.log(`🔍 Generated ${results.length} results for search ${searchId}`);
