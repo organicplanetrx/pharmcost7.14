@@ -197,8 +197,9 @@ export class MemStorage implements IStorage {
   }
 
   async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
+    const storageId = global.__pharma_storage_id__ || 'unknown';
     console.log(`🔍 getSearchWithResults called for searchId: ${id}`);
-    console.log(`📊 Storage instance: ${this.constructor.name} - Hash: ${this.constructor.name}${this.searches.size}${this.searchResults.size}`);
+    console.log(`📊 Storage instance: ${this.constructor.name} - Global ID: ${storageId}`);
     console.log(`📊 Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(', ')}]`);
     console.log(`📊 Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(', ')}]`);
     console.log(`📊 Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(', ')}]`);
@@ -249,6 +250,7 @@ export class MemStorage implements IStorage {
   }
 
   async createSearchResult(result: InsertSearchResult): Promise<SearchResult> {
+    const storageId = global.__pharma_storage_id__ || 'unknown';
     const newResult: SearchResult = {
       ...result,
       id: this.searchResultId++,
@@ -262,8 +264,8 @@ export class MemStorage implements IStorage {
     this.searchResults.set(newResult.id, newResult);
     console.log(`🔄 Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
     
-    // Verify storage persistence
-    console.log(`🔍 Storage instance ${this.constructor.name} - Results map size: ${this.searchResults.size}`);
+    // Verify storage persistence with global ID
+    console.log(`🔍 Storage instance ${this.constructor.name} - Global ID: ${storageId} - Results map size: ${this.searchResults.size}`);
     console.log(`🔍 All search results: ${Array.from(this.searchResults.keys()).join(', ')}`);
     return newResult;
   }
@@ -313,23 +315,42 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Enhanced global singleton pattern with stronger consistency
+// Ultra-robust global singleton pattern with function-based access
 declare global {
   var __pharma_storage_singleton__: MemStorage | undefined;
   var __pharma_storage_id__: string | undefined;
+  var __pharma_storage_creation_time__: number | undefined;
 }
 
-// Generate consistent storage ID for debugging across restarts  
-const currentStorageId = global.__pharma_storage_id__ || Math.random().toString(36).substring(2, 8);
-
-// Ensure singleton is created only once
-if (!global.__pharma_storage_singleton__) {
-  console.log(`🗄️ Creating NEW singleton MemStorage instance - ID: ${currentStorageId}`);
-  global.__pharma_storage_singleton__ = new MemStorage();
-  global.__pharma_storage_id__ = currentStorageId;
-} else {
-  console.log(`🔄 Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
+// Create singleton storage instance with debugging
+function createStorageInstance(): MemStorage {
+  const storageId = Math.random().toString(36).substring(2, 8);
+  const creationTime = Date.now();
+  
+  console.log(`🗄️ Creating GLOBAL singleton MemStorage instance - ID: ${storageId}`);
+  
+  const instance = new MemStorage();
+  
+  // Store in global with metadata
+  global.__pharma_storage_singleton__ = instance;
+  global.__pharma_storage_id__ = storageId;
+  global.__pharma_storage_creation_time__ = creationTime;
+  
+  return instance;
 }
 
-// Export the singleton instance directly - always use the global instance
-export const storage = global.__pharma_storage_singleton__;
+// Get or create singleton instance
+function getStorageInstance(): MemStorage {
+  if (!global.__pharma_storage_singleton__) {
+    return createStorageInstance();
+  } else {
+    const storageId = global.__pharma_storage_id__ || 'unknown';
+    const creationTime = global.__pharma_storage_creation_time__ || 0;
+    const age = Date.now() - creationTime;
+    console.log(`🔄 Using EXISTING singleton MemStorage instance - ID: ${storageId}, Age: ${age}ms`);
+    return global.__pharma_storage_singleton__;
+  }
+}
+
+// Export the singleton instance via function call to ensure consistency
+export const storage = getStorageInstance();

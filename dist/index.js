@@ -116,8 +116,9 @@ var MemStorage = class {
     return this.searches.get(id2);
   }
   async getSearchWithResults(id2) {
+    const storageId = global.__pharma_storage_id__ || "unknown";
     console.log(`\u{1F50D} getSearchWithResults called for searchId: ${id2}`);
-    console.log(`\u{1F4CA} Storage instance: ${this.constructor.name} - Hash: ${this.constructor.name}${this.searches.size}${this.searchResults.size}`);
+    console.log(`\u{1F4CA} Storage instance: ${this.constructor.name} - Global ID: ${storageId}`);
     console.log(`\u{1F4CA} Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(", ")}]`);
@@ -158,6 +159,7 @@ var MemStorage = class {
     return Array.from(this.searchResults.values()).filter((sr) => sr.searchId === searchId);
   }
   async createSearchResult(result) {
+    const storageId = global.__pharma_storage_id__ || "unknown";
     const newResult = {
       ...result,
       id: this.searchResultId++,
@@ -170,7 +172,7 @@ var MemStorage = class {
     };
     this.searchResults.set(newResult.id, newResult);
     console.log(`\u{1F504} Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
-    console.log(`\u{1F50D} Storage instance ${this.constructor.name} - Results map size: ${this.searchResults.size}`);
+    console.log(`\u{1F50D} Storage instance ${this.constructor.name} - Global ID: ${storageId} - Results map size: ${this.searchResults.size}`);
     console.log(`\u{1F50D} All search results: ${Array.from(this.searchResults.keys()).join(", ")}`);
     return newResult;
   }
@@ -203,15 +205,28 @@ var MemStorage = class {
     };
   }
 };
-var currentStorageId = global.__pharma_storage_id__ || Math.random().toString(36).substring(2, 8);
-if (!global.__pharma_storage_singleton__) {
-  console.log(`\u{1F5C4}\uFE0F Creating NEW singleton MemStorage instance - ID: ${currentStorageId}`);
-  global.__pharma_storage_singleton__ = new MemStorage();
-  global.__pharma_storage_id__ = currentStorageId;
-} else {
-  console.log(`\u{1F504} Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
+function createStorageInstance() {
+  const storageId = Math.random().toString(36).substring(2, 8);
+  const creationTime = Date.now();
+  console.log(`\u{1F5C4}\uFE0F Creating GLOBAL singleton MemStorage instance - ID: ${storageId}`);
+  const instance = new MemStorage();
+  global.__pharma_storage_singleton__ = instance;
+  global.__pharma_storage_id__ = storageId;
+  global.__pharma_storage_creation_time__ = creationTime;
+  return instance;
 }
-var storage = global.__pharma_storage_singleton__;
+function getStorageInstance() {
+  if (!global.__pharma_storage_singleton__) {
+    return createStorageInstance();
+  } else {
+    const storageId = global.__pharma_storage_id__ || "unknown";
+    const creationTime = global.__pharma_storage_creation_time__ || 0;
+    const age = Date.now() - creationTime;
+    console.log(`\u{1F504} Using EXISTING singleton MemStorage instance - ID: ${storageId}, Age: ${age}ms`);
+    return global.__pharma_storage_singleton__;
+  }
+}
+var storage = getStorageInstance();
 
 // server/services/scraper.ts
 import puppeteer from "puppeteer";
