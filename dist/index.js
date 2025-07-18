@@ -666,8 +666,20 @@ var PuppeteerScrapingService = class {
                 console.log("\u{1F504} Browser not found, attempting download...");
                 downloadAttempted = true;
                 try {
-                  console.log("\u{1F4E5} Installing browser using puppeteer install command...");
+                  console.log("\u{1F4E5} Installing system dependencies and browser...");
                   try {
+                    console.log("\u{1F4E6} Installing Chrome system dependencies...");
+                    execSync("apt-get update && apt-get install -y libnss3 libglib2.0-0 libxrandr2 libxss1 libxcursor1 libxcomposite1 libxdamage1 libxi6 libxtst6 libasound2 libatk1.0-0 libdrm2 libxkbcommon0 libgtk-3-0", {
+                      stdio: "inherit",
+                      timeout: 12e4
+                      // 2 minute timeout
+                    });
+                    console.log("\u2705 System dependencies installed");
+                  } catch (sysError) {
+                    console.log("\u26A0\uFE0F System dependency installation failed:", sysError.message);
+                  }
+                  try {
+                    console.log("\u{1F4E5} Installing Puppeteer browser...");
                     execSync("npx puppeteer browsers install chrome", {
                       stdio: "inherit",
                       timeout: 6e4

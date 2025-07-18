@@ -499,10 +499,23 @@ export class PuppeteerScrapingService implements ScrapingService {
                 downloadAttempted = true;
                 
                 try {
-                  console.log('📥 Installing browser using puppeteer install command...');
+                  console.log('📥 Installing system dependencies and browser...');
+                  
+                  // Install system dependencies for Chrome first
+                  try {
+                    console.log('📦 Installing Chrome system dependencies...');
+                    execSync('apt-get update && apt-get install -y libnss3 libglib2.0-0 libxrandr2 libxss1 libxcursor1 libxcomposite1 libxdamage1 libxi6 libxtst6 libasound2 libatk1.0-0 libdrm2 libxkbcommon0 libgtk-3-0', { 
+                      stdio: 'inherit',
+                      timeout: 120000 // 2 minute timeout
+                    });
+                    console.log('✅ System dependencies installed');
+                  } catch (sysError) {
+                    console.log('⚠️ System dependency installation failed:', sysError.message);
+                  }
                   
                   // Try to install browser using the puppeteer CLI
                   try {
+                    console.log('📥 Installing Puppeteer browser...');
                     execSync('npx puppeteer browsers install chrome', { 
                       stdio: 'inherit',
                       timeout: 60000 // 1 minute timeout
