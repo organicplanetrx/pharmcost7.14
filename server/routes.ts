@@ -137,29 +137,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Testing connection to ${vendor.name} at ${vendor.portalUrl}`);
       
+      let responseData;
       try {
         const loginSuccess = await scrapingService.login(vendor, credential);
         
         if (loginSuccess) {
-          res.json({ 
+          responseData = { 
             success: true, 
             message: `Successfully connected to ${vendor.name} portal and logged in` 
-          });
+          };
         } else {
-          res.json({ 
+          responseData = { 
             success: false, 
             message: `Failed to login to ${vendor.name} portal - please check credentials` 
-          });
+          };
         }
       } catch (error: any) {
         console.error(`Connection test failed for ${vendor.name}:`, error);
-        res.json({ 
+        responseData = { 
           success: false, 
           message: `Connection failed: ${error.message}` 
-        });
+        };
       } finally {
-        await scrapingService.cleanup();
+        try {
+          await scrapingService.cleanup();
+        } catch (cleanupError) {
+          console.error('Connection test cleanup error:', cleanupError);
+        }
       }
+      
+      // Send response only after cleanup is complete
+      res.json(responseData);
     } catch (error) {
       console.error("Connection test error:", error);
       res.status(500).json({ 

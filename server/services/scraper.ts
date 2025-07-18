@@ -1388,17 +1388,23 @@ export class PuppeteerScrapingService implements ScrapingService {
       console.error('Cardinal search error:', error);
       return [];
     }
-    if (this.page) {
-      await this.page.close();
-      this.page = null;
+  }
+
+  async cleanup(): Promise<void> {
+    try {
+      if (this.page) {
+        await this.page.close();
+        this.page = null;
+      }
+      if (this.browser) {
+        await this.browser.close();
+        this.browser = null;
+      }
+      this.currentVendor = null;
+      console.log('🧹 ScrapingService cleanup completed');
+    } catch (error) {
+      console.error('❌ ScrapingService cleanup error:', error);
     }
-    
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-    }
-    
-    this.currentVendor = null;
   }
 }
 

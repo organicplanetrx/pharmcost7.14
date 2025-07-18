@@ -1370,15 +1370,22 @@ var PuppeteerScrapingService = class {
       console.error("Cardinal search error:", error);
       return [];
     }
-    if (this.page) {
-      await this.page.close();
-      this.page = null;
+  }
+  async cleanup() {
+    try {
+      if (this.page) {
+        await this.page.close();
+        this.page = null;
+      }
+      if (this.browser) {
+        await this.browser.close();
+        this.browser = null;
+      }
+      this.currentVendor = null;
+      console.log("\u{1F9F9} ScrapingService cleanup completed");
+    } catch (error) {
+      console.error("\u274C ScrapingService cleanup error:", error);
     }
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-    }
-    this.currentVendor = null;
   }
 };
 var scrapingService = new PuppeteerScrapingService();
@@ -1607,28 +1614,34 @@ async function registerRoutes(app2) {
       }
       const credential = { id: 0, vendorId, username, password, lastValidated: null, isActive: true };
       console.log(`Testing connection to ${vendor.name} at ${vendor.portalUrl}`);
+      let responseData;
       try {
         const loginSuccess = await scrapingService.login(vendor, credential);
         if (loginSuccess) {
-          res.json({
+          responseData = {
             success: true,
             message: `Successfully connected to ${vendor.name} portal and logged in`
-          });
+          };
         } else {
-          res.json({
+          responseData = {
             success: false,
             message: `Failed to login to ${vendor.name} portal - please check credentials`
-          });
+          };
         }
       } catch (error) {
         console.error(`Connection test failed for ${vendor.name}:`, error);
-        res.json({
+        responseData = {
           success: false,
           message: `Connection failed: ${error.message}`
-        });
+        };
       } finally {
-        await scrapingService.cleanup();
+        try {
+          await scrapingService.cleanup();
+        } catch (cleanupError) {
+          console.error("Connection test cleanup error:", cleanupError);
+        }
       }
+      res.json(responseData);
     } catch (error) {
       console.error("Connection test error:", error);
       res.status(500).json({
