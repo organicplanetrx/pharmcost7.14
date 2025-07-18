@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  pharmcost-pro:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - KINRAY_USERNAME=${KINRAY_USERNAME}
+      - KINRAY_PASSWORD=${KINRAY_PASSWORD}
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/dashboard/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
