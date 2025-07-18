@@ -288,6 +288,9 @@ Changelog:
 - July 18, 2025: Chrome successfully installed at /usr/bin/google-chrome-stable in Docker container
 - July 18, 2025: Fixing npm dependency conflict in Docker build - esbuild version mismatch between tsx and main project
 - July 18, 2025: Adding --force flag to npm ci to resolve dependency conflicts and continue build process
+- July 18, 2025: CRITICAL BROWSER FIX: Updated browser path detection to prioritize Docker Chrome (/usr/bin/google-chrome-stable) in production
+- July 18, 2025: Fixed Docker user permissions by creating proper home directory and cache folders for pharmcost user
+- July 18, 2025: Browser automation should now work correctly with pre-installed Chrome instead of trying to use Replit paths
 ```
 
 ## User Preferences

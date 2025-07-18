@@ -34,7 +34,21 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
-      // Use the known working chromium path directly since verification is causing bundling issues
+      // In Docker/production environment, prioritize the pre-installed Chrome
+      if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_EXECUTABLE_PATH) {
+        const dockerChromePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable';
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(dockerChromePath)) {
+            console.log(`🔍 Using Docker Chrome path: ${dockerChromePath}`);
+            return dockerChromePath;
+          }
+        } catch (error) {
+          console.log(`Docker Chrome path not found: ${dockerChromePath}`);
+        }
+      }
+      
+      // Use the known working chromium path for Replit environment
       const knownChromiumPath = '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium';
       console.log(`🔍 Using confirmed working chromium path: ${knownChromiumPath}`);
       return knownChromiumPath;

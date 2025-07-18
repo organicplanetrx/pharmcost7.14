@@ -235,6 +235,18 @@ var PuppeteerScrapingService = class {
       } catch (e) {
         console.log("which command failed, trying manual paths...");
       }
+      if (process.env.NODE_ENV === "production" || process.env.PUPPETEER_EXECUTABLE_PATH) {
+        const dockerChromePath = process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome-stable";
+        try {
+          const fs2 = await import("fs");
+          if (fs2.existsSync(dockerChromePath)) {
+            console.log(`\u{1F50D} Using Docker Chrome path: ${dockerChromePath}`);
+            return dockerChromePath;
+          }
+        } catch (error) {
+          console.log(`Docker Chrome path not found: ${dockerChromePath}`);
+        }
+      }
       const knownChromiumPath = "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium";
       console.log(`\u{1F50D} Using confirmed working chromium path: ${knownChromiumPath}`);
       return knownChromiumPath;

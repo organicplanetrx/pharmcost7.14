@@ -47,9 +47,11 @@ COPY . .
 # Build the application
 RUN npm run build || echo "Build warnings ignored"
 
-# Create non-root user for security
-RUN groupadd -r pharmcost && useradd -r -g pharmcost -s /bin/bash pharmcost
+# Create non-root user for security with proper home directory
+RUN groupadd -r pharmcost && useradd -r -g pharmcost -s /bin/bash -m pharmcost
 RUN chown -R pharmcost:pharmcost /app
+RUN mkdir -p /home/pharmcost/.cache /home/pharmcost/.local/share/applications
+RUN chown -R pharmcost:pharmcost /home/pharmcost
 USER pharmcost
 
 # Expose port
