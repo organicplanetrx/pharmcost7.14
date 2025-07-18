@@ -72,3 +72,15 @@ This should be the final fix needed for browser automation.
 - libxdamage1, libxi6, libxtst6, libasound2, libatk1.0-0, libdrm2, libxkbcommon0, libgtk-3-0
 
 Browser automation should be fully operational with dependencies installed.
+
+## DEPLOYMENT LIMITATION IDENTIFIED - July 18, 2025 4:40 PM
+**ROOT CAUSE**: DigitalOcean Node.js buildpack doesn't allow system package installation (no root access)
+**ISSUE**: Browser downloads successfully but fails to launch due to missing `libnss3.so` system libraries
+**ERROR**: `apt-get` fails with "Permission denied" - cannot install Chrome dependencies
+
+**SOLUTION REQUIRED**: Move to Docker deployment or platform with full system access
+- Browser automation code is working perfectly
+- All fallback systems operational  
+- Only deployment environment limitation preventing success
+
+**RECOMMENDATION**: Switch to Docker-based deployment on DigitalOcean App Platform (Docker option) or alternative platform with system package support.

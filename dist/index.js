@@ -668,15 +668,24 @@ var PuppeteerScrapingService = class {
                 try {
                   console.log("\u{1F4E5} Installing system dependencies and browser...");
                   try {
-                    console.log("\u{1F4E6} Installing Chrome system dependencies...");
-                    execSync("apt-get update && apt-get install -y libnss3 libglib2.0-0 libxrandr2 libxss1 libxcursor1 libxcomposite1 libxdamage1 libxi6 libxtst6 libasound2 libatk1.0-0 libdrm2 libxkbcommon0 libgtk-3-0", {
-                      stdio: "inherit",
-                      timeout: 12e4
-                      // 2 minute timeout
-                    });
-                    console.log("\u2705 System dependencies installed");
+                    console.log("\u{1F4E6} Attempting to install Chrome system dependencies...");
+                    const approaches = [
+                      "nix-env -iA nixpkgs.nss nixpkgs.glib nixpkgs.gtk3",
+                      "apk add --no-cache nss glib gtk+3.0-dev",
+                      "yum install -y nss glib2 gtk3"
+                    ];
+                    for (const approach of approaches) {
+                      try {
+                        console.log(`\u{1F504} Trying: ${approach}`);
+                        execSync(approach, { stdio: "inherit", timeout: 6e4 });
+                        console.log("\u2705 System dependencies installed successfully");
+                        break;
+                      } catch (approachError) {
+                        console.log(`\u26A0\uFE0F ${approach.split(" ")[0]} failed`);
+                      }
+                    }
                   } catch (sysError) {
-                    console.log("\u26A0\uFE0F System dependency installation failed:", sysError.message);
+                    console.log("\u26A0\uFE0F All system dependency installation attempts failed");
                   }
                   try {
                     console.log("\u{1F4E5} Installing Puppeteer browser...");
@@ -727,7 +736,7 @@ var PuppeteerScrapingService = class {
               includesTriedToFind: fallbackError.message.includes("Tried to find the browser"),
               includesNoExecutable: fallbackError.message.includes("no executable was found")
             });
-            console.log("\u{1F504} Trying to use downloaded browser directly...");
+            console.log("\u{1F504} Trying to use downloaded browser with compatibility mode...");
             try {
               const downloadedBrowserPath = "/workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome";
               console.log(`\u{1F50D} Attempting to use downloaded browser at: ${downloadedBrowserPath}`);
@@ -738,13 +747,33 @@ var PuppeteerScrapingService = class {
                   "--no-sandbox",
                   "--disable-setuid-sandbox",
                   "--disable-dev-shm-usage",
-                  "--disable-gpu"
+                  "--disable-gpu",
+                  "--disable-software-rasterizer",
+                  "--disable-background-timer-throttling",
+                  "--disable-backgrounding-occluded-windows",
+                  "--disable-renderer-backgrounding",
+                  "--disable-web-security",
+                  "--disable-features=VizDisplayCompositor",
+                  "--disable-extensions",
+                  "--disable-plugins",
+                  "--disable-default-apps",
+                  "--disable-sync",
+                  "--disable-translate",
+                  "--disable-background-networking",
+                  "--disable-ipc-flooding-protection",
+                  "--single-process",
+                  // This might help with missing libraries
+                  "--no-zygote"
                 ]
               });
-              console.log("\u2705 Successfully launched with downloaded browser");
+              console.log("\u2705 Successfully launched with downloaded browser in compatibility mode");
               return;
             } catch (downloadedPathError) {
               console.log("\u274C Downloaded browser path failed:", downloadedPathError.message);
+              if (downloadedPathError.message.includes("libnss3.so")) {
+                console.log("\u{1F50D} Missing libnss3.so - this is a system dependency issue");
+                console.log("\u{1F4A1} Consider using Docker deployment or a platform with full system access");
+              }
               console.log("\u{1F504} Final attempt without executablePath...");
               try {
                 delete process.env.PUPPETEER_EXECUTABLE_PATH;

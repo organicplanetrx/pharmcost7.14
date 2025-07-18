@@ -1,0 +1,84 @@
+[pharmcost7-14] [2025-07-18 16:38:10] 
+[pharmcost7-14] [2025-07-18 16:38:10] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-18 16:38:10] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-18 16:38:10] 
+[pharmcost7-14] [2025-07-18 16:38:13] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-18 16:38:13] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-18 16:38:13] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-18 16:38:13] Environment: production
+[pharmcost7-14] [2025-07-18 16:38:13] Port: 5000
+[pharmcost7-14] [2025-07-18 16:38:13] ✓ Express app created
+[pharmcost7-14] [2025-07-18 16:38:13] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-18 16:38:13] Starting server initialization...
+[pharmcost7-14] [2025-07-18 16:38:13] Routes registered successfully
+[pharmcost7-14] [2025-07-18 16:38:13] Setting up static file serving...
+[pharmcost7-14] [2025-07-18 16:38:13] Static files configured
+[pharmcost7-14] [2025-07-18 16:38:13] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-18 16:38:13] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-18 16:38:13] 4:38:13 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-18 16:38:47] 
+[pharmcost7-14] [2025-07-18 16:38:47] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-18 16:38:47] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-18 16:38:47] 
+[pharmcost7-14] [2025-07-18 16:38:49] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-18 16:38:49] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-18 16:38:49] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-18 16:38:49] Environment: production
+[pharmcost7-14] [2025-07-18 16:38:49] Port: 5000
+[pharmcost7-14] [2025-07-18 16:38:49] ✓ Express app created
+[pharmcost7-14] [2025-07-18 16:38:49] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-18 16:38:49] Starting server initialization...
+[pharmcost7-14] [2025-07-18 16:38:49] Routes registered successfully
+[pharmcost7-14] [2025-07-18 16:38:49] Setting up static file serving...
+[pharmcost7-14] [2025-07-18 16:38:49] Static files configured
+[pharmcost7-14] [2025-07-18 16:38:49] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-18 16:38:49] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-18 16:38:49] 4:38:49 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-18 16:40:28] 4:40:28 PM [express] GET /api/activity 304 in 2ms :: []
+[pharmcost7-14] [2025-07-18 16:40:28] 4:40:28 PM [express] GET /api/credentials 304 in 1ms :: []
+[pharmcost7-14] [2025-07-18 16:40:28] 4:40:28 PM [express] GET /api/dashboard/stats 304 in 4ms :: {"totalSearchesToday":0,"totalCostAnalys…
+[pharmcost7-14] [2025-07-18 16:40:35] 4:40:35 PM [express] POST /api/credentials 200 in 3ms :: {"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-18 16:40:35] 4:40:35 PM [express] GET /api/credentials 200 in 1ms :: [{"vendorId":1,"username":"organicplanetrx@g…
+[pharmcost7-14] [2025-07-18 16:40:37] Testing connection to Kinray (Cardinal Health) at https://kinrayweblink.cardinalhealth.com/login
+[pharmcost7-14] [2025-07-18 16:40:37] 🔐 Attempting login to Kinray (Cardinal Health) with username: organicplanetrx@gmail.com
+[pharmcost7-14] [2025-07-18 16:40:37] 🔍 Starting browser path detection...
+[pharmcost7-14] [2025-07-18 16:40:37] which command failed, trying manual paths...
+[pharmcost7-14] [2025-07-18 16:40:37] 🔍 Using confirmed working chromium path: /nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium
+[pharmcost7-14] [2025-07-18 16:40:37] ✅ Browser automation available - attempting real portal login
+[pharmcost7-14] [2025-07-18 16:40:37] 🔍 Starting browser path detection...
+[pharmcost7-14] [2025-07-18 16:40:37] which command failed, trying manual paths...
+[pharmcost7-14] [2025-07-18 16:40:37] 🔍 Using confirmed working chromium path: /nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium
+[pharmcost7-14] [2025-07-18 16:40:37] Using browser at: /nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium
+[pharmcost7-14] [2025-07-18 16:40:37] Browser launch failed: Browser was not found at the configured executablePath (/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium)
+[pharmcost7-14] [2025-07-18 16:40:37] 🔄 System browser failed, trying Puppeteer bundled browser...
+[pharmcost7-14] [2025-07-18 16:40:37] 📦 Using Puppeteer bundled browser...
+[pharmcost7-14] [2025-07-18 16:40:37] 🔄 Browser not found, attempting download...
+[pharmcost7-14] [2025-07-18 16:40:37] 📥 Installing system dependencies and browser...
+[pharmcost7-14] [2025-07-18 16:40:37] 📦 Installing Chrome system dependencies...
+[pharmcost7-14] [2025-07-18 16:40:37] Reading package lists...
+[pharmcost7-14] [2025-07-18 16:40:37] E: List directory /var/lib/apt/lists/partial is missing. - Acquire (13: Permission denied)
+[pharmcost7-14] [2025-07-18 16:40:37] ⚠️ System dependency installation failed: Command failed: apt-get update && apt-get install -y libnss3 libglib2.0-0 libxrandr2 libxss1 libxcursor1 libxcomposite1 libxdamage1 libxi6 libxtst6 libasound2 libatk1.0-0 libdrm2 libxkbcommon0 libgtk-3-0
+[pharmcost7-14] [2025-07-18 16:40:37] 📥 Installing Puppeteer browser...
+[pharmcost7-14] [2025-07-18 16:40:43] 
+[pharmcost7-14] [2025-07-18 16:40:56] chrome@137.0.7151.119 /workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome
+[pharmcost7-14] [2025-07-18 16:40:57] ✅ Browser installed successfully via CLI
+[pharmcost7-14] [2025-07-18 16:40:57] ❌ Browser download failed: Tried to find the browser at the configured path (/usr/bin/google-chrome), but no executable was found.
+[pharmcost7-14] [2025-07-18 16:40:57] ❌ Bundled browser also failed: Tried to find the browser at the configured path (/usr/bin/google-chrome), but no executable was found.
+[pharmcost7-14] [2025-07-18 16:40:57] 🔍 Error details for debugging: {
+[pharmcost7-14] [2025-07-18 16:40:57]   message: 'Tried to find the browser at the configured path (/usr/bin/google-chrome), but no executable was found.',
+[pharmcost7-14] [2025-07-18 16:40:57]   includesCouldNotFind: false,
+[pharmcost7-14] [2025-07-18 16:40:57]   includesTriedToFind: true,
+[pharmcost7-14] [2025-07-18 16:40:57]   includesNoExecutable: true
+[pharmcost7-14] [2025-07-18 16:40:57] }
+[pharmcost7-14] [2025-07-18 16:40:57] 🔄 Trying to use downloaded browser directly...
+[pharmcost7-14] [2025-07-18 16:40:57] 🔍 Attempting to use downloaded browser at: /workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome
+[pharmcost7-14] [2025-07-18 16:40:57] ❌ Downloaded browser path failed: Failed to launch the browser process!
+[pharmcost7-14] [2025-07-18 16:40:57] /workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome: error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory
+[pharmcost7-14] [2025-07-18 16:40:57] 
+[pharmcost7-14] [2025-07-18 16:40:57] 
+[pharmcost7-14] [2025-07-18 16:40:57] TROUBLESHOOTING: https://pptr.dev/troubleshooting
+[pharmcost7-14] [2025-07-18 16:40:57] 
+[pharmcost7-14] [2025-07-18 16:40:57] 🔄 Final attempt without executablePath...
+[pharmcost7-14] [2025-07-18 16:40:57] ❌ All browser launch attempts failed: Tried to find the browser at the configured path (/usr/bin/google-chrome), but no executable was found.
+[pharmcost7-14] [2025-07-18 16:40:57] ❌ Browser initialization failed: Browser automation not available in this environment
+[pharmcost7-14] [2025-07-18 16:40:57] 4:40:57 PM [express] POST /api/credentials/test-connection 200 in 19965ms :: {"success":false,"messa…

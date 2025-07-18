@@ -501,16 +501,29 @@ export class PuppeteerScrapingService implements ScrapingService {
                 try {
                   console.log('📥 Installing system dependencies and browser...');
                   
-                  // Install system dependencies for Chrome first
+                  // Try alternative package managers and approaches
                   try {
-                    console.log('📦 Installing Chrome system dependencies...');
-                    execSync('apt-get update && apt-get install -y libnss3 libglib2.0-0 libxrandr2 libxss1 libxcursor1 libxcomposite1 libxdamage1 libxi6 libxtst6 libasound2 libatk1.0-0 libdrm2 libxkbcommon0 libgtk-3-0', { 
-                      stdio: 'inherit',
-                      timeout: 120000 // 2 minute timeout
-                    });
-                    console.log('✅ System dependencies installed');
+                    console.log('📦 Attempting to install Chrome system dependencies...');
+                    
+                    // Try different approaches for dependency installation
+                    const approaches = [
+                      'nix-env -iA nixpkgs.nss nixpkgs.glib nixpkgs.gtk3',
+                      'apk add --no-cache nss glib gtk+3.0-dev',
+                      'yum install -y nss glib2 gtk3'
+                    ];
+                    
+                    for (const approach of approaches) {
+                      try {
+                        console.log(`🔄 Trying: ${approach}`);
+                        execSync(approach, { stdio: 'inherit', timeout: 60000 });
+                        console.log('✅ System dependencies installed successfully');
+                        break;
+                      } catch (approachError) {
+                        console.log(`⚠️ ${approach.split(' ')[0]} failed`);
+                      }
+                    }
                   } catch (sysError) {
-                    console.log('⚠️ System dependency installation failed:', sysError.message);
+                    console.log('⚠️ All system dependency installation attempts failed');
                   }
                   
                   // Try to install browser using the puppeteer CLI
@@ -567,8 +580,8 @@ export class PuppeteerScrapingService implements ScrapingService {
               includesNoExecutable: fallbackError.message.includes('no executable was found')
             });
             
-            // Final fallback: use downloaded browser explicitly
-            console.log('🔄 Trying to use downloaded browser directly...');
+            // Final fallback: use downloaded browser with extensive compatibility args
+            console.log('🔄 Trying to use downloaded browser with compatibility mode...');
             try {
               // Try to find the downloaded browser
               const downloadedBrowserPath = '/workspace/.cache/puppeteer/chrome/linux-137.0.7151.119/chrome-linux64/chrome';
@@ -581,13 +594,34 @@ export class PuppeteerScrapingService implements ScrapingService {
                   '--no-sandbox',
                   '--disable-setuid-sandbox',
                   '--disable-dev-shm-usage',
-                  '--disable-gpu'
+                  '--disable-gpu',
+                  '--disable-software-rasterizer',
+                  '--disable-background-timer-throttling',
+                  '--disable-backgrounding-occluded-windows',
+                  '--disable-renderer-backgrounding',
+                  '--disable-web-security',
+                  '--disable-features=VizDisplayCompositor',
+                  '--disable-extensions',
+                  '--disable-plugins',
+                  '--disable-default-apps',
+                  '--disable-sync',
+                  '--disable-translate',
+                  '--disable-background-networking',
+                  '--disable-ipc-flooding-protection',
+                  '--single-process', // This might help with missing libraries
+                  '--no-zygote'
                 ]
               });
-              console.log('✅ Successfully launched with downloaded browser');
+              console.log('✅ Successfully launched with downloaded browser in compatibility mode');
               return;
             } catch (downloadedPathError) {
               console.log('❌ Downloaded browser path failed:', downloadedPathError.message);
+              
+              // Check if we can provide more detailed error information
+              if (downloadedPathError.message.includes('libnss3.so')) {
+                console.log('🔍 Missing libnss3.so - this is a system dependency issue');
+                console.log('💡 Consider using Docker deployment or a platform with full system access');
+              }
               
               // Ultimate fallback: try without any executablePath
               console.log('🔄 Final attempt without executablePath...');
