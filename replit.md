@@ -317,6 +317,11 @@ Changelog:
 - July 18, 2025: Backend API now consistently returning completed search results with authentic pharmaceutical data
 - July 18, 2025: Successfully tested: 10 lisinopril results ($1.37-$68.43) and 5 metformin results ($12.45-$45.20) with real NDC codes
 - July 18, 2025: Search completion timing optimized - searches complete in 17-25 seconds with proper status tracking
+- July 18, 2025: ✅ CRITICAL STORAGE ARCHITECTURE FIX: Identified and resolved multiple Node.js process issue causing storage inconsistency
+- July 18, 2025: Implemented database-backed storage using PostgreSQL instead of memory-only storage to eliminate process boundary issues
+- July 18, 2025: Fixed "Search not found" errors by replacing MemStorage with DatabaseStorage singleton pattern
+- July 18, 2025: Search persistence now works correctly across all API endpoints with consistent data access
+- July 18, 2025: Frontend polling mechanism now receives proper search status updates instead of 404 errors
 ```
 
 ## User Preferences

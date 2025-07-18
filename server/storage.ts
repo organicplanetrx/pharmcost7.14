@@ -352,5 +352,8 @@ function getStorageInstance(): MemStorage {
   }
 }
 
-// Export the singleton instance via function call to ensure consistency
-export const storage = getStorageInstance();
+// Import and use DatabaseStorage instead of MemStorage
+import { DatabaseStorage } from "./storage/database";
+
+// Export the singleton database storage instance
+export const storage = DatabaseStorage.getInstance();
