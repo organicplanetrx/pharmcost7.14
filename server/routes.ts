@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { getStorage } from "./storage";
+const storage = getStorage();
 import { scrapingService } from "./services/scraper";
 import { csvExportService } from "./services/csv-export";
 import { insertCredentialSchema, insertSearchSchema, MedicationSearchResult } from "@shared/schema";

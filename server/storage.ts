@@ -78,7 +78,8 @@ export class MemStorage implements IStorage {
   private activityLogId = 1;
 
   constructor() {
-    console.log(`🔍 MemStorage constructor called - instance creation`);
+    const instanceId = Math.random().toString(36).substring(7);
+    console.log(`🔍 MemStorage constructor called - instance creation - ID: ${instanceId}`);
     // Initialize with default vendors
     this.initializeDefaultVendors();
   }
@@ -317,15 +318,19 @@ declare global {
   var __storage_instance__: MemStorage | undefined;
 }
 
+// Force a single storage instance across all modules
+let _storageInstance: MemStorage | undefined;
+
 export const getStorage = (): MemStorage => {
-  if (!global.__storage_instance__) {
+  if (!_storageInstance) {
     console.log('🗄️ Creating new MemStorage instance');
     console.log('🔍 MemStorage constructor called - instance creation');
-    global.__storage_instance__ = new MemStorage();
+    _storageInstance = new MemStorage();
+    global.__storage_instance__ = _storageInstance;
   } else {
     console.log('🔄 Using existing MemStorage instance');
   }
-  return global.__storage_instance__;
+  return _storageInstance;
 };
 
 export const storage = getStorage();

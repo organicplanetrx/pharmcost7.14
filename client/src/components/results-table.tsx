@@ -71,6 +71,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
   }
 
   if (!searchResults) {
+    console.log('ResultsTable: No search results data received');
     return (
       <div className="border border-slate-200 rounded-lg overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
@@ -84,6 +85,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
   }
 
   if (searchResults.status === 'failed') {
+    console.log('ResultsTable: Search status is failed');
     return (
       <div className="border border-slate-200 rounded-lg overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
@@ -127,9 +129,9 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
           <h3 className="text-lg font-semibold text-slate-800">Search Results</h3>
           <div className="flex items-center space-x-3">
             <span className="text-sm text-slate-600">
-              {searchResults.results.length} results found
+              {searchResults.results?.length || 0} results found
             </span>
-            {searchResults.results.length > 0 && (
+            {searchResults.results && searchResults.results.length > 0 && (
               <Button
                 onClick={handleExport}
                 size="sm"
@@ -143,7 +145,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
         </div>
       </div>
 
-      {searchResults.results.length === 0 ? (
+      {(!searchResults.results || searchResults.results.length === 0) ? (
         <div className="p-6 space-y-4">
           <div className="text-center">
             <p className="text-slate-600">No medications found for your search.</p>
@@ -208,7 +210,7 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {searchResults.results.map((result) => (
+              {searchResults.results && searchResults.results.map((result) => (
                 <tr key={result.id} className="hover:bg-slate-50">
                   <td className="py-4 px-6">
                     <div>

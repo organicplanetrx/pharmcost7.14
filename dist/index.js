@@ -19,7 +19,8 @@ var MemStorage = class {
   searchResultId = 1;
   activityLogId = 1;
   constructor() {
-    console.log(`\u{1F50D} MemStorage constructor called - instance creation`);
+    const instanceId = Math.random().toString(36).substring(7);
+    console.log(`\u{1F50D} MemStorage constructor called - instance creation - ID: ${instanceId}`);
     this.initializeDefaultVendors();
   }
   initializeDefaultVendors() {
@@ -202,15 +203,17 @@ var MemStorage = class {
     };
   }
 };
+var _storageInstance;
 var getStorage = () => {
-  if (!global.__storage_instance__) {
+  if (!_storageInstance) {
     console.log("\u{1F5C4}\uFE0F Creating new MemStorage instance");
     console.log("\u{1F50D} MemStorage constructor called - instance creation");
-    global.__storage_instance__ = new MemStorage();
+    _storageInstance = new MemStorage();
+    global.__storage_instance__ = _storageInstance;
   } else {
     console.log("\u{1F504} Using existing MemStorage instance");
   }
-  return global.__storage_instance__;
+  return _storageInstance;
 };
 var storage = getStorage();
 
@@ -2309,10 +2312,11 @@ var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
 
 // server/routes.ts
 import { z } from "zod";
+var storage2 = getStorage();
 async function registerRoutes(app2) {
   app2.get("/api/vendors", async (req, res) => {
     try {
-      const vendors2 = await storage.getVendors();
+      const vendors2 = await storage2.getVendors();
       res.json(vendors2);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch vendors" });
@@ -2320,7 +2324,7 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/credentials", async (req, res) => {
     try {
-      const credentials2 = await storage.getCredentials();
+      const credentials2 = await storage2.getCredentials();
       res.json(credentials2);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch credentials" });
@@ -2329,7 +2333,7 @@ async function registerRoutes(app2) {
   app2.post("/api/credentials", async (req, res) => {
     try {
       const credential = insertCredentialSchema.parse(req.body);
-      const newCredential = await storage.createCredential(credential);
+      const newCredential = await storage2.createCredential(credential);
       res.json(newCredential);
     } catch (error) {
       res.status(500).json({ message: "Failed to save credentials" });
@@ -2344,7 +2348,7 @@ async function registerRoutes(app2) {
           message: "Missing required fields: vendorId, username, password"
         });
       }
-      const vendor = await storage.getVendor(vendorId);
+      const vendor = await storage2.getVendor(vendorId);
       if (!vendor) {
         return res.status(404).json({
           success: false,
@@ -2395,7 +2399,7 @@ async function registerRoutes(app2) {
         status: "pending",
         resultCount: 0
       };
-      const search = await storage.createSearch({
+      const search = await storage2.createSearch({
         ...searchData,
         status: "pending",
         resultCount: 0
@@ -2403,7 +2407,7 @@ async function registerRoutes(app2) {
       setTimeout(() => {
         performSearch(search.id, searchData).catch((error) => {
           console.error(`Background search ${search.id} failed:`, error);
-          storage.updateSearch(search.id, {
+          storage2.updateSearch(search.id, {
             status: "failed",
             completedAt: /* @__PURE__ */ new Date()
           }).catch(() => {
@@ -2422,7 +2426,7 @@ async function registerRoutes(app2) {
     try {
       const id2 = parseInt(req.params.id);
       console.log(`\u{1F50D} API: Fetching search ${id2}`);
-      const searchWithResults = await storage.getSearchWithResults(id2);
+      const searchWithResults = await storage2.getSearchWithResults(id2);
       if (!searchWithResults) {
         console.log(`\u274C API: Search ${id2} not found`);
         return res.status(404).json({ message: "Search not found" });
@@ -2437,7 +2441,7 @@ async function registerRoutes(app2) {
   app2.get("/api/search/:id/results", async (req, res) => {
     try {
       const searchId = parseInt(req.params.id);
-      const results = await storage.getSearchResults(searchId);
+      const results = await storage2.getSearchResults(searchId);
       res.json(results);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch search results" });
@@ -2446,7 +2450,7 @@ async function registerRoutes(app2) {
   app2.get("/api/searches", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit) : 50;
-      const searches2 = await storage.getSearches(limit);
+      const searches2 = await storage2.getSearches(limit);
       res.json(searches2);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch searches" });
@@ -2455,7 +2459,7 @@ async function registerRoutes(app2) {
   app2.get("/api/search/:id/export", async (req, res) => {
     try {
       const searchId = parseInt(req.params.id);
-      const searchWithResults = await storage.getSearchWithResults(searchId);
+      const searchWithResults = await storage2.getSearchWithResults(searchId);
       if (!searchWithResults) {
         return res.status(404).json({ message: "Search not found" });
       }
@@ -2471,7 +2475,7 @@ async function registerRoutes(app2) {
   app2.get("/api/activity", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit) : 20;
-      const activities = await storage.getActivityLogs(limit);
+      const activities = await storage2.getActivityLogs(limit);
       res.json(activities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch activity logs" });
@@ -2479,7 +2483,7 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/dashboard/stats", async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      const stats = await storage2.getDashboardStats();
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
@@ -2487,7 +2491,7 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/medications", async (req, res) => {
     try {
-      const medications2 = await storage.getMedications();
+      const medications2 = await storage2.getMedications();
       res.json(medications2);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch medications" });
@@ -2496,8 +2500,8 @@ async function registerRoutes(app2) {
   async function performSearch(searchId, searchData) {
     try {
       console.log(`\u{1F50D} Starting search ${searchId} for "${searchData.searchTerm}"`);
-      await storage.updateSearch(searchId, { status: "in_progress" });
-      const vendor = await storage.getVendor(searchData.vendorId);
+      await storage2.updateSearch(searchId, { status: "in_progress" });
+      const vendor = await storage2.getVendor(searchData.vendorId);
       if (!vendor) {
         throw new Error("Vendor not found");
       }
@@ -2512,7 +2516,7 @@ async function registerRoutes(app2) {
           isActive: true
         };
       } else {
-        credential = await storage.getCredentialByVendorId(searchData.vendorId);
+        credential = await storage2.getCredentialByVendorId(searchData.vendorId);
       }
       if (!credential) {
         throw new Error("No credentials found for vendor");
@@ -2551,11 +2555,11 @@ async function registerRoutes(app2) {
       }
       console.log(`\u{1F50D} Generated ${results.length} results for search ${searchId}`);
       for (const result of results) {
-        let medication = await storage.getMedicationByNdc(result.medication.ndc || "");
+        let medication = await storage2.getMedicationByNdc(result.medication.ndc || "");
         if (!medication) {
-          medication = await storage.createMedication(result.medication);
+          medication = await storage2.createMedication(result.medication);
         }
-        await storage.createSearchResult({
+        await storage2.createSearchResult({
           searchId,
           medicationId: medication.id,
           vendorId: searchData.vendorId,
@@ -2563,13 +2567,13 @@ async function registerRoutes(app2) {
           availability: result.availability
         });
       }
-      await storage.updateSearch(searchId, {
+      await storage2.updateSearch(searchId, {
         status: "completed",
         resultCount: results.length,
         completedAt: /* @__PURE__ */ new Date()
       });
       console.log(`\u2705 Search ${searchId} completed with ${results.length} results`);
-      await storage.createActivityLog({
+      await storage2.createActivityLog({
         action: "search",
         status: "success",
         description: `Search completed for "${searchData.searchTerm}" - ${results.length} results found`,
@@ -2578,8 +2582,8 @@ async function registerRoutes(app2) {
       });
     } catch (error) {
       console.error("Search failed:", error);
-      await storage.updateSearch(searchId, { status: "failed" });
-      await storage.createActivityLog({
+      await storage2.updateSearch(searchId, { status: "failed" });
+      await storage2.createActivityLog({
         action: "search",
         status: "failure",
         description: `Search failed for "${searchData.searchTerm}": ${error.message || error}`,
