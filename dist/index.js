@@ -203,17 +203,14 @@ var MemStorage = class {
     };
   }
 };
-var _storageInstance;
 var getStorage = () => {
-  if (!_storageInstance) {
-    console.log("\u{1F5C4}\uFE0F Creating new MemStorage instance");
-    console.log("\u{1F50D} MemStorage constructor called - instance creation");
-    _storageInstance = new MemStorage();
-    global.__storage_instance__ = _storageInstance;
+  if (!global.__pharma_storage_singleton__) {
+    console.log("\u{1F5C4}\uFE0F Creating SINGLETON MemStorage instance");
+    global.__pharma_storage_singleton__ = new MemStorage();
   } else {
-    console.log("\u{1F504} Using existing MemStorage instance");
+    console.log("\u{1F504} Using SINGLETON MemStorage instance");
   }
-  return _storageInstance;
+  return global.__pharma_storage_singleton__;
 };
 var storage = getStorage();
 
