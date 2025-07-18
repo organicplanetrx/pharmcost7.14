@@ -1,0 +1,36 @@
+[pharmcost7-14] [2025-07-18 16:18:41] 
+[pharmcost7-14] [2025-07-18 16:18:41] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-18 16:18:41] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-18 16:18:41] 
+[pharmcost7-14] [2025-07-18 16:18:43] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-18 16:18:43] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-18 16:18:43] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-18 16:18:43] Environment: production
+[pharmcost7-14] [2025-07-18 16:18:43] Port: 5000
+[pharmcost7-14] [2025-07-18 16:18:43] ✓ Express app created
+[pharmcost7-14] [2025-07-18 16:18:43] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-18 16:18:43] Starting server initialization...
+[pharmcost7-14] [2025-07-18 16:18:43] Routes registered successfully
+[pharmcost7-14] [2025-07-18 16:18:43] Setting up static file serving...
+[pharmcost7-14] [2025-07-18 16:18:43] Static files configured
+[pharmcost7-14] [2025-07-18 16:18:43] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-18 16:18:43] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-18 16:18:43] 4:18:43 PM [express] serving on port 5000
+[pharmcost7-14] [2025-07-18 16:19:14] 
+[pharmcost7-14] [2025-07-18 16:19:14] > rest-express@1.0.0 start
+[pharmcost7-14] [2025-07-18 16:19:14] > NODE_ENV=production node dist/index.js
+[pharmcost7-14] [2025-07-18 16:19:14] 
+[pharmcost7-14] [2025-07-18 16:19:17] 🗄️ Creating new MemStorage instance
+[pharmcost7-14] [2025-07-18 16:19:17] 🔍 MemStorage constructor called - instance creation
+[pharmcost7-14] [2025-07-18 16:19:17] 🚀 Starting PharmaCost Pro server...
+[pharmcost7-14] [2025-07-18 16:19:17] Environment: production
+[pharmcost7-14] [2025-07-18 16:19:17] Port: 5000
+[pharmcost7-14] [2025-07-18 16:19:17] ✓ Express app created
+[pharmcost7-14] [2025-07-18 16:19:17] ✓ Express middleware configured
+[pharmcost7-14] [2025-07-18 16:19:17] Starting server initialization...
+[pharmcost7-14] [2025-07-18 16:19:17] Routes registered successfully
+[pharmcost7-14] [2025-07-18 16:19:17] Setting up static file serving...
+[pharmcost7-14] [2025-07-18 16:19:17] Static files configured
+[pharmcost7-14] [2025-07-18 16:19:17] Attempting to start server on port 5000...
+[pharmcost7-14] [2025-07-18 16:19:17] 🚀 Server successfully started on port 5000
+[pharmcost7-14] [2025-07-18 16:19:17] 4:19:17 PM [express] serving on port 5000
