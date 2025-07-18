@@ -1842,28 +1842,6 @@ export class PuppeteerScrapingService implements ScrapingService {
     }
   }
 
-  private async searchCardinal(searchTerm: string, searchType: string): Promise<MedicationSearchResult[]> {
-    // Similar implementation for Cardinal Health
-    if (!this.page) return [];
-    
-    try {
-      await this.page.waitForSelector('#searchInput, .search-field', { timeout: 10000 });
-      await this.page.type('#searchInput, .search-field', searchTerm);
-      await this.page.click('.search-submit, #searchButton');
-      await this.page.waitForSelector('.results-container, .product-results', { timeout: 15000 });
-      
-      return await this.page.evaluate((vendorName) => {
-        const results: MedicationSearchResult[] = [];
-        // Extract Cardinal-specific result structure
-        return results;
-      }, this.currentVendor?.name || 'Cardinal Health');
-      
-    } catch (error) {
-      console.error('Cardinal search error:', error);
-      return [];
-    }
-  }
-
   private async searchKinray(searchTerm: string, searchType: string): Promise<MedicationSearchResult[]> {
     if (!this.page) return [];
     

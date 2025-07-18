@@ -1,0 +1,15 @@
+[build]
+exclude = [
+  "node_modules/",
+  ".git/",
+  "attached_assets/",
+  "archive/"
+]
+
+[[build.env]]
+name = "NODE_ENV"
+value = "production"
+
+[[build.env]]
+name = "PUPPETEER_EXECUTABLE_PATH"
+value = "/usr/bin/google-chrome-stable"

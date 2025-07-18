@@ -11,3 +11,5 @@ dist
 attached_assets
 archive
 .replit
+.buildpacks
+project.toml

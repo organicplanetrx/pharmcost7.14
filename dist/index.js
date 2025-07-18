@@ -1724,22 +1724,6 @@ var PuppeteerScrapingService = class {
       return [];
     }
   }
-  async searchCardinal(searchTerm, searchType) {
-    if (!this.page) return [];
-    try {
-      await this.page.waitForSelector("#searchInput, .search-field", { timeout: 1e4 });
-      await this.page.type("#searchInput, .search-field", searchTerm);
-      await this.page.click(".search-submit, #searchButton");
-      await this.page.waitForSelector(".results-container, .product-results", { timeout: 15e3 });
-      return await this.page.evaluate((vendorName) => {
-        const results = [];
-        return results;
-      }, this.currentVendor?.name || "Cardinal Health");
-    } catch (error) {
-      console.error("Cardinal search error:", error);
-      return [];
-    }
-  }
   async searchKinray(searchTerm, searchType) {
     if (!this.page) return [];
     try {
