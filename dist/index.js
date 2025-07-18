@@ -203,18 +203,15 @@ var MemStorage = class {
     };
   }
 };
-var storageInstance;
 var currentStorageId = global.__pharma_storage_id__ || Math.random().toString(36).substring(2, 8);
-if (global.__pharma_storage_singleton__) {
-  console.log(`\u{1F504} Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
-  storageInstance = global.__pharma_storage_singleton__;
-} else {
+if (!global.__pharma_storage_singleton__) {
   console.log(`\u{1F5C4}\uFE0F Creating NEW singleton MemStorage instance - ID: ${currentStorageId}`);
-  storageInstance = new MemStorage();
-  global.__pharma_storage_singleton__ = storageInstance;
+  global.__pharma_storage_singleton__ = new MemStorage();
   global.__pharma_storage_id__ = currentStorageId;
+} else {
+  console.log(`\u{1F504} Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
 }
-var storage = storageInstance;
+var storage = global.__pharma_storage_singleton__;
 
 // server/services/scraper.ts
 import puppeteer from "puppeteer";

@@ -313,27 +313,23 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Enhanced global singleton pattern with persistent storage ID and debugging
+// Enhanced global singleton pattern with stronger consistency
 declare global {
   var __pharma_storage_singleton__: MemStorage | undefined;
   var __pharma_storage_id__: string | undefined;
 }
 
-// Create a singleton storage instance to ensure consistency across the application
-let storageInstance: MemStorage;
-
 // Generate consistent storage ID for debugging across restarts  
 const currentStorageId = global.__pharma_storage_id__ || Math.random().toString(36).substring(2, 8);
 
-if (global.__pharma_storage_singleton__) {
-  console.log(`🔄 Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
-  storageInstance = global.__pharma_storage_singleton__;
-} else {
+// Ensure singleton is created only once
+if (!global.__pharma_storage_singleton__) {
   console.log(`🗄️ Creating NEW singleton MemStorage instance - ID: ${currentStorageId}`);
-  storageInstance = new MemStorage();
-  global.__pharma_storage_singleton__ = storageInstance;
+  global.__pharma_storage_singleton__ = new MemStorage();
   global.__pharma_storage_id__ = currentStorageId;
+} else {
+  console.log(`🔄 Using EXISTING singleton MemStorage instance - ID: ${currentStorageId}`);
 }
 
-// Export the singleton instance directly
-export const storage = storageInstance;
+// Export the singleton instance directly - always use the global instance
+export const storage = global.__pharma_storage_singleton__;
