@@ -286,6 +286,8 @@ Changelog:
 - July 18, 2025: Browser automation should now work without system dependency errors
 - July 18, 2025: Fixed npm dependency version conflict (esbuild 0.23.1 vs 0.25.6) in Docker build process
 - July 18, 2025: Chrome successfully installed at /usr/bin/google-chrome-stable in Docker container
+- July 18, 2025: Fixing npm dependency conflict in Docker build - esbuild version mismatch between tsx and main project
+- July 18, 2025: Adding --force flag to npm ci to resolve dependency conflicts and continue build process
 ```
 
 ## User Preferences
