@@ -38,8 +38,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Clean install dependencies
+RUN npm ci --omit=dev --no-audit --legacy-peer-deps
 
 # Copy source code
 COPY . .
