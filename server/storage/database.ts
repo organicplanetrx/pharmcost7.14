@@ -18,8 +18,22 @@ import {
   type DashboardStats,
 } from "@shared/schema";
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
+// Database connection with proper error handling
+let db: any = null;
+try {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (databaseUrl) {
+    console.log('🔗 Database URL found, initializing Neon connection...');
+    const sql = neon(databaseUrl);
+    db = drizzle(sql);
+    console.log('✅ Database connection established');
+  } else {
+    console.log('⚠️ No DATABASE_URL found, using memory-only storage');
+  }
+} catch (error) {
+  console.error('❌ Database connection failed:', error);
+  console.log('📝 Falling back to memory-only storage');
+}
 
 export class DatabaseStorage implements IStorage {
   private static instance: DatabaseStorage;

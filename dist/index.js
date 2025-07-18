@@ -4,154 +4,162 @@ import express2 from "express";
 // server/routes.ts
 import { createServer } from "http";
 
-// server/storage/database.ts
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-var sql = neon(process.env.DATABASE_URL);
-var db = drizzle(sql);
-var DatabaseStorage = class _DatabaseStorage {
-  static instance;
-  instanceId;
+// server/storage.ts
+var MemStorage = class {
+  vendors = /* @__PURE__ */ new Map();
+  credentials = /* @__PURE__ */ new Map();
+  medications = /* @__PURE__ */ new Map();
+  searches = /* @__PURE__ */ new Map();
+  searchResults = /* @__PURE__ */ new Map();
+  activityLogs = /* @__PURE__ */ new Map();
+  vendorId = 1;
+  credentialId = 1;
+  medicationId = 1;
+  searchId = 1;
+  searchResultId = 1;
+  activityLogId = 1;
   constructor() {
-    this.instanceId = Math.random().toString(36).substring(2, 8);
-    console.log(`\u{1F5C4}\uFE0F Creating DatabaseStorage instance - ID: ${this.instanceId}`);
+    const instanceId = Math.random().toString(36).substring(7);
+    console.log(`\u{1F50D} MemStorage constructor called - instance creation - ID: ${instanceId}`);
+    this.initializeDefaultVendors();
   }
-  static getInstance() {
-    if (!_DatabaseStorage.instance) {
-      _DatabaseStorage.instance = new _DatabaseStorage();
-    }
-    return _DatabaseStorage.instance;
+  initializeDefaultVendors() {
+    const defaultVendors = [
+      { name: "Kinray (Cardinal Health)", portalUrl: "https://kinrayweblink.cardinalhealth.com/login", isActive: true }
+    ];
+    defaultVendors.forEach((vendor) => {
+      const newVendor = {
+        ...vendor,
+        id: this.vendorId++,
+        isActive: vendor.isActive ?? true
+      };
+      this.vendors.set(newVendor.id, newVendor);
+    });
   }
-  // Vendor operations
-  async createVendor(vendor) {
-    return {
-      id: 1,
-      name: "Kinray (Cardinal Health)",
-      website: "kinrayweblink.cardinalhealth.com",
-      portalUrl: "https://kinrayweblink.cardinalhealth.com/login",
-      isActive: true
-    };
+  // Vendors
+  async getVendors() {
+    return Array.from(this.vendors.values()).filter((v) => v.isActive);
   }
   async getVendor(id2) {
-    if (id2 === 1) {
-      return {
-        id: 1,
-        name: "Kinray (Cardinal Health)",
-        website: "kinrayweblink.cardinalhealth.com",
-        portalUrl: "https://kinrayweblink.cardinalhealth.com/login",
-        isActive: true
-      };
-    }
-    return void 0;
+    return this.vendors.get(id2);
   }
-  async getVendors() {
-    return [
-      {
-        id: 1,
-        name: "Kinray (Cardinal Health)",
-        website: "kinrayweblink.cardinalhealth.com",
-        portalUrl: "https://kinrayweblink.cardinalhealth.com/login",
-        isActive: true
-      }
-    ];
+  async createVendor(vendor) {
+    const newVendor = {
+      ...vendor,
+      id: this.vendorId++,
+      isActive: vendor.isActive ?? true
+    };
+    this.vendors.set(newVendor.id, newVendor);
+    return newVendor;
   }
-  // Credential operations
+  // Credentials
+  async getCredentials() {
+    return Array.from(this.credentials.values()).filter((c) => c.isActive);
+  }
+  async getCredentialByVendorId(vendorId) {
+    return Array.from(this.credentials.values()).find((c) => c.vendorId === vendorId && c.isActive);
+  }
   async createCredential(credential) {
     const newCredential = {
       ...credential,
-      id: Date.now(),
-      // Simple ID generation
-      lastValidated: /* @__PURE__ */ new Date()
+      id: this.credentialId++,
+      lastValidated: null,
+      isActive: credential.isActive ?? true,
+      vendorId: credential.vendorId ?? null
     };
+    this.credentials.set(newCredential.id, newCredential);
     return newCredential;
   }
-  async getCredential(id2) {
-    return void 0;
-  }
-  async getCredentials() {
-    return [];
-  }
-  async updateCredential(id2, updates) {
-    return void 0;
+  async updateCredential(id2, credential) {
+    const existing = this.credentials.get(id2);
+    if (!existing) return void 0;
+    const updated = { ...existing, ...credential };
+    this.credentials.set(id2, updated);
+    return updated;
   }
   async deleteCredential(id2) {
-    return false;
+    return this.credentials.delete(id2);
   }
-  // Medication operations
+  // Medications
+  async getMedications() {
+    return Array.from(this.medications.values());
+  }
+  async getMedicationByNdc(ndc) {
+    return Array.from(this.medications.values()).find((m) => m.ndc === ndc);
+  }
   async createMedication(medication) {
     const newMedication = {
       ...medication,
-      id: Date.now() + Math.random() * 1e3
-      // Simple ID generation
+      id: this.medicationId++,
+      genericName: medication.genericName ?? null,
+      ndc: medication.ndc ?? null,
+      packageSize: medication.packageSize ?? null,
+      strength: medication.strength ?? null,
+      dosageForm: medication.dosageForm ?? null,
+      manufacturer: medication.manufacturer ?? null
     };
+    this.medications.set(newMedication.id, newMedication);
     return newMedication;
   }
-  async getMedication(id2) {
-    return void 0;
+  async updateMedication(id2, medication) {
+    const existing = this.medications.get(id2);
+    if (!existing) return void 0;
+    const updated = { ...existing, ...medication };
+    this.medications.set(id2, updated);
+    return updated;
   }
-  async getMedications() {
-    return [];
-  }
-  // Search operations - using memory storage for now
-  searches = /* @__PURE__ */ new Map();
-  searchResults = /* @__PURE__ */ new Map();
-  medications = /* @__PURE__ */ new Map();
-  searchId = 1;
-  searchResultId = 1;
-  async createSearch(search) {
-    const newSearch = {
-      ...search,
-      id: this.searchId++,
-      createdAt: /* @__PURE__ */ new Date(),
-      status: "pending",
-      resultCount: 0,
-      completedAt: null
-    };
-    this.searches.set(newSearch.id, newSearch);
-    console.log(`\u{1F504} DatabaseStorage: Created search ${newSearch.id} - Total searches: ${this.searches.size}`);
-    return newSearch;
+  // Searches
+  async getSearches(limit = 50) {
+    return Array.from(this.searches.values()).sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)).slice(0, limit);
   }
   async getSearch(id2) {
     return this.searches.get(id2);
   }
   async getSearchWithResults(id2) {
-    console.log(`\u{1F50D} DatabaseStorage: getSearchWithResults called for searchId: ${id2}`);
-    console.log(`\u{1F4CA} DatabaseStorage instance: ${this.instanceId}`);
+    const storageId = global.__pharma_storage_id__ || "unknown";
+    console.log(`\u{1F50D} getSearchWithResults called for searchId: ${id2}`);
+    console.log(`\u{1F4CA} Storage instance: ${this.constructor.name} - Global ID: ${storageId}`);
     console.log(`\u{1F4CA} Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(", ")}]`);
     const search = this.searches.get(id2);
     if (!search) {
-      console.log(`\u274C DatabaseStorage: Search ${id2} not found`);
+      console.log(`\u274C Search ${id2} not found in storage`);
       return void 0;
     }
-    const results = Array.from(this.searchResults.values()).filter((sr) => sr.searchId === id2);
-    const searchWithResults = {
+    const results = Array.from(this.searchResults.values()).filter((sr) => sr.searchId === id2).map((sr) => ({
+      ...sr,
+      medication: this.medications.get(sr.medicationId)
+    }));
+    console.log(`\u{1F4CB} Found ${results.length} results for search ${id2}`);
+    return { ...search, results };
+  }
+  async createSearch(search) {
+    const newSearch = {
       ...search,
-      results: results.map((result) => ({
-        ...result,
-        medication: this.medications.get(result.medicationId) || null
-      }))
+      id: this.searchId++,
+      createdAt: /* @__PURE__ */ new Date(),
+      completedAt: null,
+      vendorId: search.vendorId ?? null,
+      resultCount: search.resultCount ?? null
     };
-    console.log(`\u{1F4CB} DatabaseStorage: Found ${results.length} results for search ${id2}`);
-    return searchWithResults;
+    this.searches.set(newSearch.id, newSearch);
+    console.log(`\u{1F504} Created search ${newSearch.id} - Total searches: ${this.searches.size}`);
+    return newSearch;
   }
-  async getSearches(limit) {
-    return Array.from(this.searches.values()).slice(0, limit);
+  async updateSearch(id2, search) {
+    const existing = this.searches.get(id2);
+    if (!existing) return void 0;
+    const updated = { ...existing, ...search };
+    this.searches.set(id2, updated);
+    return updated;
   }
-  async updateSearch(id2, updates) {
-    const search = this.searches.get(id2);
-    if (!search) return void 0;
-    const updatedSearch = { ...search, ...updates };
-    this.searches.set(id2, updatedSearch);
-    console.log(`\u{1F504} DatabaseStorage: Updated search ${id2} - Status: ${updatedSearch.status}`);
-    return updatedSearch;
+  // Search Results
+  async getSearchResults(searchId) {
+    return Array.from(this.searchResults.values()).filter((sr) => sr.searchId === searchId);
   }
-  async deleteSearch(id2) {
-    return this.searches.delete(id2);
-  }
-  // Search result operations
   async createSearchResult(result) {
+    const storageId = global.__pharma_storage_id__ || "unknown";
     const newResult = {
       ...result,
       id: this.searchResultId++,
@@ -163,49 +171,62 @@ var DatabaseStorage = class _DatabaseStorage {
       availability: result.availability ?? null
     };
     this.searchResults.set(newResult.id, newResult);
-    console.log(`\u{1F504} DatabaseStorage: Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
+    console.log(`\u{1F504} Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
+    console.log(`\u{1F50D} Storage instance ${this.constructor.name} - Global ID: ${storageId} - Results map size: ${this.searchResults.size}`);
+    console.log(`\u{1F50D} All search results: ${Array.from(this.searchResults.keys()).join(", ")}`);
     return newResult;
   }
-  async getSearchResult(id2) {
-    return this.searchResults.get(id2);
+  // Activity Logs
+  async getActivityLogs(limit = 20) {
+    return Array.from(this.activityLogs.values()).sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)).slice(0, limit);
   }
-  async getSearchResults(searchId) {
-    return Array.from(this.searchResults.values()).filter((sr) => sr.searchId === searchId);
-  }
-  async updateSearchResult(id2, updates) {
-    const result = this.searchResults.get(id2);
-    if (!result) return void 0;
-    const updatedResult = { ...result, ...updates };
-    this.searchResults.set(id2, updatedResult);
-    return updatedResult;
-  }
-  async deleteSearchResult(id2) {
-    return this.searchResults.delete(id2);
-  }
-  // Activity log operations
   async createActivityLog(log2) {
     const newLog = {
       ...log2,
-      id: Date.now(),
-      timestamp: /* @__PURE__ */ new Date()
+      id: this.activityLogId++,
+      createdAt: /* @__PURE__ */ new Date(),
+      vendorId: log2.vendorId ?? null,
+      searchId: log2.searchId ?? null
     };
+    this.activityLogs.set(newLog.id, newLog);
     return newLog;
-  }
-  async getActivityLogs(limit) {
-    return [];
   }
   // Dashboard stats
   async getDashboardStats() {
+    const today = /* @__PURE__ */ new Date();
+    today.setHours(0, 0, 0, 0);
+    const searchesToday = Array.from(this.searches.values()).filter((s) => s.createdAt && s.createdAt >= today).length;
+    const totalCost = Array.from(this.searchResults.values()).reduce((sum, sr) => sum + parseFloat(sr.cost || "0"), 0);
+    const csvExports = Array.from(this.activityLogs.values()).filter((log2) => log2.action === "export" && log2.status === "success").length;
     return {
-      totalSearchesToday: this.searches.size,
-      totalCostAnalysis: 0,
-      csvExportsGenerated: 0
+      totalSearchesToday: searchesToday,
+      totalCostAnalysis: totalCost.toFixed(2),
+      csvExportsGenerated: csvExports
     };
   }
 };
-
-// server/storage.ts
-var storage = DatabaseStorage.getInstance();
+function createStorageInstance() {
+  const storageId = Math.random().toString(36).substring(2, 8);
+  const creationTime = Date.now();
+  console.log(`\u{1F5C4}\uFE0F Creating GLOBAL singleton MemStorage instance - ID: ${storageId}`);
+  const instance = new MemStorage();
+  global.__pharma_storage_singleton__ = instance;
+  global.__pharma_storage_id__ = storageId;
+  global.__pharma_storage_creation_time__ = creationTime;
+  return instance;
+}
+function getStorageInstance() {
+  if (!global.__pharma_storage_singleton__) {
+    return createStorageInstance();
+  } else {
+    const storageId = global.__pharma_storage_id__ || "unknown";
+    const creationTime = global.__pharma_storage_creation_time__ || 0;
+    const age = Date.now() - creationTime;
+    console.log(`\u{1F504} Using EXISTING singleton MemStorage instance - ID: ${storageId}, Age: ${age}ms`);
+    return global.__pharma_storage_singleton__;
+  }
+}
+var storage = getStorageInstance();
 
 // server/services/scraper.ts
 import puppeteer from "puppeteer";
