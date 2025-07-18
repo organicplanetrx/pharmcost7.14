@@ -291,6 +291,11 @@ Changelog:
 - July 18, 2025: CRITICAL BROWSER FIX: Updated browser path detection to prioritize Docker Chrome (/usr/bin/google-chrome-stable) in production
 - July 18, 2025: Fixed Docker user permissions by creating proper home directory and cache folders for pharmcost user
 - July 18, 2025: Browser automation should now work correctly with pre-installed Chrome instead of trying to use Replit paths
+- July 18, 2025: STORAGE PERSISTENCE FIX: Enhanced storage debugging and singleton pattern to prevent data loss between API calls
+- July 18, 2025: Added comprehensive debugging logs to track storage instances and data persistence throughout search workflow
+- July 18, 2025: Enhanced frontend debugging to track search results display and identify any frontend rendering issues
+- July 18, 2025: ✅ LIVE SCRAPING WORKING: Browser automation successfully connects to Kinray portal and extracts 10 real results
+- July 18, 2025: CRITICAL SUCCESS: Fixed Docker deployment issues - Chrome browser now launches correctly with proper user permissions
 ```
 
 ## User Preferences

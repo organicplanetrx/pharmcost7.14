@@ -116,10 +116,10 @@ var MemStorage = class {
   }
   async getSearchWithResults(id2) {
     console.log(`\u{1F50D} getSearchWithResults called for searchId: ${id2}`);
-    console.log(`\u{1F4CA} Storage instance: ${this.constructor.name}`);
-    console.log(`\u{1F4CA} Available searches: ${this.searches.size}`);
-    console.log(`\u{1F4CA} Available results: ${this.searchResults.size}`);
-    console.log(`\u{1F4CA} Available medications: ${this.medications.size}`);
+    console.log(`\u{1F4CA} Storage instance: ${this.constructor.name} - Hash: ${this.constructor.name}${this.searches.size}${this.searchResults.size}`);
+    console.log(`\u{1F4CA} Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(", ")}]`);
+    console.log(`\u{1F4CA} Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(", ")}]`);
+    console.log(`\u{1F4CA} Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(", ")}]`);
     const search = this.searches.get(id2);
     if (!search) {
       console.log(`\u274C Search ${id2} not found in storage`);
@@ -169,6 +169,8 @@ var MemStorage = class {
     };
     this.searchResults.set(newResult.id, newResult);
     console.log(`\u{1F504} Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
+    console.log(`\u{1F50D} Storage instance ${this.constructor.name} - Results map size: ${this.searchResults.size}`);
+    console.log(`\u{1F50D} All search results: ${Array.from(this.searchResults.keys()).join(", ")}`);
     return newResult;
   }
   // Activity Logs
@@ -203,6 +205,7 @@ var MemStorage = class {
 var getStorage = () => {
   if (!global.__storage_instance__) {
     console.log("\u{1F5C4}\uFE0F Creating new MemStorage instance");
+    console.log("\u{1F50D} MemStorage constructor called - instance creation");
     global.__storage_instance__ = new MemStorage();
   } else {
     console.log("\u{1F504} Using existing MemStorage instance");

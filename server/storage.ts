@@ -197,10 +197,10 @@ export class MemStorage implements IStorage {
 
   async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
     console.log(`🔍 getSearchWithResults called for searchId: ${id}`);
-    console.log(`📊 Storage instance: ${this.constructor.name}`);
-    console.log(`📊 Available searches: ${this.searches.size}`);
-    console.log(`📊 Available results: ${this.searchResults.size}`);
-    console.log(`📊 Available medications: ${this.medications.size}`);
+    console.log(`📊 Storage instance: ${this.constructor.name} - Hash: ${this.constructor.name}${this.searches.size}${this.searchResults.size}`);
+    console.log(`📊 Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(', ')}]`);
+    console.log(`📊 Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(', ')}]`);
+    console.log(`📊 Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(', ')}]`);
     
     const search = this.searches.get(id);
     if (!search) {
@@ -260,6 +260,10 @@ export class MemStorage implements IStorage {
     };
     this.searchResults.set(newResult.id, newResult);
     console.log(`🔄 Created result ${newResult.id} for search ${newResult.searchId} - Total results: ${this.searchResults.size}`);
+    
+    // Verify storage persistence
+    console.log(`🔍 Storage instance ${this.constructor.name} - Results map size: ${this.searchResults.size}`);
+    console.log(`🔍 All search results: ${Array.from(this.searchResults.keys()).join(', ')}`);
     return newResult;
   }
 
@@ -316,6 +320,7 @@ declare global {
 export const getStorage = (): MemStorage => {
   if (!global.__storage_instance__) {
     console.log('🗄️ Creating new MemStorage instance');
+    console.log('🔍 MemStorage constructor called - instance creation');
     global.__storage_instance__ = new MemStorage();
   } else {
     console.log('🔄 Using existing MemStorage instance');

@@ -22,6 +22,14 @@ export default function ResultsTable({ searchId }: ResultsTableProps) {
   });
 
   console.log(`ResultsTable render - searchId: ${searchId}, isLoading: ${isLoading}, error:`, error, 'data:', searchResults);
+  
+  // Enhanced debugging
+  if (searchResults) {
+    console.log('Search results object:', JSON.stringify(searchResults, null, 2));
+    console.log('Results array:', searchResults.results);
+    console.log('Results length:', searchResults.results?.length || 0);
+    console.log('Status:', searchResults.status);
+  }
 
   // Results table for search ID: ${searchId}
 
