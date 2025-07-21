@@ -10,9 +10,8 @@ import express2 from "express";
 // server/routes.ts
 import { createServer } from "http";
 
-// server/database.ts
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+// server/storage-database.ts
+import { eq, desc, and, gte } from "drizzle-orm";
 
 // shared/schema.ts
 var schema_exports = {};
@@ -115,30 +114,46 @@ var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
 });
 
 // server/database.ts
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    console.log("\u26A0\uFE0F DATABASE_URL not found - Railway PostgreSQL may not be configured");
+    console.error("\u274C DATABASE_URL environment variable not found");
+    console.error("   Please ensure PostgreSQL service is added to Railway project");
     return null;
   }
+  console.log("\u{1F517} Attempting Railway PostgreSQL connection...");
+  console.log("   Database URL format:", databaseUrl.substring(0, 30) + "...");
   try {
-    console.log("\u{1F517} Connecting to Railway PostgreSQL...");
-    const sql = neon(databaseUrl);
+    const sql = neon(databaseUrl, {
+      connectionTimeoutMillis: 1e4,
+      queryTimeoutMillis: 3e4
+    });
     const db = drizzle(sql, { schema: schema_exports });
     console.log("\u2705 Railway PostgreSQL connection established");
     return db;
   } catch (error) {
-    console.error("\u274C Failed to connect to Railway PostgreSQL:", error);
+    console.error("\u274C Railway PostgreSQL connection failed:", error);
+    console.error("   This may indicate Railway PostgreSQL service issues");
     return null;
   }
 }
 async function testDatabaseConnection(db) {
   try {
-    await db.execute("SELECT 1");
+    console.log("\u{1F50D} Testing Railway database connection...");
+    const result = await db.execute("SELECT 1 as test");
     console.log("\u2705 Railway database connection test successful");
+    console.log("   Test query result:", result);
     return true;
   } catch (error) {
-    console.error("\u274C Railway database connection test failed:", error);
+    console.error("\u274C Railway database connection test failed");
+    console.error("   Error details:", error);
+    console.error("   Error type:", typeof error);
+    if (error instanceof Error) {
+      console.error("   Error message:", error.message);
+      console.error("   Error stack:", error.stack);
+    }
     return false;
   }
 }
@@ -168,6 +183,253 @@ async function initializeDatabaseSchema(db) {
     return false;
   }
 }
+
+// server/storage-database.ts
+var RailwayDatabaseStorage = class {
+  db;
+  isConnected = false;
+  connectionPromise;
+  constructor() {
+    this.connectionPromise = this.initializeDatabase();
+  }
+  async initializeDatabase() {
+    try {
+      console.log("\u{1F680} Initializing Railway PostgreSQL connection...");
+      this.db = createDatabaseConnection();
+      if (this.db) {
+        this.isConnected = await testDatabaseConnection(this.db);
+        if (this.isConnected) {
+          await initializeDatabaseSchema(this.db);
+          console.log("\u{1F5C4}\uFE0F Railway DatabaseStorage fully operational");
+        }
+      }
+    } catch (error) {
+      console.error("\u274C Database initialization failed:", error);
+      this.isConnected = false;
+    }
+  }
+  async ensureConnection() {
+    await this.connectionPromise;
+    if (!this.isConnected) {
+      throw new Error("Railway PostgreSQL connection not available");
+    }
+    return true;
+  }
+  // Vendors
+  async getVendors() {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(vendors);
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching vendors:", error);
+      return [];
+    }
+  }
+  async getVendor(id2) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(vendors).where(eq(vendors.id, id2));
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error fetching vendor:", error);
+      return void 0;
+    }
+  }
+  async createVendor(vendor) {
+    await this.ensureConnection();
+    const result = await this.db.insert(vendors).values(vendor).returning();
+    return result[0];
+  }
+  // Credentials
+  async getCredentials() {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(credentials);
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching credentials:", error);
+      return [];
+    }
+  }
+  async getCredentialByVendorId(vendorId) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(credentials).where(eq(credentials.vendorId, vendorId));
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error fetching credential by vendor:", error);
+      return void 0;
+    }
+  }
+  async createCredential(credential) {
+    await this.ensureConnection();
+    const result = await this.db.insert(credentials).values(credential).returning();
+    return result[0];
+  }
+  async updateCredential(id2, credential) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.update(credentials).set(credential).where(eq(credentials.id, id2)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error updating credential:", error);
+      return void 0;
+    }
+  }
+  async deleteCredential(id2) {
+    await this.ensureConnection();
+    try {
+      await this.db.delete(credentials).where(eq(credentials.id, id2));
+      return true;
+    } catch (error) {
+      console.error("\u274C Error deleting credential:", error);
+      return false;
+    }
+  }
+  // Medications
+  async getMedications() {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(medications);
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching medications:", error);
+      return [];
+    }
+  }
+  async getMedicationByNdc(ndc) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(medications).where(eq(medications.ndc, ndc));
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error fetching medication by NDC:", error);
+      return void 0;
+    }
+  }
+  async createMedication(medication) {
+    await this.ensureConnection();
+    const result = await this.db.insert(medications).values(medication).returning();
+    return result[0];
+  }
+  async updateMedication(id2, medication) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.update(medications).set(medication).where(eq(medications.id, id2)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error updating medication:", error);
+      return void 0;
+    }
+  }
+  // Searches
+  async getSearches(limit = 50) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(searches).orderBy(desc(searches.createdAt)).limit(limit);
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching searches:", error);
+      return [];
+    }
+  }
+  async getSearch(id2) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(searches).where(eq(searches.id, id2));
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error fetching search:", error);
+      return void 0;
+    }
+  }
+  async getSearchWithResults(id2) {
+    await this.ensureConnection();
+    try {
+      const search = await this.getSearch(id2);
+      if (!search) return void 0;
+      const results = await this.getSearchResults(id2);
+      return { ...search, results };
+    } catch (error) {
+      console.error("\u274C Error fetching search with results:", error);
+      return void 0;
+    }
+  }
+  async createSearch(search) {
+    await this.ensureConnection();
+    const result = await this.db.insert(searches).values(search).returning();
+    return result[0];
+  }
+  async updateSearch(id2, search) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.update(searches).set(search).where(eq(searches.id, id2)).returning();
+      return result[0];
+    } catch (error) {
+      console.error("\u274C Error updating search:", error);
+      return void 0;
+    }
+  }
+  // Search Results
+  async getSearchResults(searchId) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(searchResults).where(eq(searchResults.searchId, searchId));
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching search results:", error);
+      return [];
+    }
+  }
+  async createSearchResult(result) {
+    await this.ensureConnection();
+    const dbResult = await this.db.insert(searchResults).values(result).returning();
+    return dbResult[0];
+  }
+  // Activity Logs
+  async getActivityLogs(limit = 100) {
+    await this.ensureConnection();
+    try {
+      const result = await this.db.select().from(activityLogs).orderBy(desc(activityLogs.createdAt)).limit(limit);
+      return result;
+    } catch (error) {
+      console.error("\u274C Error fetching activity logs:", error);
+      return [];
+    }
+  }
+  async createActivityLog(log2) {
+    await this.ensureConnection();
+    const result = await this.db.insert(activityLogs).values(log2).returning();
+    return result[0];
+  }
+  // Dashboard Stats
+  async getDashboardStats() {
+    await this.ensureConnection();
+    try {
+      const today = /* @__PURE__ */ new Date();
+      today.setHours(0, 0, 0, 0);
+      const searchesToday = await this.db.select({ count: "COUNT(*)" }).from(searches).where(gte(searches.createdAt, today));
+      const totalCostQuery = await this.db.select({ sum: "SUM(CAST(cost AS DECIMAL))" }).from(searchResults).where(eq(searchResults.cost, searchResults.cost));
+      const csvExports = await this.db.select({ count: "COUNT(*)" }).from(activityLogs).where(and(
+        eq(activityLogs.action, "export"),
+        eq(activityLogs.status, "success")
+      ));
+      return {
+        totalSearchesToday: parseInt(searchesToday[0]?.count || "0"),
+        totalCostAnalysis: parseFloat(totalCostQuery[0]?.sum || "0").toFixed(2),
+        csvExportsGenerated: parseInt(csvExports[0]?.count || "0")
+      };
+    } catch (error) {
+      console.error("\u274C Error calculating dashboard stats:", error);
+      return {
+        totalSearchesToday: 0,
+        totalCostAnalysis: "0.00",
+        csvExportsGenerated: 0
+      };
+    }
+  }
+};
 
 // server/storage.ts
 var MemStorage = class {
@@ -391,125 +653,15 @@ function getStorageInstance() {
     return global.__pharma_storage_singleton__;
   }
 }
-var DatabaseStorage = class {
-  db;
-  isConnected = false;
-  constructor() {
-    this.initializeDatabase();
-  }
-  async initializeDatabase() {
-    this.db = createDatabaseConnection();
-    if (this.db) {
-      this.isConnected = await testDatabaseConnection(this.db);
-      if (this.isConnected) {
-        await initializeDatabaseSchema(this.db);
-        console.log("\u{1F5C4}\uFE0F Railway DatabaseStorage initialized successfully");
-      }
-    }
-    if (!this.isConnected) {
-      console.log("\u26A0\uFE0F Database unavailable - using memory storage fallback");
-    }
-  }
-  // Implement all interface methods (placeholder for now)
-  async getVendors() {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async getVendor(id2) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async createVendor(vendor) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async getCredentials() {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async getCredentialByVendorId(vendorId) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async createCredential(credential) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async updateCredential(id2, credential) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async deleteCredential(id2) {
-    if (!this.isConnected) return false;
-    return false;
-  }
-  async getMedications() {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async getMedicationByNdc(ndc) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async createMedication(medication) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async updateMedication(id2, medication) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async getSearches(limit) {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async getSearch(id2) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async getSearchWithResults(id2) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async createSearch(search) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async updateSearch(id2, search) {
-    if (!this.isConnected) return void 0;
-    return void 0;
-  }
-  async getSearchResults(searchId) {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async createSearchResult(result) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async getActivityLogs(limit) {
-    if (!this.isConnected) return [];
-    return [];
-  }
-  async createActivityLog(log2) {
-    if (!this.isConnected) throw new Error("Database not available");
-    throw new Error("Not implemented");
-  }
-  async getDashboardStats() {
-    return {
-      totalSearchesToday: 0,
-      totalCostAnalysis: "0.00",
-      csvExportsGenerated: 0
-    };
-  }
-};
 function createSmartStorage() {
   const databaseUrl = process.env.DATABASE_URL;
-  if (databaseUrl && process.env.NODE_ENV === "production") {
-    console.log("\u{1F682} Railway environment detected - attempting database connection");
-    return new DatabaseStorage();
+  if (databaseUrl) {
+    console.log("\u{1F682} Railway PostgreSQL detected - using database storage");
+    console.log("   DATABASE_URL configured:", databaseUrl.substring(0, 30) + "...");
+    return new RailwayDatabaseStorage();
   } else {
-    console.log("\u{1F4BE} Using memory storage (development mode or no database)");
+    console.log("\u{1F4BE} No DATABASE_URL found - using memory storage");
+    console.log("   Add PostgreSQL service to Railway project for persistent storage");
     return getStorageInstance();
   }
 }
