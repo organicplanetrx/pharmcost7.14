@@ -1,11 +1,1 @@
-[phases.setup]
-nixPkgs = ["nodejs-20_x"]
-
-[phases.install]
-cmds = ["npm ci --omit=dev", "npm run build"]
-
-[start]
-cmd = "node dist/index.js"
-
-[variables]
-NODE_ENV = "production"
+# Let Railway auto-detect Node.js configuration
