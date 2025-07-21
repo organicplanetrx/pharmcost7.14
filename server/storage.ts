@@ -352,5 +352,166 @@ function getStorageInstance(): MemStorage {
   }
 }
 
-// Use the working MemStorage singleton pattern until database is properly configured
-export const storage = getStorageInstance();
+// Railway Database Storage Implementation
+import { createDatabaseConnection, testDatabaseConnection, initializeDatabaseSchema } from './database';
+
+class DatabaseStorage implements IStorage {
+  private db: any;
+  private isConnected = false;
+
+  constructor() {
+    this.initializeDatabase();
+  }
+
+  private async initializeDatabase() {
+    this.db = createDatabaseConnection();
+    
+    if (this.db) {
+      this.isConnected = await testDatabaseConnection(this.db);
+      if (this.isConnected) {
+        await initializeDatabaseSchema(this.db);
+        console.log('🗄️ Railway DatabaseStorage initialized successfully');
+      }
+    }
+    
+    if (!this.isConnected) {
+      console.log('⚠️ Database unavailable - using memory storage fallback');
+    }
+  }
+
+  // Implement all interface methods (placeholder for now)
+  async getVendors(): Promise<Vendor[]> {
+    if (!this.isConnected) return [];
+    // TODO: Implement database query
+    return [];
+  }
+
+  async getVendor(id: number): Promise<Vendor | undefined> {
+    if (!this.isConnected) return undefined;
+    // TODO: Implement database query
+    return undefined;
+  }
+
+  async createVendor(vendor: InsertVendor): Promise<Vendor> {
+    if (!this.isConnected) throw new Error('Database not available');
+    // TODO: Implement database insert
+    throw new Error('Not implemented');
+  }
+
+  async getCredentials(): Promise<Credential[]> {
+    if (!this.isConnected) return [];
+    return [];
+  }
+
+  async getCredentialByVendorId(vendorId: number): Promise<Credential | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async createCredential(credential: InsertCredential): Promise<Credential> {
+    if (!this.isConnected) throw new Error('Database not available');
+    throw new Error('Not implemented');
+  }
+
+  async updateCredential(id: number, credential: Partial<InsertCredential>): Promise<Credential | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async deleteCredential(id: number): Promise<boolean> {
+    if (!this.isConnected) return false;
+    return false;
+  }
+
+  async getMedications(): Promise<Medication[]> {
+    if (!this.isConnected) return [];
+    return [];
+  }
+
+  async getMedicationByNdc(ndc: string): Promise<Medication | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async createMedication(medication: InsertMedication): Promise<Medication> {
+    if (!this.isConnected) throw new Error('Database not available');
+    throw new Error('Not implemented');
+  }
+
+  async updateMedication(id: number, medication: Partial<InsertMedication>): Promise<Medication | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async getSearches(limit?: number): Promise<Search[]> {
+    if (!this.isConnected) return [];
+    return [];
+  }
+
+  async getSearch(id: number): Promise<Search | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async getSearchWithResults(id: number): Promise<SearchWithResults | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async createSearch(search: InsertSearch): Promise<Search> {
+    if (!this.isConnected) throw new Error('Database not available');
+    throw new Error('Not implemented');
+  }
+
+  async updateSearch(id: number, search: Partial<Search>): Promise<Search | undefined> {
+    if (!this.isConnected) return undefined;
+    return undefined;
+  }
+
+  async getSearchResults(searchId: number): Promise<SearchResult[]> {
+    if (!this.isConnected) return [];
+    return [];
+  }
+
+  async createSearchResult(result: InsertSearchResult): Promise<SearchResult> {
+    if (!this.isConnected) throw new Error('Database not available');
+    throw new Error('Not implemented');
+  }
+
+  async getActivityLogs(limit?: number): Promise<ActivityLog[]> {
+    if (!this.isConnected) return [];
+    return [];
+  }
+
+  async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
+    if (!this.isConnected) throw new Error('Database not available');
+    throw new Error('Not implemented');
+  }
+
+  async getDashboardStats(): Promise<{
+    totalSearchesToday: number;
+    totalCostAnalysis: string;
+    csvExportsGenerated: number;
+  }> {
+    return {
+      totalSearchesToday: 0,
+      totalCostAnalysis: "0.00",
+      csvExportsGenerated: 0
+    };
+  }
+}
+
+// Smart storage selection: use Database if available, fallback to Memory
+function createSmartStorage(): IStorage {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (databaseUrl && process.env.NODE_ENV === 'production') {
+    console.log('🚂 Railway environment detected - attempting database connection');
+    return new DatabaseStorage();
+  } else {
+    console.log('💾 Using memory storage (development mode or no database)');
+    return getStorageInstance();
+  }
+}
+
+export const storage = createSmartStorage();

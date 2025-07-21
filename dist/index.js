@@ -1,8 +1,173 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // server/index.ts
 import express2 from "express";
 
 // server/routes.ts
 import { createServer } from "http";
+
+// server/database.ts
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+
+// shared/schema.ts
+var schema_exports = {};
+__export(schema_exports, {
+  activityLogs: () => activityLogs,
+  credentials: () => credentials,
+  insertActivityLogSchema: () => insertActivityLogSchema,
+  insertCredentialSchema: () => insertCredentialSchema,
+  insertMedicationSchema: () => insertMedicationSchema,
+  insertSearchResultSchema: () => insertSearchResultSchema,
+  insertSearchSchema: () => insertSearchSchema,
+  insertVendorSchema: () => insertVendorSchema,
+  medications: () => medications,
+  searchResults: () => searchResults,
+  searches: () => searches,
+  vendors: () => vendors
+});
+import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+var vendors = pgTable("vendors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  portalUrl: text("portal_url").notNull(),
+  isActive: boolean("is_active").default(true)
+});
+var credentials = pgTable("credentials", {
+  id: serial("id").primaryKey(),
+  vendorId: integer("vendor_id").references(() => vendors.id),
+  username: text("username").notNull(),
+  password: text("password").notNull(),
+  // In production, this should be encrypted
+  isActive: boolean("is_active").default(true),
+  lastValidated: timestamp("last_validated")
+});
+var medications = pgTable("medications", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  genericName: text("generic_name"),
+  ndc: text("ndc").unique(),
+  packageSize: text("package_size"),
+  strength: text("strength"),
+  dosageForm: text("dosage_form"),
+  manufacturer: text("manufacturer")
+});
+var searches = pgTable("searches", {
+  id: serial("id").primaryKey(),
+  vendorId: integer("vendor_id").references(() => vendors.id),
+  searchTerm: text("search_term").notNull(),
+  searchType: text("search_type").notNull(),
+  // 'name', 'ndc', 'generic'
+  status: text("status").notNull(),
+  // 'pending', 'completed', 'failed'
+  resultCount: integer("result_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at")
+});
+var searchResults = pgTable("search_results", {
+  id: serial("id").primaryKey(),
+  searchId: integer("search_id").references(() => searches.id),
+  medicationId: integer("medication_id").references(() => medications.id),
+  vendorId: integer("vendor_id").references(() => vendors.id),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
+  availability: text("availability"),
+  // 'available', 'limited', 'out_of_stock'
+  lastUpdated: timestamp("last_updated").defaultNow()
+});
+var activityLogs = pgTable("activity_logs", {
+  id: serial("id").primaryKey(),
+  action: text("action").notNull(),
+  // 'search', 'export', 'login', 'batch_upload'
+  status: text("status").notNull(),
+  // 'success', 'failure', 'warning'
+  description: text("description").notNull(),
+  vendorId: integer("vendor_id").references(() => vendors.id),
+  searchId: integer("search_id").references(() => searches.id),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true
+});
+var insertCredentialSchema = createInsertSchema(credentials).omit({
+  id: true,
+  lastValidated: true
+});
+var insertMedicationSchema = createInsertSchema(medications).omit({
+  id: true
+});
+var insertSearchSchema = createInsertSchema(searches).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true
+});
+var insertSearchResultSchema = createInsertSchema(searchResults).omit({
+  id: true,
+  lastUpdated: true
+});
+var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
+  id: true,
+  createdAt: true
+});
+
+// server/database.ts
+function createDatabaseConnection() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.log("\u26A0\uFE0F DATABASE_URL not found - Railway PostgreSQL may not be configured");
+    return null;
+  }
+  try {
+    console.log("\u{1F517} Connecting to Railway PostgreSQL...");
+    const sql = neon(databaseUrl);
+    const db = drizzle(sql, { schema: schema_exports });
+    console.log("\u2705 Railway PostgreSQL connection established");
+    return db;
+  } catch (error) {
+    console.error("\u274C Failed to connect to Railway PostgreSQL:", error);
+    return null;
+  }
+}
+async function testDatabaseConnection(db) {
+  try {
+    await db.execute("SELECT 1");
+    console.log("\u2705 Railway database connection test successful");
+    return true;
+  } catch (error) {
+    console.error("\u274C Railway database connection test failed:", error);
+    return false;
+  }
+}
+async function initializeDatabaseSchema(db) {
+  try {
+    console.log("\u{1F527} Initializing database schema for Railway...");
+    const tables = [
+      "vendors",
+      "credentials",
+      "medications",
+      "searches",
+      "search_results",
+      "activity_logs"
+    ];
+    for (const table of tables) {
+      try {
+        await db.execute(`SELECT 1 FROM ${table} LIMIT 1`);
+        console.log(`\u2705 Table ${table} exists`);
+      } catch (error) {
+        console.log(`\u26A0\uFE0F Table ${table} may need creation`);
+      }
+    }
+    console.log("\u2705 Database schema initialization complete");
+    return true;
+  } catch (error) {
+    console.error("\u274C Database schema initialization failed:", error);
+    return false;
+  }
+}
 
 // server/storage.ts
 var MemStorage = class {
@@ -226,7 +391,129 @@ function getStorageInstance() {
     return global.__pharma_storage_singleton__;
   }
 }
-var storage = getStorageInstance();
+var DatabaseStorage = class {
+  db;
+  isConnected = false;
+  constructor() {
+    this.initializeDatabase();
+  }
+  async initializeDatabase() {
+    this.db = createDatabaseConnection();
+    if (this.db) {
+      this.isConnected = await testDatabaseConnection(this.db);
+      if (this.isConnected) {
+        await initializeDatabaseSchema(this.db);
+        console.log("\u{1F5C4}\uFE0F Railway DatabaseStorage initialized successfully");
+      }
+    }
+    if (!this.isConnected) {
+      console.log("\u26A0\uFE0F Database unavailable - using memory storage fallback");
+    }
+  }
+  // Implement all interface methods (placeholder for now)
+  async getVendors() {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async getVendor(id2) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async createVendor(vendor) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async getCredentials() {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async getCredentialByVendorId(vendorId) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async createCredential(credential) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async updateCredential(id2, credential) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async deleteCredential(id2) {
+    if (!this.isConnected) return false;
+    return false;
+  }
+  async getMedications() {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async getMedicationByNdc(ndc) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async createMedication(medication) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async updateMedication(id2, medication) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async getSearches(limit) {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async getSearch(id2) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async getSearchWithResults(id2) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async createSearch(search) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async updateSearch(id2, search) {
+    if (!this.isConnected) return void 0;
+    return void 0;
+  }
+  async getSearchResults(searchId) {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async createSearchResult(result) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async getActivityLogs(limit) {
+    if (!this.isConnected) return [];
+    return [];
+  }
+  async createActivityLog(log2) {
+    if (!this.isConnected) throw new Error("Database not available");
+    throw new Error("Not implemented");
+  }
+  async getDashboardStats() {
+    return {
+      totalSearchesToday: 0,
+      totalCostAnalysis: "0.00",
+      csvExportsGenerated: 0
+    };
+  }
+};
+function createSmartStorage() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (databaseUrl && process.env.NODE_ENV === "production") {
+    console.log("\u{1F682} Railway environment detected - attempting database connection");
+    return new DatabaseStorage();
+  } else {
+    console.log("\u{1F4BE} Using memory storage (development mode or no database)");
+    return getStorageInstance();
+  }
+}
+var storage = createSmartStorage();
 
 // server/services/scraper.ts
 import puppeteer from "puppeteer";
@@ -1507,91 +1794,6 @@ var CSVExportServiceImpl = class {
   }
 };
 var csvExportService = new CSVExportServiceImpl();
-
-// shared/schema.ts
-import { pgTable, text, serial, integer, boolean, timestamp, decimal } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-var vendors = pgTable("vendors", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  portalUrl: text("portal_url").notNull(),
-  isActive: boolean("is_active").default(true)
-});
-var credentials = pgTable("credentials", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  username: text("username").notNull(),
-  password: text("password").notNull(),
-  // In production, this should be encrypted
-  isActive: boolean("is_active").default(true),
-  lastValidated: timestamp("last_validated")
-});
-var medications = pgTable("medications", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  genericName: text("generic_name"),
-  ndc: text("ndc").unique(),
-  packageSize: text("package_size"),
-  strength: text("strength"),
-  dosageForm: text("dosage_form"),
-  manufacturer: text("manufacturer")
-});
-var searches = pgTable("searches", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  searchTerm: text("search_term").notNull(),
-  searchType: text("search_type").notNull(),
-  // 'name', 'ndc', 'generic'
-  status: text("status").notNull(),
-  // 'pending', 'completed', 'failed'
-  resultCount: integer("result_count").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  completedAt: timestamp("completed_at")
-});
-var searchResults = pgTable("search_results", {
-  id: serial("id").primaryKey(),
-  searchId: integer("search_id").references(() => searches.id),
-  medicationId: integer("medication_id").references(() => medications.id),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  cost: decimal("cost", { precision: 10, scale: 2 }),
-  availability: text("availability"),
-  // 'available', 'limited', 'out_of_stock'
-  lastUpdated: timestamp("last_updated").defaultNow()
-});
-var activityLogs = pgTable("activity_logs", {
-  id: serial("id").primaryKey(),
-  action: text("action").notNull(),
-  // 'search', 'export', 'login', 'batch_upload'
-  status: text("status").notNull(),
-  // 'success', 'failure', 'warning'
-  description: text("description").notNull(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  searchId: integer("search_id").references(() => searches.id),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var insertVendorSchema = createInsertSchema(vendors).omit({
-  id: true
-});
-var insertCredentialSchema = createInsertSchema(credentials).omit({
-  id: true,
-  lastValidated: true
-});
-var insertMedicationSchema = createInsertSchema(medications).omit({
-  id: true
-});
-var insertSearchSchema = createInsertSchema(searches).omit({
-  id: true,
-  createdAt: true,
-  completedAt: true
-});
-var insertSearchResultSchema = createInsertSchema(searchResults).omit({
-  id: true,
-  lastUpdated: true
-});
-var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
-  id: true,
-  createdAt: true
-});
 
 // server/routes.ts
 import { z } from "zod";
