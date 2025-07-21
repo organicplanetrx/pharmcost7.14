@@ -147,11 +147,15 @@ function getRailwayOptimizedConnectionString(databaseUrl) {
   try {
     const url = new URL(databaseUrl);
     url.searchParams.set("sslmode", "require");
-    url.searchParams.set("connect_timeout", "30");
+    url.searchParams.set("connect_timeout", "15");
     url.searchParams.set("application_name", "PharmaCost-Pro");
+    url.searchParams.set("statement_timeout", "30000");
+    url.searchParams.set("idle_in_transaction_session_timeout", "30000");
+    console.log("\u{1F527} Using optimized Railway PostgreSQL connection parameters");
     return url.toString();
   } catch (error) {
     console.error("\u274C Error optimizing Railway connection string:", error);
+    console.error("   Using original DATABASE_URL - check PostgreSQL service health");
     return databaseUrl;
   }
 }
@@ -169,21 +173,25 @@ function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     console.error("\u274C DATABASE_URL environment variable not found");
-    console.error("   Please ensure PostgreSQL service is added to Railway project");
+    console.error("   Check Railway PostgreSQL service status - it may have crashed");
     return null;
   }
-  console.log("\u{1F517} Attempting Railway PostgreSQL connection...");
+  console.log("\u{1F517} Connecting to Railway PostgreSQL...");
+  console.log("   Database host:", databaseUrl.includes("postgres.railway.internal") ? "Internal Railway Network" : "External Host");
   logRailwayResourceUsage();
   try {
     const optimizedUrl = getRailwayOptimizedConnectionString(databaseUrl);
     const sql = neon(optimizedUrl);
     const db = drizzle(sql, { schema: schema_exports });
-    console.log("\u2705 Railway PostgreSQL connection established");
-    logRailwayResourceUsage();
+    console.log("\u2705 Railway PostgreSQL connection ready");
     return db;
   } catch (error) {
-    console.error("\u274C Railway PostgreSQL connection failed:", error);
-    logRailwayResourceUsage();
+    console.error("\u274C Railway PostgreSQL connection failed");
+    console.error("   This usually indicates PostgreSQL service is crashed");
+    console.error("   Check PostgreSQL service logs in Railway dashboard");
+    if (error instanceof Error) {
+      console.error("   Error:", error.message);
+    }
     return null;
   }
 }

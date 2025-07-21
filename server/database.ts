@@ -9,25 +9,29 @@ export function createDatabaseConnection() {
   
   if (!databaseUrl) {
     console.error('❌ DATABASE_URL environment variable not found');
-    console.error('   Please ensure PostgreSQL service is added to Railway project');
+    console.error('   Check Railway PostgreSQL service status - it may have crashed');
     return null;
   }
 
-  console.log('🔗 Attempting Railway PostgreSQL connection...');
+  console.log('🔗 Connecting to Railway PostgreSQL...');
+  console.log('   Database host:', databaseUrl.includes('postgres.railway.internal') ? 'Internal Railway Network' : 'External Host');
   logRailwayResourceUsage();
   
   try {
-    // Use Railway-optimized connection string
+    // Use Railway-optimized connection with minimal configuration
     const optimizedUrl = getRailwayOptimizedConnectionString(databaseUrl);
     const sql = neon(optimizedUrl);
     const db = drizzle(sql, { schema });
     
-    console.log('✅ Railway PostgreSQL connection established');
-    logRailwayResourceUsage();
+    console.log('✅ Railway PostgreSQL connection ready');
     return db;
   } catch (error) {
-    console.error('❌ Railway PostgreSQL connection failed:', error);
-    logRailwayResourceUsage();
+    console.error('❌ Railway PostgreSQL connection failed');
+    console.error('   This usually indicates PostgreSQL service is crashed');
+    console.error('   Check PostgreSQL service logs in Railway dashboard');
+    if (error instanceof Error) {
+      console.error('   Error:', error.message);
+    }
     return null;
   }
 }

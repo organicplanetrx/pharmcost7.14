@@ -30,14 +30,20 @@ export function getRailwayOptimizedConnectionString(databaseUrl: string): string
   try {
     const url = new URL(databaseUrl);
     
-    // Add Railway-optimized connection parameters
+    // Railway-optimized parameters to prevent connection issues
     url.searchParams.set('sslmode', 'require');
-    url.searchParams.set('connect_timeout', '30');
+    url.searchParams.set('connect_timeout', '15'); // Reduced timeout
     url.searchParams.set('application_name', 'PharmaCost-Pro');
+    url.searchParams.set('statement_timeout', '30000'); // 30 second query timeout
     
+    // Add connection pooling parameters for stability
+    url.searchParams.set('idle_in_transaction_session_timeout', '30000');
+    
+    console.log('🔧 Using optimized Railway PostgreSQL connection parameters');
     return url.toString();
   } catch (error) {
     console.error('❌ Error optimizing Railway connection string:', error);
+    console.error('   Using original DATABASE_URL - check PostgreSQL service health');
     return databaseUrl;
   }
 }
