@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
+import fs from "fs";
 
 // Add process error handlers to catch uncaught exceptions
 process.on('uncaughtException', (error) => {
@@ -81,8 +83,26 @@ app.use((req, res, next) => {
     await setupVite(app, server);
   } else {
     console.log("Setting up static file serving...");
-    serveStatic(app);
-    console.log("Static files configured");
+    
+    // Railway production static file serving
+    const staticPath = path.join(process.cwd(), 'dist', 'public');
+    console.log('Static files directory:', staticPath);
+    
+    if (fs.existsSync(staticPath)) {
+      app.use(express.static(staticPath));
+      // Handle client-side routing
+      app.get("*", (req, res) => {
+        if (req.path.startsWith('/api')) {
+          return res.status(404).json({ message: 'API endpoint not found' });
+        }
+        res.sendFile(path.join(staticPath, 'index.html'));
+      });
+      console.log("✅ Static files configured for Railway deployment");
+    } else {
+      console.error("❌ Static files directory not found:", staticPath);
+      // Fallback - let serveStatic handle it
+      serveStatic(app);
+    }
   }
 
   // Use Railway's PORT or default to 5000 for local development

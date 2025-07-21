@@ -777,8 +777,8 @@ var PuppeteerScrapingService = class {
         ].filter(Boolean);
         for (const chromePath of possiblePaths) {
           try {
-            const fs2 = await import("fs");
-            if (fs2.existsSync(chromePath)) {
+            const fs3 = await import("fs");
+            if (fs3.existsSync(chromePath)) {
               console.log(`\u{1F50D} Using Railway/production Chrome path: ${chromePath}`);
               return chromePath;
             }
@@ -795,29 +795,29 @@ var PuppeteerScrapingService = class {
       return null;
     }
   }
-  async verifyBrowserPath(path3) {
+  async verifyBrowserPath(path4) {
     try {
-      const fs2 = await import("fs");
-      const exists = fs2.existsSync(path3);
-      console.log(`\u{1F50D} Path exists check for ${path3}: ${exists}`);
+      const fs3 = await import("fs");
+      const exists = fs3.existsSync(path4);
+      console.log(`\u{1F50D} Path exists check for ${path4}: ${exists}`);
       if (!exists) {
-        console.log(`\u274C Browser path does not exist: ${path3}`);
+        console.log(`\u274C Browser path does not exist: ${path4}`);
         return false;
       }
-      if (path3.includes("/nix/store") && path3.includes("chromium")) {
-        console.log(`\u2705 Using known working chromium path: ${path3}`);
+      if (path4.includes("/nix/store") && path4.includes("chromium")) {
+        console.log(`\u2705 Using known working chromium path: ${path4}`);
         return true;
       }
-      console.log(`\u2705 Verified browser path: ${path3}`);
+      console.log(`\u2705 Verified browser path: ${path4}`);
       return true;
     } catch (e) {
-      console.log(`\u274C Browser path verification failed: ${path3} - ${e.message}`);
+      console.log(`\u274C Browser path verification failed: ${path4} - ${e.message}`);
       return false;
     }
   }
   async checkBrowserAvailability() {
-    const path3 = await this.findChromiumPath();
-    return path3 !== null;
+    const path4 = await this.findChromiumPath();
+    return path4 !== null;
   }
   generateDemoResults(searchTerm, searchType) {
     console.log(`Generating realistic Kinray invoice pricing for: ${searchTerm} (${searchType})`);
@@ -2484,6 +2484,8 @@ function serveStatic(app2) {
 }
 
 // server/index.ts
+import path3 from "path";
+import fs2 from "fs";
 process.on("uncaughtException", (error) => {
   console.error("\u274C Uncaught Exception:", error);
   if (process.env.NODE_ENV === "production") {
@@ -2506,7 +2508,7 @@ app.use(express2.urlencoded({ extended: false }));
 console.log("\u2713 Express middleware configured");
 app.use((req, res, next) => {
   const start = Date.now();
-  const path3 = req.path;
+  const path4 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -2515,8 +2517,8 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path3.startsWith("/api")) {
-      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+    if (path4.startsWith("/api")) {
+      let logLine = `${req.method} ${path4} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -2543,8 +2545,21 @@ app.use((req, res, next) => {
       await setupVite(app, server);
     } else {
       console.log("Setting up static file serving...");
-      serveStatic(app);
-      console.log("Static files configured");
+      const staticPath = path3.join(process.cwd(), "dist", "public");
+      console.log("Static files directory:", staticPath);
+      if (fs2.existsSync(staticPath)) {
+        app.use(express2.static(staticPath));
+        app.get("*", (req, res) => {
+          if (req.path.startsWith("/api")) {
+            return res.status(404).json({ message: "API endpoint not found" });
+          }
+          res.sendFile(path3.join(staticPath, "index.html"));
+        });
+        console.log("\u2705 Static files configured for Railway deployment");
+      } else {
+        console.error("\u274C Static files directory not found:", staticPath);
+        serveStatic(app);
+      }
     }
     const port = parseInt(process.env.PORT || "5000");
     console.log(`Attempting to start server on port ${port}...`);
