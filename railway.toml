@@ -4,5 +4,9 @@ builder = "dockerfile"
 [deploy]
 healthcheckPath = "/api/dashboard/stats"
 healthcheckTimeout = 300
+healthcheckInterval = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[variables]
+PORT = 5000

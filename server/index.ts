@@ -105,8 +105,9 @@ app.use((req, res, next) => {
     }
   }
 
-  // Use Railway's PORT or default to 5000 for local development
+  // Use Railway's PORT environment variable - critical for Railway deployment
   const port = parseInt(process.env.PORT || "5000");
+  console.log(`Railway PORT environment variable:`, process.env.PORT);
   console.log(`Attempting to start server on port ${port}...`);
   
   server.listen({
