@@ -61,5 +61,5 @@ EXPOSE 5000
 ENV NODE_ENV=production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with Railway-optimized entry point
+CMD ["node", "railway-server.js"]

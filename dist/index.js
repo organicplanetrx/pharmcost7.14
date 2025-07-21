@@ -2202,13 +2202,18 @@ async function registerRoutes(app2) {
     }
   });
   app2.get("/health", (req, res) => {
-    res.status(200).json({
+    const response = {
       status: "healthy",
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
       service: "PharmaCost Pro",
       environment: process.env.NODE_ENV || "development",
-      port: process.env.PORT || "5000"
-    });
+      port: process.env.PORT || "undefined",
+      railway_env: process.env.RAILWAY_ENVIRONMENT || "undefined",
+      host: req.get("host"),
+      url: req.url
+    };
+    console.log(`Health check hit from ${req.ip} - responding with port ${response.port}`);
+    res.status(200).json(response);
   });
   app2.get("/api/dashboard/stats", async (req, res) => {
     try {
@@ -2576,21 +2581,34 @@ app.use((req, res, next) => {
         serveStatic(app);
       }
     }
-    const port = process.env.PORT ? parseInt(process.env.PORT) : 5e3;
-    console.log(`Railway PORT environment variable:`, process.env.PORT);
+    const railwayPort = process.env.PORT;
+    const port = railwayPort ? parseInt(railwayPort) : 5e3;
+    console.log(`=== RAILWAY PORT DEBUGGING ===`);
+    console.log(`Railway PORT environment variable: "${railwayPort}"`);
+    console.log(`Parsed port number: ${port}`);
+    console.log(`Is Railway deployment: ${process.env.RAILWAY_ENVIRONMENT ? "YES" : "NO"}`);
+    console.log(`All Railway env vars:`, Object.keys(process.env).filter((key) => key.includes("RAILWAY")));
     console.log(`Server will bind to port: ${port}`);
-    console.log(`Railway deployment: ${process.env.RAILWAY_DEPLOYMENT_ID ? "YES" : "NO"}`);
-    console.log(`Attempting to start server on port ${port}...`);
+    console.log(`===============================`);
+    if (!railwayPort && process.env.NODE_ENV === "production") {
+      console.error(`\u274C CRITICAL: Railway PORT not found in production environment`);
+      console.error(`   This will cause Railway health checks to fail`);
+    }
     const serverOptions = {
       port,
       host: "0.0.0.0"
       // Critical for Railway - must bind to all interfaces
     };
     server.listen(serverOptions, () => {
-      console.log(`\u{1F680} PharmaCost Pro successfully deployed on Railway`);
-      console.log(`\u{1F310} Server running on ${serverOptions.host}:${port}`);
-      console.log(`\u{1F517} Health check available at /api/dashboard/stats`);
+      console.log(`\u{1F680} PharmaCost Pro successfully started`);
+      console.log(`\u{1F310} Server listening on ${serverOptions.host}:${port}`);
+      console.log(`\u{1F517} Health check endpoint: /health`);
+      console.log(`\u{1F4CA} Dashboard API: /api/dashboard/stats`);
       console.log(`\u{1F48A} Kinray pharmaceutical portal automation ready`);
+      if (process.env.NODE_ENV === "production") {
+        console.log(`Railway will route traffic to this port: ${port}`);
+        console.log(`Railway health checks will hit: https://pharmcost714-production.up.railway.app/health`);
+      }
       log(`serving on port ${port}`);
     });
     server.on("error", (err) => {

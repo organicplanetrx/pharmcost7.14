@@ -288,15 +288,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Railway health check endpoint - critical for load balancer
+  // Railway health check endpoint - CRITICAL for load balancer
   app.get("/health", (req, res) => {
-    res.status(200).json({ 
+    const response = { 
       status: 'healthy',
       timestamp: new Date().toISOString(),
       service: 'PharmaCost Pro',
       environment: process.env.NODE_ENV || 'development',
-      port: process.env.PORT || '5000'
-    });
+      port: process.env.PORT || 'undefined',
+      railway_env: process.env.RAILWAY_ENVIRONMENT || 'undefined',
+      host: req.get('host'),
+      url: req.url
+    };
+    
+    console.log(`Health check hit from ${req.ip} - responding with port ${response.port}`);
+    res.status(200).json(response);
   });
 
   // Dashboard stats

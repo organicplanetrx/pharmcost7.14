@@ -105,12 +105,22 @@ app.use((req, res, next) => {
     }
   }
 
-  // Use Railway's dynamic PORT - CRITICAL for Railway deployment
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-  console.log(`Railway PORT environment variable:`, process.env.PORT);
+  // RAILWAY CRITICAL: Railway assigns dynamic PORT - server MUST use this exact port
+  const railwayPort = process.env.PORT;
+  const port = railwayPort ? parseInt(railwayPort) : 5000;
+  
+  console.log(`=== RAILWAY PORT DEBUGGING ===`);
+  console.log(`Railway PORT environment variable: "${railwayPort}"`);
+  console.log(`Parsed port number: ${port}`);
+  console.log(`Is Railway deployment: ${process.env.RAILWAY_ENVIRONMENT ? 'YES' : 'NO'}`);
+  console.log(`All Railway env vars:`, Object.keys(process.env).filter(key => key.includes('RAILWAY')));
   console.log(`Server will bind to port: ${port}`);
-  console.log(`Railway deployment: ${process.env.RAILWAY_DEPLOYMENT_ID ? 'YES' : 'NO'}`);
-  console.log(`Attempting to start server on port ${port}...`);
+  console.log(`===============================`);
+  
+  if (!railwayPort && process.env.NODE_ENV === 'production') {
+    console.error(`❌ CRITICAL: Railway PORT not found in production environment`);
+    console.error(`   This will cause Railway health checks to fail`);
+  }
   
   // Railway-specific server configuration
   const serverOptions = {
@@ -119,10 +129,18 @@ app.use((req, res, next) => {
   };
 
   server.listen(serverOptions, () => {
-    console.log(`🚀 PharmaCost Pro successfully deployed on Railway`);
-    console.log(`🌐 Server running on ${serverOptions.host}:${port}`);
-    console.log(`🔗 Health check available at /api/dashboard/stats`);
+    console.log(`🚀 PharmaCost Pro successfully started`);
+    console.log(`🌐 Server listening on ${serverOptions.host}:${port}`);
+    console.log(`🔗 Health check endpoint: /health`);
+    console.log(`📊 Dashboard API: /api/dashboard/stats`);
     console.log(`💊 Kinray pharmaceutical portal automation ready`);
+    
+    // Railway-specific debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`Railway will route traffic to this port: ${port}`);
+      console.log(`Railway health checks will hit: https://pharmcost714-production.up.railway.app/health`);
+    }
+    
     log(`serving on port ${port}`);
   });
 
