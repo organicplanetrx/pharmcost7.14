@@ -35,15 +35,21 @@ export function createDatabaseConnection() {
 // Test database connection with detailed diagnostics
 export async function testDatabaseConnection(db: any) {
   try {
-    console.log('🔍 Testing Railway database connection...');
-    // Use a simple SELECT query that works with Neon/Railway
-    const result = await db.execute('SELECT NOW() as current_time');
-    console.log('✅ Railway database connection test successful');
+    console.log('🔍 Testing Railway PostgreSQL connection...');
+    // Simple query with timeout to avoid hanging on crashed PostgreSQL
+    const result = await Promise.race([
+      db.execute('SELECT 1 as test'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000))
+    ]);
+    console.log('✅ Railway PostgreSQL connection successful');
     return true;
   } catch (error) {
-    console.error('❌ Railway database connection test failed');
+    console.error('❌ Railway PostgreSQL connection failed');
     if (error instanceof Error) {
-      console.error('   Error message:', error.message);
+      console.error('   Error:', error.message);
+      if (error.message.includes('Connection timeout')) {
+        console.error('   PostgreSQL service may be crashed or unreachable');
+      }
     }
     return false;
   }

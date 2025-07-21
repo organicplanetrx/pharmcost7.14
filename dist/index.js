@@ -189,14 +189,20 @@ function createDatabaseConnection() {
 }
 async function testDatabaseConnection(db) {
   try {
-    console.log("\u{1F50D} Testing Railway database connection...");
-    const result = await db.execute("SELECT NOW() as current_time");
-    console.log("\u2705 Railway database connection test successful");
+    console.log("\u{1F50D} Testing Railway PostgreSQL connection...");
+    const result = await Promise.race([
+      db.execute("SELECT 1 as test"),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Connection timeout")), 1e4))
+    ]);
+    console.log("\u2705 Railway PostgreSQL connection successful");
     return true;
   } catch (error) {
-    console.error("\u274C Railway database connection test failed");
+    console.error("\u274C Railway PostgreSQL connection failed");
     if (error instanceof Error) {
-      console.error("   Error message:", error.message);
+      console.error("   Error:", error.message);
+      if (error.message.includes("Connection timeout")) {
+        console.error("   PostgreSQL service may be crashed or unreachable");
+      }
     }
     return false;
   }
@@ -224,10 +230,21 @@ var RailwayDatabaseStorage = class {
       console.log("\u{1F680} Initializing Railway PostgreSQL connection...");
       this.db = createDatabaseConnection();
       if (this.db) {
-        this.isConnected = await testDatabaseConnection(this.db);
+        let retries = 3;
+        while (retries > 0 && !this.isConnected) {
+          this.isConnected = await testDatabaseConnection(this.db);
+          if (!this.isConnected) {
+            console.log(`   Retrying PostgreSQL connection... (${retries} attempts left)`);
+            await new Promise((resolve) => setTimeout(resolve, 5e3));
+            retries--;
+          }
+        }
         if (this.isConnected) {
           await initializeDatabaseSchema(this.db);
-          console.log("\u{1F5C4}\uFE0F Railway DatabaseStorage fully operational");
+          console.log("\u{1F5C4}\uFE0F Railway PostgreSQL storage operational");
+        } else {
+          console.error("\u274C PostgreSQL service appears to be crashed or unreachable");
+          console.error("   Check Railway PostgreSQL service status in dashboard");
         }
       }
     } catch (error) {

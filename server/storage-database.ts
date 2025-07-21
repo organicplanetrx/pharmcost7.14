@@ -38,10 +38,23 @@ export class RailwayDatabaseStorage implements IStorage {
       this.db = createDatabaseConnection();
       
       if (this.db) {
-        this.isConnected = await testDatabaseConnection(this.db);
+        // Test connection with retry logic for crashed PostgreSQL service
+        let retries = 3;
+        while (retries > 0 && !this.isConnected) {
+          this.isConnected = await testDatabaseConnection(this.db);
+          if (!this.isConnected) {
+            console.log(`   Retrying PostgreSQL connection... (${retries} attempts left)`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            retries--;
+          }
+        }
+        
         if (this.isConnected) {
           await initializeDatabaseSchema(this.db);
-          console.log('🗄️ Railway DatabaseStorage fully operational');
+          console.log('🗄️ Railway PostgreSQL storage operational');
+        } else {
+          console.error('❌ PostgreSQL service appears to be crashed or unreachable');
+          console.error('   Check Railway PostgreSQL service status in dashboard');
         }
       }
     } catch (error) {
