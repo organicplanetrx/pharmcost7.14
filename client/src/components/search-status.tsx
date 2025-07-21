@@ -18,11 +18,11 @@ export default function SearchStatus({ status, message }: SearchStatusProps) {
         };
       case 'in_progress':
         return {
-          icon: <Loader2 className="h-5 w-5 animate-spin text-green-600" />,
-          color: 'bg-green-50 border-green-200',
-          textColor: 'text-green-800',
-          title: 'Successfully Logged In',
-          description: 'Bypassing 2FA verification and navigating to product search...'
+          icon: <Loader2 className="h-5 w-5 animate-spin text-blue-600" />,
+          color: 'bg-blue-50 border-blue-200',
+          textColor: 'text-blue-800',
+          title: 'Searching Kinray Portal',
+          description: 'Authenticated successfully, now extracting medication pricing data...'
         };
       case 'completed':
         return {

@@ -1,4 +1,4 @@
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -46,11 +46,24 @@ export default function SearchSuccessIndicator({ searchId, onComplete }: SearchS
   }
 
   if (searchResults.status === 'completed') {
+    const resultCount = searchResults.results?.length || 0;
+    
+    if (resultCount === 0) {
+      return (
+        <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            Search completed but no results found. Try a different medication name or check if it's available in the Kinray catalog.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    
     return (
       <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
         <AlertDescription className="text-green-700 dark:text-green-300">
-          Search completed successfully! Found {searchResults.results?.length || 0} results from Kinray.
+          Search completed successfully! Found {resultCount} results from Kinray portal.
         </AlertDescription>
       </Alert>
     );
