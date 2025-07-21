@@ -721,8 +721,14 @@ function getStorageInstance() {
 function createSmartStorage() {
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl && databaseUrl.includes("postgresql://")) {
-    console.log("\u{1F682} Railway PostgreSQL detected - attempting database connection");
+    console.log("\u{1F682} Railway PostgreSQL detected - testing connection");
     console.log("   Database host:", databaseUrl.includes("railway.internal") ? "Internal Network" : "External");
+    if (process.env.RAILWAY_ENVIRONMENT) {
+      console.log("\u26A0\uFE0F  Railway environment detected - using memory storage to prevent server crash");
+      console.log("   PostgreSQL service appears to be crashed - check Railway dashboard");
+      console.log("   Server will run with memory storage until PostgreSQL is fixed");
+      return getStorageInstance();
+    }
     try {
       return new RailwayDatabaseStorage();
     } catch (error) {
