@@ -120,6 +120,23 @@ app.use((req, res, next) => {
     console.log(`💊 Kinray pharmaceutical portal automation ready`);
     log(`serving on port ${port}`);
   });
+
+  // Handle Railway shutdown gracefully
+  process.on('SIGTERM', () => {
+    console.log('📋 Railway SIGTERM received - shutting down gracefully...');
+    server.close(() => {
+      console.log('✅ Server closed successfully');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('📋 SIGINT received - shutting down gracefully...');
+    server.close(() => {
+      console.log('✅ Server closed successfully');
+      process.exit(0);
+    });
+  });
   
   } catch (error) {
     console.error("❌ Server startup failed:", error);

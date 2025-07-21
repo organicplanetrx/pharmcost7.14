@@ -723,7 +723,7 @@ function createSmartStorage() {
   if (databaseUrl && databaseUrl.includes("postgresql://")) {
     console.log("\u{1F682} Railway PostgreSQL detected - testing connection");
     console.log("   Database host:", databaseUrl.includes("railway.internal") ? "Internal Network" : "External");
-    if (process.env.RAILWAY_ENVIRONMENT) {
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_SERVICE_ID) {
       console.log("\u26A0\uFE0F  Railway environment detected - using memory storage to prevent server crash");
       console.log("   PostgreSQL service appears to be crashed - check Railway dashboard");
       console.log("   Server will run with memory storage until PostgreSQL is fixed");
@@ -2579,6 +2579,20 @@ app.use((req, res, next) => {
       console.log(`\u{1F517} Health check available at /api/dashboard/stats`);
       console.log(`\u{1F48A} Kinray pharmaceutical portal automation ready`);
       log(`serving on port ${port}`);
+    });
+    process.on("SIGTERM", () => {
+      console.log("\u{1F4CB} Railway SIGTERM received - shutting down gracefully...");
+      server.close(() => {
+        console.log("\u2705 Server closed successfully");
+        process.exit(0);
+      });
+    });
+    process.on("SIGINT", () => {
+      console.log("\u{1F4CB} SIGINT received - shutting down gracefully...");
+      server.close(() => {
+        console.log("\u2705 Server closed successfully");
+        process.exit(0);
+      });
     });
   } catch (error) {
     console.error("\u274C Server startup failed:", error);

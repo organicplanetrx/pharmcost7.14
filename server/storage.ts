@@ -366,7 +366,7 @@ function createSmartStorage(): IStorage {
     console.log('   Database host:', databaseUrl.includes('railway.internal') ? 'Internal Network' : 'External');
     
     // Don't crash server if PostgreSQL service is down - always use memory fallback on Railway
-    if (process.env.RAILWAY_ENVIRONMENT) {
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_DEPLOYMENT_ID || process.env.RAILWAY_SERVICE_ID) {
       console.log('⚠️  Railway environment detected - using memory storage to prevent server crash');
       console.log('   PostgreSQL service appears to be crashed - check Railway dashboard');
       console.log('   Server will run with memory storage until PostgreSQL is fixed');
