@@ -1753,6 +1753,8 @@ var PuppeteerScrapingService = class {
   }
   async searchMedication(searchTerm, searchType) {
     console.log(`\u{1F50D} Starting medication search for "${searchTerm}" (${searchType})`);
+    console.log(`\u{1F4CA} Current vendor:`, this.currentVendor?.name);
+    console.log(`\u{1F4CA} Page available:`, !!this.page);
     const browserAvailable = await this.checkBrowserAvailability();
     if (!browserAvailable) {
       console.log("Browser automation not available - cannot perform live scraping");
@@ -2449,14 +2451,18 @@ async function registerRoutes(app2) {
             setTimeout(() => reject(new Error("Search timeout after 20 seconds")), 2e4);
           });
           try {
+            console.log(`\u{1F50D} Calling searchMedication for "${searchData.searchTerm}" (${searchData.searchType})`);
             results = await Promise.race([
               scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
               searchTimeout
             ]);
+            console.log(`\u{1F4CA} Search completed - received ${results?.length || 0} results`);
             if (results && results.length > 0) {
               console.log(`\u{1F3AF} Successfully extracted ${results.length} live results from ${vendor.name}`);
+              console.log(`\u{1F4CB} Sample result:`, JSON.stringify(results[0], null, 2));
             } else {
               console.log(`\u26A0\uFE0F Search completed but no results found in ${vendor.name} portal`);
+              console.log(`\u{1F4CA} Debug: results object type:`, typeof results, "value:", results);
               results = [];
             }
           } catch (timeoutError) {

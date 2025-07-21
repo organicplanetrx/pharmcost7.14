@@ -380,15 +380,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           try {
+            console.log(`🔍 Calling searchMedication for "${searchData.searchTerm}" (${searchData.searchType})`);
             results = await Promise.race([
               scrapingService.searchMedication(searchData.searchTerm, searchData.searchType),
               searchTimeout
             ]);
             
+            console.log(`📊 Search completed - received ${results?.length || 0} results`);
             if (results && results.length > 0) {
               console.log(`🎯 Successfully extracted ${results.length} live results from ${vendor.name}`);
+              console.log(`📋 Sample result:`, JSON.stringify(results[0], null, 2));
             } else {
               console.log(`⚠️ Search completed but no results found in ${vendor.name} portal`);
+              console.log(`📊 Debug: results object type:`, typeof results, 'value:', results);
               results = [];
             }
           } catch (timeoutError) {

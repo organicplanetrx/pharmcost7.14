@@ -1184,6 +1184,8 @@ export class PuppeteerScrapingService implements ScrapingService {
 
   async searchMedication(searchTerm: string, searchType: 'name' | 'ndc' | 'generic'): Promise<MedicationSearchResult[]> {
     console.log(`🔍 Starting medication search for "${searchTerm}" (${searchType})`);
+    console.log(`📊 Current vendor:`, this.currentVendor?.name);
+    console.log(`📊 Page available:`, !!this.page);
     
     // Check if browser automation is available
     const browserAvailable = await this.checkBrowserAvailability();
