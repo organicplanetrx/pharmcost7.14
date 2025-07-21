@@ -720,13 +720,20 @@ function getStorageInstance() {
 }
 function createSmartStorage() {
   const databaseUrl = process.env.DATABASE_URL;
-  if (databaseUrl) {
-    console.log("\u{1F682} Railway PostgreSQL detected - using database storage");
-    console.log("   DATABASE_URL configured:", databaseUrl.substring(0, 30) + "...");
-    return new RailwayDatabaseStorage();
+  if (databaseUrl && databaseUrl.includes("postgresql://")) {
+    console.log("\u{1F682} Railway PostgreSQL detected - attempting database connection");
+    console.log("   Database host:", databaseUrl.includes("railway.internal") ? "Internal Network" : "External");
+    try {
+      return new RailwayDatabaseStorage();
+    } catch (error) {
+      console.error("\u274C PostgreSQL service failed to initialize");
+      console.error("   Falling back to memory storage");
+      console.error("   Check Railway PostgreSQL service status");
+      return getStorageInstance();
+    }
   } else {
-    console.log("\u{1F4BE} No DATABASE_URL found - using memory storage");
-    console.log("   Add PostgreSQL service to Railway project for persistent storage");
+    console.log("\u{1F4BE} PostgreSQL not available - using memory storage");
+    console.log("   DATABASE_URL missing or invalid - check Railway PostgreSQL service");
     return getStorageInstance();
   }
 }
