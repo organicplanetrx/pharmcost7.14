@@ -110,16 +110,29 @@ app.use((req, res, next) => {
   console.log(`Railway PORT environment variable:`, process.env.PORT);
   console.log(`Attempting to start server on port ${port}...`);
   
-  server.listen({
+  // Railway-specific server configuration
+  const serverOptions = {
     port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+    host: "0.0.0.0", // Critical for Railway - must bind to all interfaces
+  };
+
+  server.listen(serverOptions, () => {
     console.log(`🚀 PharmaCost Pro successfully deployed on Railway`);
-    console.log(`🌐 Server running on port ${port}`);
+    console.log(`🌐 Server running on ${serverOptions.host}:${port}`);
     console.log(`🔗 Health check available at /api/dashboard/stats`);
     console.log(`💊 Kinray pharmaceutical portal automation ready`);
     log(`serving on port ${port}`);
+  });
+
+  // Add explicit error handling for server startup
+  server.on('error', (err) => {
+    console.error('❌ Server startup error:', err);
+    if (err.code === 'EADDRINUSE') {
+      console.error(`   Port ${port} already in use`);
+    } else if (err.code === 'EACCES') {
+      console.error(`   Permission denied to bind port ${port}`);
+    }
+    process.exit(1);
   });
 
   // Handle Railway shutdown gracefully

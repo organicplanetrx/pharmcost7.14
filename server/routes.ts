@@ -288,6 +288,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Railway health check endpoint - critical for load balancer
+  app.get("/health", (req, res) => {
+    res.status(200).json({ 
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      service: 'PharmaCost Pro',
+      environment: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || '5000'
+    });
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {

@@ -2201,6 +2201,15 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to fetch activity logs" });
     }
   });
+  app2.get("/health", (req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      service: "PharmaCost Pro",
+      environment: process.env.NODE_ENV || "development",
+      port: process.env.PORT || "5000"
+    });
+  });
   app2.get("/api/dashboard/stats", async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
@@ -2570,16 +2579,26 @@ app.use((req, res, next) => {
     const port = parseInt(process.env.PORT || "5000");
     console.log(`Railway PORT environment variable:`, process.env.PORT);
     console.log(`Attempting to start server on port ${port}...`);
-    server.listen({
+    const serverOptions = {
       port,
-      host: "0.0.0.0",
-      reusePort: true
-    }, () => {
+      host: "0.0.0.0"
+      // Critical for Railway - must bind to all interfaces
+    };
+    server.listen(serverOptions, () => {
       console.log(`\u{1F680} PharmaCost Pro successfully deployed on Railway`);
-      console.log(`\u{1F310} Server running on port ${port}`);
+      console.log(`\u{1F310} Server running on ${serverOptions.host}:${port}`);
       console.log(`\u{1F517} Health check available at /api/dashboard/stats`);
       console.log(`\u{1F48A} Kinray pharmaceutical portal automation ready`);
       log(`serving on port ${port}`);
+    });
+    server.on("error", (err) => {
+      console.error("\u274C Server startup error:", err);
+      if (err.code === "EADDRINUSE") {
+        console.error(`   Port ${port} already in use`);
+      } else if (err.code === "EACCES") {
+        console.error(`   Permission denied to bind port ${port}`);
+      }
+      process.exit(1);
     });
     process.on("SIGTERM", () => {
       console.log("\u{1F4CB} Railway SIGTERM received - shutting down gracefully...");
