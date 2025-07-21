@@ -94,8 +94,41 @@ export class PuppeteerScrapingService implements ScrapingService {
   }
 
   private async checkBrowserAvailability(): Promise<boolean> {
-    const path = await this.findChromiumPath();
-    return path !== null;
+    try {
+      console.log('🔍 Testing browser automation availability...');
+      
+      const path = await this.findChromiumPath();
+      console.log(`📊 Browser path found: ${path}`);
+      
+      if (!path) {
+        console.log('❌ No browser executable found');
+        return false;
+      }
+      
+      // Test actual browser launch
+      const testBrowser = await puppeteer.launch({
+        headless: true,
+        executablePath: path,
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-extensions',
+          '--no-first-run'
+        ]
+      });
+      
+      console.log('✅ Browser instance created successfully');
+      await testBrowser.close();
+      console.log('✅ Browser closed successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Browser automation test failed:', error.message);
+      console.error('❌ Full error details:', error);
+      return false;
+    }
   }
 
   private generateDemoResults(searchTerm: string, searchType: string): MedicationSearchResult[] {

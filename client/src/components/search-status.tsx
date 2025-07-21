@@ -38,7 +38,7 @@ export default function SearchStatus({ status, message }: SearchStatusProps) {
           color: 'bg-red-50 border-red-200',
           textColor: 'text-red-800',
           title: 'Search Failed',
-          description: message || 'Unable to complete search - please check credentials or try again'
+          description: message || 'Browser automation not available in current deployment environment'
         };
       default:
         return {

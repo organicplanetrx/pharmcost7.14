@@ -356,6 +356,10 @@ Changelog:
 - July 21, 2025: Expanded search selectors to 15+ patterns including form-control, aria-label, and data-testid attributes
 - July 21, 2025: Enhanced result extraction with 12+ container selector patterns for flexible data detection
 - July 21, 2025: Added detailed page analysis after search to identify why results aren't being extracted from portal
+- July 21, 2025: DEPLOYMENT DIAGNOSIS: Identified Railway platform limitation - browser automation not available in container environment
+- July 21, 2025: Enhanced browser availability testing with comprehensive error reporting and path validation
+- July 21, 2025: Updated error messages to clearly indicate deployment environment limitations rather than credential issues
+- July 21, 2025: System requires platform with Chrome/Puppeteer support for live pharmaceutical portal scraping
 ```
 
 ## User Preferences

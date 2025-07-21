@@ -822,8 +822,36 @@ var PuppeteerScrapingService = class {
     }
   }
   async checkBrowserAvailability() {
-    const path4 = await this.findChromiumPath();
-    return path4 !== null;
+    try {
+      console.log("\u{1F50D} Testing browser automation availability...");
+      const path4 = await this.findChromiumPath();
+      console.log(`\u{1F4CA} Browser path found: ${path4}`);
+      if (!path4) {
+        console.log("\u274C No browser executable found");
+        return false;
+      }
+      const testBrowser = await puppeteer.launch({
+        headless: true,
+        executablePath: path4,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--disable-web-security",
+          "--disable-extensions",
+          "--no-first-run"
+        ]
+      });
+      console.log("\u2705 Browser instance created successfully");
+      await testBrowser.close();
+      console.log("\u2705 Browser closed successfully");
+      return true;
+    } catch (error) {
+      console.error("\u274C Browser automation test failed:", error.message);
+      console.error("\u274C Full error details:", error);
+      return false;
+    }
   }
   generateDemoResults(searchTerm, searchType) {
     console.log(`\u274C Demo data generation disabled. Only authentic Kinray portal data allowed.`);
@@ -2470,11 +2498,16 @@ async function registerRoutes(app2) {
   async function performSearch(searchId, searchData) {
     try {
       console.log(`\u{1F50D} Starting search ${searchId} for "${searchData.searchTerm}"`);
+      console.log(`\u{1F4CA} Search data:`, JSON.stringify(searchData, null, 2));
       await storage.updateSearch(searchId, { status: "in_progress" });
+      console.log(`\u2705 Updated search ${searchId} status to in_progress`);
+      console.log(`\u{1F4CA} Getting vendor for ID: ${searchData.vendorId}`);
       const vendor = await storage.getVendor(searchData.vendorId);
       if (!vendor) {
+        console.log(`\u274C Vendor not found for ID: ${searchData.vendorId}`);
         throw new Error("Vendor not found");
       }
+      console.log(`\u2705 Found vendor: ${vendor.name}`);
       let credential = null;
       if (vendor.name.includes("Kinray") && process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
         credential = {
@@ -2489,10 +2522,18 @@ async function registerRoutes(app2) {
         credential = await storage.getCredentialByVendorId(searchData.vendorId);
       }
       if (!credential) {
+        console.log(`\u274C No credentials found for vendor ${vendor.name}`);
         throw new Error("No credentials found for vendor");
       }
+      console.log(`\u2705 Using credentials for ${vendor.name} - username: ${credential.username}`);
       let results = [];
       try {
+        console.log(`\u{1F50D} Checking browser automation availability...`);
+        const browserAvailable = await scrapingService.checkBrowserAvailability();
+        console.log(`\u{1F4CA} Browser automation available: ${browserAvailable}`);
+        if (!browserAvailable) {
+          throw new Error("Browser automation not available in Railway deployment environment. This requires a platform with Chrome/Puppeteer support.");
+        }
         console.log(`\u{1F680} Attempting login to ${vendor.name}...`);
         const loginSuccess = await scrapingService.login(vendor, credential);
         if (!loginSuccess) {
@@ -2555,7 +2596,9 @@ async function registerRoutes(app2) {
       });
     } catch (error) {
       console.error("Search failed:", error);
+      console.error("Error stack:", error.stack);
       await storage.updateSearch(searchId, { status: "failed" });
+      console.log(`\u2705 Updated search ${searchId} status to failed`);
       await storage.createActivityLog({
         action: "search",
         status: "failure",

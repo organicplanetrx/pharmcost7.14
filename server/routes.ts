@@ -332,15 +332,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   async function performSearch(searchId: number, searchData: any) {
     try {
       console.log(`🔍 Starting search ${searchId} for "${searchData.searchTerm}"`);
+      console.log(`📊 Search data:`, JSON.stringify(searchData, null, 2));
+      
       // Update search status
       await storage.updateSearch(searchId, { status: "in_progress" });
+      console.log(`✅ Updated search ${searchId} status to in_progress`);
 
       // Get vendor and credentials
+      console.log(`📊 Getting vendor for ID: ${searchData.vendorId}`);
       const vendor = await storage.getVendor(searchData.vendorId);
       
       if (!vendor) {
+        console.log(`❌ Vendor not found for ID: ${searchData.vendorId}`);
         throw new Error("Vendor not found");
       }
+      
+      console.log(`✅ Found vendor: ${vendor.name}`);
 
       let credential = null;
       
@@ -359,12 +366,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!credential) {
+        console.log(`❌ No credentials found for vendor ${vendor.name}`);
         throw new Error("No credentials found for vendor");
       }
+      
+      console.log(`✅ Using credentials for ${vendor.name} - username: ${credential.username}`);
 
       let results: MedicationSearchResult[] = [];
 
       try {
+        // Check browser automation availability first
+        console.log(`🔍 Checking browser automation availability...`);
+        const browserAvailable = await scrapingService.checkBrowserAvailability();
+        console.log(`📊 Browser automation available: ${browserAvailable}`);
+        
+        if (!browserAvailable) {
+          throw new Error('Browser automation not available in Railway deployment environment. This requires a platform with Chrome/Puppeteer support.');
+        }
+        
         // Attempt real scraping with detailed logging
         console.log(`🚀 Attempting login to ${vendor.name}...`);
         const loginSuccess = await scrapingService.login(vendor, credential);
@@ -446,9 +465,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error("Search failed:", error);
+      console.error("Error stack:", error.stack);
       
       // Update search status
       await storage.updateSearch(searchId, { status: "failed" });
+      console.log(`✅ Updated search ${searchId} status to failed`);
 
       // Log failure
       await storage.createActivityLog({
