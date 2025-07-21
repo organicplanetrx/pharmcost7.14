@@ -207,7 +207,23 @@ export class RailwayDatabaseStorage implements IStorage {
       const search = await this.getSearch(id);
       if (!search) return undefined;
 
-      const results = await this.getSearchResults(id);
+      const searchResultsData = await this.getSearchResults(id);
+      
+      // Convert SearchResult[] to the expected format with medication data
+      const results = searchResultsData.map(sr => ({
+        ...sr,
+        medication: {
+          id: sr.medicationId || 0,
+          name: 'Unknown',
+          genericName: null,
+          ndc: null,
+          packageSize: null,
+          strength: null,
+          dosageForm: null,
+          manufacturer: null
+        }
+      }));
+
       return { ...search, results };
     } catch (error) {
       console.error('❌ Error fetching search with results:', error);

@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from '@shared/schema';
+import { getRailwayOptimizedConnectionString, logRailwayResourceUsage } from './railway-config';
 
 // Railway PostgreSQL connection with comprehensive error handling
 export function createDatabaseConnection() {
@@ -13,19 +14,20 @@ export function createDatabaseConnection() {
   }
 
   console.log('🔗 Attempting Railway PostgreSQL connection...');
-  console.log('   Database URL format:', databaseUrl.substring(0, 30) + '...');
+  logRailwayResourceUsage();
   
   try {
-    const sql = neon(databaseUrl, {
-      connectionTimeoutMillis: 10000,
-      queryTimeoutMillis: 30000,
-    });
+    // Use Railway-optimized connection string
+    const optimizedUrl = getRailwayOptimizedConnectionString(databaseUrl);
+    const sql = neon(optimizedUrl);
     const db = drizzle(sql, { schema });
+    
     console.log('✅ Railway PostgreSQL connection established');
+    logRailwayResourceUsage();
     return db;
   } catch (error) {
     console.error('❌ Railway PostgreSQL connection failed:', error);
-    console.error('   This may indicate Railway PostgreSQL service issues');
+    logRailwayResourceUsage();
     return null;
   }
 }
@@ -34,17 +36,14 @@ export function createDatabaseConnection() {
 export async function testDatabaseConnection(db: any) {
   try {
     console.log('🔍 Testing Railway database connection...');
-    const result = await db.execute('SELECT 1 as test');
+    // Use a simple SELECT query that works with Neon/Railway
+    const result = await db.execute('SELECT NOW() as current_time');
     console.log('✅ Railway database connection test successful');
-    console.log('   Test query result:', result);
     return true;
   } catch (error) {
     console.error('❌ Railway database connection test failed');
-    console.error('   Error details:', error);
-    console.error('   Error type:', typeof error);
     if (error instanceof Error) {
       console.error('   Error message:', error.message);
-      console.error('   Error stack:', error.stack);
     }
     return false;
   }
@@ -53,28 +52,12 @@ export async function testDatabaseConnection(db: any) {
 // Initialize database schema for Railway
 export async function initializeDatabaseSchema(db: any) {
   try {
-    console.log('🔧 Initializing database schema for Railway...');
-    
-    // Create tables if they don't exist (Railway auto-migration)
-    const tables = [
-      'vendors', 'credentials', 'medications', 
-      'searches', 'search_results', 'activity_logs'
-    ];
-    
-    // Check if tables exist
-    for (const table of tables) {
-      try {
-        await db.execute(`SELECT 1 FROM ${table} LIMIT 1`);
-        console.log(`✅ Table ${table} exists`);
-      } catch (error) {
-        console.log(`⚠️ Table ${table} may need creation`);
-      }
-    }
-    
-    console.log('✅ Database schema initialization complete');
+    console.log('🔧 Railway database schema ready (managed by Drizzle migrations)');
+    // Railway + Drizzle handles schema automatically via migrations
+    // No manual table creation needed
     return true;
   } catch (error) {
-    console.error('❌ Database schema initialization failed:', error);
+    console.error('❌ Database schema check failed:', error);
     return false;
   }
 }

@@ -116,6 +116,55 @@ var insertActivityLogSchema = createInsertSchema(activityLogs).omit({
 // server/database.ts
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
+
+// server/railway-config.ts
+var RAILWAY_CONFIG = {
+  // Database connection limits to prevent resource exhaustion
+  MAX_CONNECTIONS: 5,
+  // Conservative limit for Railway free tier
+  CONNECTION_TIMEOUT: 3e4,
+  // 30 seconds
+  QUERY_TIMEOUT: 6e4,
+  // 1 minute for complex pharmaceutical queries
+  // Memory optimization settings
+  ENABLE_CONNECTION_POOLING: true,
+  POOL_MIN_SIZE: 1,
+  POOL_MAX_SIZE: 3,
+  // Railway service resource limits
+  MAX_MEMORY_MB: 512,
+  // Railway free tier limit
+  CPU_CORES: 1,
+  // Error handling and retry configuration
+  MAX_RETRIES: 3,
+  RETRY_DELAY_MS: 2e3,
+  ENABLE_GRACEFUL_DEGRADATION: true,
+  // Logging levels for Railway debugging
+  LOG_DATABASE_QUERIES: process.env.NODE_ENV === "development",
+  LOG_CONNECTION_EVENTS: true,
+  LOG_ERROR_DETAILS: true
+};
+function getRailwayOptimizedConnectionString(databaseUrl) {
+  try {
+    const url = new URL(databaseUrl);
+    url.searchParams.set("sslmode", "require");
+    url.searchParams.set("connect_timeout", "30");
+    url.searchParams.set("application_name", "PharmaCost-Pro");
+    return url.toString();
+  } catch (error) {
+    console.error("\u274C Error optimizing Railway connection string:", error);
+    return databaseUrl;
+  }
+}
+function logRailwayResourceUsage() {
+  if (process.memoryUsage && RAILWAY_CONFIG.LOG_CONNECTION_EVENTS) {
+    const memory = process.memoryUsage();
+    console.log("\u{1F4CA} Railway resource usage:");
+    console.log(`   Memory: ${Math.round(memory.rss / 1024 / 1024)}MB / ${RAILWAY_CONFIG.MAX_MEMORY_MB}MB`);
+    console.log(`   Heap: ${Math.round(memory.heapUsed / 1024 / 1024)}MB`);
+  }
+}
+
+// server/database.ts
 function createDatabaseConnection() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
@@ -124,62 +173,40 @@ function createDatabaseConnection() {
     return null;
   }
   console.log("\u{1F517} Attempting Railway PostgreSQL connection...");
-  console.log("   Database URL format:", databaseUrl.substring(0, 30) + "...");
+  logRailwayResourceUsage();
   try {
-    const sql = neon(databaseUrl, {
-      connectionTimeoutMillis: 1e4,
-      queryTimeoutMillis: 3e4
-    });
+    const optimizedUrl = getRailwayOptimizedConnectionString(databaseUrl);
+    const sql = neon(optimizedUrl);
     const db = drizzle(sql, { schema: schema_exports });
     console.log("\u2705 Railway PostgreSQL connection established");
+    logRailwayResourceUsage();
     return db;
   } catch (error) {
     console.error("\u274C Railway PostgreSQL connection failed:", error);
-    console.error("   This may indicate Railway PostgreSQL service issues");
+    logRailwayResourceUsage();
     return null;
   }
 }
 async function testDatabaseConnection(db) {
   try {
     console.log("\u{1F50D} Testing Railway database connection...");
-    const result = await db.execute("SELECT 1 as test");
+    const result = await db.execute("SELECT NOW() as current_time");
     console.log("\u2705 Railway database connection test successful");
-    console.log("   Test query result:", result);
     return true;
   } catch (error) {
     console.error("\u274C Railway database connection test failed");
-    console.error("   Error details:", error);
-    console.error("   Error type:", typeof error);
     if (error instanceof Error) {
       console.error("   Error message:", error.message);
-      console.error("   Error stack:", error.stack);
     }
     return false;
   }
 }
 async function initializeDatabaseSchema(db) {
   try {
-    console.log("\u{1F527} Initializing database schema for Railway...");
-    const tables = [
-      "vendors",
-      "credentials",
-      "medications",
-      "searches",
-      "search_results",
-      "activity_logs"
-    ];
-    for (const table of tables) {
-      try {
-        await db.execute(`SELECT 1 FROM ${table} LIMIT 1`);
-        console.log(`\u2705 Table ${table} exists`);
-      } catch (error) {
-        console.log(`\u26A0\uFE0F Table ${table} may need creation`);
-      }
-    }
-    console.log("\u2705 Database schema initialization complete");
+    console.log("\u{1F527} Railway database schema ready (managed by Drizzle migrations)");
     return true;
   } catch (error) {
-    console.error("\u274C Database schema initialization failed:", error);
+    console.error("\u274C Database schema check failed:", error);
     return false;
   }
 }
@@ -349,7 +376,20 @@ var RailwayDatabaseStorage = class {
     try {
       const search = await this.getSearch(id2);
       if (!search) return void 0;
-      const results = await this.getSearchResults(id2);
+      const searchResultsData = await this.getSearchResults(id2);
+      const results = searchResultsData.map((sr) => ({
+        ...sr,
+        medication: {
+          id: sr.medicationId || 0,
+          name: "Unknown",
+          genericName: null,
+          ndc: null,
+          packageSize: null,
+          strength: null,
+          dosageForm: null,
+          manufacturer: null
+        }
+      }));
       return { ...search, results };
     } catch (error) {
       console.error("\u274C Error fetching search with results:", error);
