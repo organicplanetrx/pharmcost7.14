@@ -1408,20 +1408,59 @@ export class PuppeteerScrapingService implements ScrapingService {
       
       // Navigate to search page if needed
       const currentUrl = this.page.url();
+      console.log(`📊 Current page URL: ${currentUrl}`);
+      
+      // Debug: Take a screenshot and analyze page structure
+      try {
+        console.log('📸 Taking screenshot for debugging...');
+        await this.page.screenshot({ path: '/tmp/kinray-search-debug.png', fullPage: true });
+        console.log('✅ Screenshot saved');
+      } catch (screenshotError) {
+        console.log('❌ Screenshot failed:', screenshotError.message);
+      }
+      
+      // Debug: Get page title and basic structure
+      const pageTitle = await this.page.title();
+      console.log(`📊 Page title: ${pageTitle}`);
+      
+      // Debug: Check what input elements are available
+      const allInputs = await this.page.evaluate(() => {
+        const inputs = Array.from(document.querySelectorAll('input'));
+        return inputs.map(input => ({
+          tag: input.tagName,
+          type: input.type,
+          name: input.name,
+          id: input.id,
+          placeholder: input.placeholder,
+          className: input.className
+        }));
+      });
+      console.log(`📊 Found ${allInputs.length} input elements:`, JSON.stringify(allInputs, null, 2));
+      
       if (!currentUrl.includes('search') && !currentUrl.includes('product')) {
         console.log('🔍 Navigating to search interface...');
         await this.navigateToSearch();
       }
       
-      // Look for search form with Kinray-specific selectors
+      // Look for search form with comprehensive selectors
       const searchSelectors = [
         'input[name="search"]',
         'input[id*="search"]',
-        'input[placeholder*="search"]',
-        'input[placeholder*="product"]',
+        'input[placeholder*="search" i]',
+        'input[placeholder*="product" i]',
+        'input[placeholder*="item" i]',
+        'input[placeholder*="drug" i]',
+        'input[placeholder*="medication" i]',
         '.search-input',
         '#searchInput',
-        'input[type="text"]'
+        '#search',
+        'input[type="text"]',
+        'input[type="search"]',
+        '[data-testid*="search"]',
+        '[aria-label*="search" i]',
+        'input.form-control',
+        '.search-box input',
+        '.searchbox input'
       ];
       
       let searchInput = null;
@@ -1503,6 +1542,20 @@ export class PuppeteerScrapingService implements ScrapingService {
       
       if (!resultsFound) {
         console.log('❌ No results container found after search');
+        
+        // Debug: Check what's actually on the page after search
+        const pageContent = await this.page.evaluate(() => {
+          return {
+            title: document.title,
+            url: window.location.href,
+            bodyText: document.body.innerText.substring(0, 1000),
+            allTables: Array.from(document.querySelectorAll('table')).length,
+            allDivs: Array.from(document.querySelectorAll('div')).length,
+            hasResults: !!document.querySelector('*[class*="result"], *[id*="result"], table tbody tr')
+          };
+        });
+        console.log('📊 Page analysis after search:', JSON.stringify(pageContent, null, 2));
+        
         return []; // Return empty array instead of throwing error
       }
       
@@ -1517,7 +1570,15 @@ export class PuppeteerScrapingService implements ScrapingService {
           'table tbody tr',
           '.product-list .product',
           '.medication-list .medication',
-          '[class*="result"] tr'
+          '[class*="result"] tr',
+          'tbody tr',
+          '.data-row',
+          '.item-row',
+          '.product-row',
+          '.result-item',
+          'tr:not(:first-child)', // All table rows except header
+          '.grid-row',
+          '[role="row"]'
         ];
         
         for (const containerSelector of resultContainers) {

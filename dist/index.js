@@ -1921,6 +1921,28 @@ var PuppeteerScrapingService = class {
     try {
       console.log(`\u{1F50D} Performing live Kinray portal search for: ${searchTerm} (${searchType})`);
       const currentUrl = this.page.url();
+      console.log(`\u{1F4CA} Current page URL: ${currentUrl}`);
+      try {
+        console.log("\u{1F4F8} Taking screenshot for debugging...");
+        await this.page.screenshot({ path: "/tmp/kinray-search-debug.png", fullPage: true });
+        console.log("\u2705 Screenshot saved");
+      } catch (screenshotError) {
+        console.log("\u274C Screenshot failed:", screenshotError.message);
+      }
+      const pageTitle = await this.page.title();
+      console.log(`\u{1F4CA} Page title: ${pageTitle}`);
+      const allInputs = await this.page.evaluate(() => {
+        const inputs = Array.from(document.querySelectorAll("input"));
+        return inputs.map((input) => ({
+          tag: input.tagName,
+          type: input.type,
+          name: input.name,
+          id: input.id,
+          placeholder: input.placeholder,
+          className: input.className
+        }));
+      });
+      console.log(`\u{1F4CA} Found ${allInputs.length} input elements:`, JSON.stringify(allInputs, null, 2));
       if (!currentUrl.includes("search") && !currentUrl.includes("product")) {
         console.log("\u{1F50D} Navigating to search interface...");
         await this.navigateToSearch();
@@ -1928,11 +1950,21 @@ var PuppeteerScrapingService = class {
       const searchSelectors = [
         'input[name="search"]',
         'input[id*="search"]',
-        'input[placeholder*="search"]',
-        'input[placeholder*="product"]',
+        'input[placeholder*="search" i]',
+        'input[placeholder*="product" i]',
+        'input[placeholder*="item" i]',
+        'input[placeholder*="drug" i]',
+        'input[placeholder*="medication" i]',
         ".search-input",
         "#searchInput",
-        'input[type="text"]'
+        "#search",
+        'input[type="text"]',
+        'input[type="search"]',
+        '[data-testid*="search"]',
+        '[aria-label*="search" i]',
+        "input.form-control",
+        ".search-box input",
+        ".searchbox input"
       ];
       let searchInput = null;
       for (const selector of searchSelectors) {
@@ -2001,6 +2033,17 @@ var PuppeteerScrapingService = class {
       }
       if (!resultsFound) {
         console.log("\u274C No results container found after search");
+        const pageContent = await this.page.evaluate(() => {
+          return {
+            title: document.title,
+            url: window.location.href,
+            bodyText: document.body.innerText.substring(0, 1e3),
+            allTables: Array.from(document.querySelectorAll("table")).length,
+            allDivs: Array.from(document.querySelectorAll("div")).length,
+            hasResults: !!document.querySelector('*[class*="result"], *[id*="result"], table tbody tr')
+          };
+        });
+        console.log("\u{1F4CA} Page analysis after search:", JSON.stringify(pageContent, null, 2));
         return [];
       }
       const results = await this.page.evaluate((vendorName) => {
@@ -2011,7 +2054,16 @@ var PuppeteerScrapingService = class {
           "table tbody tr",
           ".product-list .product",
           ".medication-list .medication",
-          '[class*="result"] tr'
+          '[class*="result"] tr',
+          "tbody tr",
+          ".data-row",
+          ".item-row",
+          ".product-row",
+          ".result-item",
+          "tr:not(:first-child)",
+          // All table rows except header
+          ".grid-row",
+          '[role="row"]'
         ];
         for (const containerSelector of resultContainers) {
           const rows = document.querySelectorAll(containerSelector);

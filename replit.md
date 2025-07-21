@@ -352,6 +352,10 @@ Changelog:
 - July 21, 2025: Enhanced search result handling for zero results - now shows helpful yellow warning instead of error
 - July 21, 2025: Comprehensive Kinray portal scraping with multiple selector strategies and fallback approaches
 - July 21, 2025: Live search functionality now complete - authentication, navigation, search submission, and data extraction
+- July 21, 2025: ENHANCED SCRAPING DEBUG: Added comprehensive page structure analysis with screenshots and input element detection
+- July 21, 2025: Expanded search selectors to 15+ patterns including form-control, aria-label, and data-testid attributes
+- July 21, 2025: Enhanced result extraction with 12+ container selector patterns for flexible data detection
+- July 21, 2025: Added detailed page analysis after search to identify why results aren't being extracted from portal
 ```
 
 ## User Preferences
