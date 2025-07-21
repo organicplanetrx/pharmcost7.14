@@ -94,7 +94,10 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    console.log(`🚀 Server successfully started on port ${port}`);
+    console.log(`🚀 PharmaCost Pro successfully deployed on Railway`);
+    console.log(`🌐 Server running on port ${port}`);
+    console.log(`🔗 Health check available at /api/dashboard/stats`);
+    console.log(`💊 Kinray pharmaceutical portal automation ready`);
     log(`serving on port ${port}`);
   });
   

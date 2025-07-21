@@ -252,16 +252,28 @@ var PuppeteerScrapingService = class {
       } catch (e) {
         console.log("which command failed, trying manual paths...");
       }
-      if (process.env.NODE_ENV === "production" || process.env.PUPPETEER_EXECUTABLE_PATH) {
-        const dockerChromePath = process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome-stable";
-        try {
-          const fs2 = await import("fs");
-          if (fs2.existsSync(dockerChromePath)) {
-            console.log(`\u{1F50D} Using Docker Chrome path: ${dockerChromePath}`);
-            return dockerChromePath;
+      if (process.env.NODE_ENV === "production" || process.env.PUPPETEER_EXECUTABLE_PATH || process.env.RAILWAY_ENVIRONMENT) {
+        const possiblePaths = [
+          process.env.PUPPETEER_EXECUTABLE_PATH,
+          "/usr/bin/google-chrome-stable",
+          // Docker/Railway Chrome
+          "/usr/bin/google-chrome",
+          // Alternative Chrome path
+          "/usr/bin/chromium",
+          // Chromium in some containers
+          "/usr/bin/chromium-browser"
+          // Ubuntu-style Chromium
+        ].filter(Boolean);
+        for (const chromePath of possiblePaths) {
+          try {
+            const fs2 = await import("fs");
+            if (fs2.existsSync(chromePath)) {
+              console.log(`\u{1F50D} Using Railway/production Chrome path: ${chromePath}`);
+              return chromePath;
+            }
+          } catch (error) {
+            console.log(`Chrome path not found: ${chromePath}`);
           }
-        } catch (error) {
-          console.log(`Docker Chrome path not found: ${dockerChromePath}`);
         }
       }
       const knownChromiumPath = "/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium";
@@ -2115,7 +2127,10 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
       reusePort: true
     }, () => {
-      console.log(`\u{1F680} Server successfully started on port ${port}`);
+      console.log(`\u{1F680} PharmaCost Pro successfully deployed on Railway`);
+      console.log(`\u{1F310} Server running on port ${port}`);
+      console.log(`\u{1F517} Health check available at /api/dashboard/stats`);
+      console.log(`\u{1F48A} Kinray pharmaceutical portal automation ready`);
       log(`serving on port ${port}`);
     });
   } catch (error) {

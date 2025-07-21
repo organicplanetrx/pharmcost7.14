@@ -34,17 +34,26 @@ export class PuppeteerScrapingService implements ScrapingService {
         console.log('which command failed, trying manual paths...');
       }
       
-      // In Docker/production environment, prioritize the pre-installed Chrome
-      if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_EXECUTABLE_PATH) {
-        const dockerChromePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable';
-        try {
-          const fs = await import('fs');
-          if (fs.existsSync(dockerChromePath)) {
-            console.log(`🔍 Using Docker Chrome path: ${dockerChromePath}`);
-            return dockerChromePath;
+      // Railway/Docker/production environment browser detection
+      if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_EXECUTABLE_PATH || process.env.RAILWAY_ENVIRONMENT) {
+        const possiblePaths = [
+          process.env.PUPPETEER_EXECUTABLE_PATH,
+          '/usr/bin/google-chrome-stable',  // Docker/Railway Chrome
+          '/usr/bin/google-chrome',         // Alternative Chrome path
+          '/usr/bin/chromium',              // Chromium in some containers
+          '/usr/bin/chromium-browser'       // Ubuntu-style Chromium
+        ].filter(Boolean);
+        
+        for (const chromePath of possiblePaths) {
+          try {
+            const fs = await import('fs');
+            if (fs.existsSync(chromePath!)) {
+              console.log(`🔍 Using Railway/production Chrome path: ${chromePath}`);
+              return chromePath!;
+            }
+          } catch (error) {
+            console.log(`Chrome path not found: ${chromePath}`);
           }
-        } catch (error) {
-          console.log(`Docker Chrome path not found: ${dockerChromePath}`);
         }
       }
       
