@@ -99,10 +99,9 @@ export class PuppeteerScrapingService implements ScrapingService {
   }
 
   private generateDemoResults(searchTerm: string, searchType: string): MedicationSearchResult[] {
-    console.log(`Generating realistic Kinray invoice pricing for: ${searchTerm} (${searchType})`);
-    
-    // Generate results that match actual Kinray portal invoice pricing format
-    const isLisinopril = searchTerm.toLowerCase().includes('lisinopril');
+    // Demo data generation disabled - only live scraping allowed
+    console.log(`❌ Demo data generation disabled. Only authentic Kinray portal data allowed.`);
+    return [];
     
     if (isLisinopril) {
       return [
@@ -1236,11 +1235,11 @@ export class PuppeteerScrapingService implements ScrapingService {
         return await this.searchKinray(searchTerm, searchType);
       } else {
         console.log(`Vendor ${this.currentVendor.name} not supported yet - focusing on Kinray only`);
-        return this.generateDemoResults(searchTerm, searchType);
+        throw new Error(`Only Kinray (Cardinal Health) portal is currently supported. Other vendors require real portal integration.`);
       }
     } catch (error) {
-      console.error('Search failed:', error);
-      return this.generateDemoResults(searchTerm, searchType);
+      console.error('Live search failed:', error);
+      throw error;
     }
   }
 

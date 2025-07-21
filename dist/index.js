@@ -826,8 +826,8 @@ var PuppeteerScrapingService = class {
     return path4 !== null;
   }
   generateDemoResults(searchTerm, searchType) {
-    console.log(`Generating realistic Kinray invoice pricing for: ${searchTerm} (${searchType})`);
-    const isLisinopril = searchTerm.toLowerCase().includes("lisinopril");
+    console.log(`\u274C Demo data generation disabled. Only authentic Kinray portal data allowed.`);
+    return [];
     if (isLisinopril) {
       return [
         {
@@ -1787,11 +1787,11 @@ var PuppeteerScrapingService = class {
         return await this.searchKinray(searchTerm, searchType);
       } else {
         console.log(`Vendor ${this.currentVendor.name} not supported yet - focusing on Kinray only`);
-        return this.generateDemoResults(searchTerm, searchType);
+        throw new Error(`Only Kinray (Cardinal Health) portal is currently supported. Other vendors require real portal integration.`);
       }
     } catch (error) {
-      console.error("Search failed:", error);
-      return this.generateDemoResults(searchTerm, searchType);
+      console.error("Live search failed:", error);
+      throw error;
     }
   }
   async navigateToSearch() {
@@ -2260,36 +2260,7 @@ async function registerRoutes(app2) {
         console.log(`\u{1F680} Attempting login to ${vendor.name}...`);
         const loginSuccess = await scrapingService.login(vendor, credential);
         if (!loginSuccess) {
-          console.log(`\u274C Login failed to ${vendor.name} - falling back to demo results`);
-          results = [
-            {
-              medication: {
-                name: `${searchData.searchTerm} 10mg Tablets`,
-                genericName: searchData.searchTerm,
-                ndc: "0781-1506-01",
-                packageSize: "100 tablets",
-                strength: "10mg",
-                dosageForm: "Tablet"
-              },
-              cost: "12.50",
-              availability: "Available",
-              vendor: vendor.name
-            },
-            {
-              medication: {
-                name: `${searchData.searchTerm} 20mg Tablets`,
-                genericName: searchData.searchTerm,
-                ndc: "0781-1507-01",
-                packageSize: "100 tablets",
-                strength: "20mg",
-                dosageForm: "Tablet"
-              },
-              cost: "18.75",
-              availability: "Available",
-              vendor: vendor.name
-            }
-          ];
-          console.log(`\u2705 Generated ${results.length} demo results for ${searchData.searchTerm}`);
+          throw new Error(`Authentication failed for ${vendor.name}. Please check your credentials and try again.`);
         } else {
           console.log(`\u2705 Login successful to ${vendor.name} - proceeding with search...`);
           const searchTimeout = new Promise((_, reject) => {
@@ -2303,59 +2274,17 @@ async function registerRoutes(app2) {
             if (results && results.length > 0) {
               console.log(`\u{1F3AF} Successfully extracted ${results.length} live results from ${vendor.name}`);
             } else {
-              console.log(`\u26A0\uFE0F Search completed but no results found - using demo results`);
-              results = [
-                {
-                  medication: {
-                    name: `${searchData.searchTerm} 10mg Tablets`,
-                    genericName: searchData.searchTerm,
-                    ndc: "0781-1506-01",
-                    packageSize: "100 tablets",
-                    strength: "10mg",
-                    dosageForm: "Tablet"
-                  },
-                  cost: "12.50",
-                  availability: "Available",
-                  vendor: vendor.name
-                }
-              ];
+              console.log(`\u26A0\uFE0F Search completed but no results found in ${vendor.name} portal`);
+              results = [];
             }
           } catch (timeoutError) {
-            console.log(`\u23F0 Search timed out after 20 seconds - using demo results`);
-            results = [
-              {
-                medication: {
-                  name: `${searchData.searchTerm} 10mg Tablets`,
-                  genericName: searchData.searchTerm,
-                  ndc: "0781-1506-01",
-                  packageSize: "100 tablets",
-                  strength: "10mg",
-                  dosageForm: "Tablet"
-                },
-                cost: "12.50",
-                availability: "Available",
-                vendor: vendor.name
-              }
-            ];
+            console.log(`\u23F0 Search timed out after 20 seconds`);
+            throw new Error(`Search timeout - ${vendor.name} portal did not respond within expected time`);
           }
         }
       } catch (scrapingError) {
-        console.log(`\u274C Scraping error: ${scrapingError.message} - using demo results`);
-        results = [
-          {
-            medication: {
-              name: `${searchData.searchTerm} 10mg Tablets`,
-              genericName: searchData.searchTerm,
-              ndc: "0781-1506-01",
-              packageSize: "100 tablets",
-              strength: "10mg",
-              dosageForm: "Tablet"
-            },
-            cost: "12.50",
-            availability: "Available",
-            vendor: vendor.name
-          }
-        ];
+        console.log(`\u274C Scraping error: ${scrapingError.message}`);
+        throw scrapingError;
       }
       console.log(`\u{1F50D} Generated ${results.length} results for search ${searchId}`);
       for (const result of results) {
