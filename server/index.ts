@@ -23,7 +23,15 @@ process.on('unhandledRejection', (reason, promise) => {
 
 console.log('🚀 Starting PharmaCost Pro server...');
 console.log('Environment:', process.env.NODE_ENV);
-console.log('Port:', process.env.PORT || '5000');
+
+// RAILWAY CRITICAL DEBUG - Force Railway PORT detection
+const RAILWAY_PORT = process.env.PORT;
+console.log('=== RAILWAY PORT DETECTION ===');
+console.log('Raw PORT env:', RAILWAY_PORT);
+console.log('PORT type:', typeof RAILWAY_PORT);
+console.log('Railway vars found:', Object.keys(process.env).filter(k => k.includes('RAILWAY')).length);
+console.log('Will use port:', RAILWAY_PORT || '5000');
+console.log('==============================');
 
 const app = express();
 console.log('✓ Express app created');
