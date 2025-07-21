@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import CredentialForm from "@/components/credential-form";
 import SearchInterface from "@/components/search-interface";
 import ActivityLog from "@/components/activity-log";
+import { CookieInjection } from "@/components/cookie-injection";
 import LoadingModal from "@/components/loading-modal";
 import { DashboardStats } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,11 @@ export default function Dashboard() {
           <div className="lg:col-span-1">
             <div className="pharma-card">
               <CredentialForm />
+            </div>
+            
+            {/* Cookie Injection */}
+            <div className="mt-6">
+              <CookieInjection />
             </div>
             
             {/* Quick Actions */}

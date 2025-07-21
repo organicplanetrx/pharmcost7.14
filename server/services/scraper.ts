@@ -1,10 +1,12 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
 import { execSync } from 'child_process';
 import { Credential, Vendor, MedicationSearchResult } from '@shared/schema';
+import { SessionManager, SessionCookie } from './session-manager.js';
 
 export interface ScrapingService {
   login(vendor: Vendor, credential: Credential): Promise<boolean>;
   searchMedication(searchTerm: string, searchType: 'name' | 'ndc' | 'generic'): Promise<MedicationSearchResult[]>;
+  injectSessionCookies(cookies: SessionCookie[]): Promise<boolean>;
   cleanup(): Promise<void>;
 }
 
@@ -1332,6 +1334,22 @@ export class PuppeteerScrapingService implements ScrapingService {
     }
   }
 
+  async injectSessionCookies(cookies: SessionCookie[]): Promise<boolean> {
+    try {
+      if (!this.page) {
+        await this.initBrowser();
+        if (!this.page) throw new Error('Failed to initialize browser');
+      }
+      
+      console.log('🍪 Injecting session cookies to bypass authentication...');
+      await SessionManager.injectSessionCookies(this.page, cookies);
+      return true;
+    } catch (error) {
+      console.error('Cookie injection failed:', error);
+      return false;
+    }
+  }
+
   async searchMedication(searchTerm: string, searchType: 'name' | 'ndc' | 'generic'): Promise<MedicationSearchResult[]> {
     console.log(`🔍 Starting medication search for "${searchTerm}" (${searchType})`);
     console.log(`📊 Current vendor:`, this.currentVendor?.name);
@@ -1346,8 +1364,8 @@ export class PuppeteerScrapingService implements ScrapingService {
     
     console.log('✅ Browser automation available');
     
-    // Initialize browser and go directly to Kinray portal (using existing session)
-    console.log('🍪 Using existing browser session - bypassing login');
+    // Initialize browser and go directly to Kinray portal (using session cookies)
+    console.log('🍪 Using session cookie injection - bypassing login');
     
     try {
       await this.initBrowser();
@@ -1366,7 +1384,13 @@ export class PuppeteerScrapingService implements ScrapingService {
     };
 
     try {
-      console.log(`🌐 Going directly to Kinray portal search page (bypassing login)`);
+      // Check for injected session cookies before navigation
+      if (global.__kinray_session_cookies__) {
+        console.log('🍪 Found injected session cookies - applying them before navigation...');
+        await SessionManager.injectSessionCookies(this.page, global.__kinray_session_cookies__);
+      }
+      
+      console.log(`🌐 Going directly to Kinray portal search page (using session cookies)`);
       
       // Go directly to Kinray main portal page
       const kinrayMainUrl = 'https://kinrayweblink.cardinalhealth.com';

@@ -116,6 +116,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cookie injection endpoint
+  app.post('/api/inject-cookies', async (req, res) => {
+    try {
+      const { cookies } = req.body;
+      
+      if (!cookies || !Array.isArray(cookies)) {
+        return res.status(400).json({ error: 'Invalid cookie data' });
+      }
+      
+      console.log(`🍪 Received ${cookies.length} cookies for injection`);
+      
+      // Store cookies globally for use in searches
+      global.__kinray_session_cookies__ = cookies;
+      
+      res.json({ success: true, message: 'Session cookies stored successfully' });
+    } catch (error) {
+      console.error('Cookie injection error:', error);
+      res.status(500).json({ error: 'Failed to inject cookies' });
+    }
+  });
+
   app.post("/api/credentials/test-connection", async (req, res) => {
     try {
       const { vendorId, username, password } = req.body;
