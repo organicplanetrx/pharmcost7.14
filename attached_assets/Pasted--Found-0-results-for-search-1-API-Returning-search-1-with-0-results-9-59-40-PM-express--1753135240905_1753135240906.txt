@@ -1,0 +1,114 @@
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+9:59:40 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+Found password field: input[name="password"]
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: u8pwms
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+9:59:42 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+Found submit button: input[type="submit"]
+
+Navigation completed successfully
+
+Final URL after login attempt: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+=== CHECKING LOGIN SUCCESS ===
+
+URL indicates success: false (https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call)
+
+Page elements indicate success: true
+
+Login form absent: true
+
+=== LOGIN DECISION ===
+
+Final result: true
+
+Reasons: URL(false), Elements(true), NoForm(true), NoError(true)
+
+✅ LOGIN SUCCESSFUL - Proceeding to search
+
+🔑 Kinray login result: true
+
+✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+
+🔍 Calling searchMedication for "lisinopril" (name)
+
+🔍 Starting medication search for "lisinopril" (name)
+
+📊 Current vendor: Kinray (Cardinal Health)
+
+📊 Page available: true
+
+🔍 Testing browser automation availability...
+
+🔍 Starting browser path detection...
+
+which command failed, trying manual paths...
+
+🚂 Railway environment detected - trying bundled browser first
+
+📦 Puppeteer bundled browser path: /usr/bin/google-chrome-stable
+
+✅ Using Puppeteer bundled browser for Railway: /usr/bin/google-chrome-stable
+
+📊 Browser path found: /usr/bin/google-chrome-stable
+
+✅ Browser instance created successfully
+
+✅ Browser closed successfully
+
+✅ Browser automation available
+
+🌐 Attempting real search on Kinray (Cardinal Health) portal
+
+Current page: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+Page title: Kinray Weblink
+
+🎯 Connected to Kinray portal - attempting real search
+
+🔍 Performing live Kinray portal search for: lisinopril (name)
+
+📊 Current page URL: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+📸 Taking screenshot for debugging...
+
+✅ Screenshot saved
+
+📊 Page title: Kinray Weblink
+
+📊 Found 2 input elements: [
+
+  {
+
+    "tag": "INPUT",
+
+    "type": "tel",
+
+    "name": "answer",
+
+    "id": "input71",
+
+    "placeholder": "",
+
+    "className": ""
+
