@@ -770,6 +770,20 @@ var PuppeteerScrapingService = class {
         console.log("which command failed, trying manual paths...");
       }
       if (process.env.NODE_ENV === "production" || process.env.PUPPETEER_EXECUTABLE_PATH || process.env.RAILWAY_ENVIRONMENT) {
+        console.log("\u{1F682} Railway environment detected - trying bundled browser first");
+        try {
+          const bundledPath = puppeteer.executablePath();
+          console.log(`\u{1F4E6} Puppeteer bundled browser path: ${bundledPath}`);
+          const fs3 = await import("fs");
+          if (fs3.existsSync(bundledPath)) {
+            console.log(`\u2705 Using Puppeteer bundled browser for Railway: ${bundledPath}`);
+            return bundledPath;
+          } else {
+            console.log("\u{1F4E6} Bundled browser not found, will download...");
+          }
+        } catch (error) {
+          console.log("Bundled browser check failed:", error.message);
+        }
         const possiblePaths = [
           process.env.PUPPETEER_EXECUTABLE_PATH,
           "/usr/bin/google-chrome-stable",
@@ -830,18 +844,27 @@ var PuppeteerScrapingService = class {
         console.log("\u274C No browser executable found");
         return false;
       }
+      const launchArgs = [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-web-security",
+        "--disable-extensions",
+        "--no-first-run"
+      ];
+      if (process.env.RAILWAY_ENVIRONMENT) {
+        launchArgs.push(
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding",
+          "--single-process"
+        );
+      }
       const testBrowser = await puppeteer.launch({
         headless: true,
         executablePath: path4,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-          "--disable-web-security",
-          "--disable-extensions",
-          "--no-first-run"
-        ]
+        args: launchArgs
       });
       console.log("\u2705 Browser instance created successfully");
       await testBrowser.close();

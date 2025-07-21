@@ -7,3 +7,8 @@ healthcheckTimeout = 300
 healthcheckInterval = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[deploy.env]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "false"
+PUPPETEER_CACHE_DIR = "/tmp/.cache/puppeteer"
+RAILWAY_ENVIRONMENT = "true"

@@ -36,6 +36,25 @@ export class PuppeteerScrapingService implements ScrapingService {
       
       // Railway/Docker/production environment browser detection
       if (process.env.NODE_ENV === 'production' || process.env.PUPPETEER_EXECUTABLE_PATH || process.env.RAILWAY_ENVIRONMENT) {
+        console.log('🚂 Railway environment detected - trying bundled browser first');
+        
+        // First try Puppeteer's bundled browser for Railway
+        try {
+          const bundledPath = puppeteer.executablePath();
+          console.log(`📦 Puppeteer bundled browser path: ${bundledPath}`);
+          
+          const fs = await import('fs');
+          if (fs.existsSync(bundledPath)) {
+            console.log(`✅ Using Puppeteer bundled browser for Railway: ${bundledPath}`);
+            return bundledPath;
+          } else {
+            console.log('📦 Bundled browser not found, will download...');
+          }
+        } catch (error) {
+          console.log('Bundled browser check failed:', error.message);
+        }
+        
+        // Then try system paths
         const possiblePaths = [
           process.env.PUPPETEER_EXECUTABLE_PATH,
           '/usr/bin/google-chrome-stable',  // Docker/Railway Chrome
@@ -105,19 +124,31 @@ export class PuppeteerScrapingService implements ScrapingService {
         return false;
       }
       
-      // Test actual browser launch
+      // Test actual browser launch with Railway-optimized configuration
+      const launchArgs = [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-extensions',
+        '--no-first-run'
+      ];
+      
+      // Add Railway-specific args if detected
+      if (process.env.RAILWAY_ENVIRONMENT) {
+        launchArgs.push(
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--single-process'
+        );
+      }
+      
       const testBrowser = await puppeteer.launch({
         headless: true,
         executablePath: path,
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-extensions',
-          '--no-first-run'
-        ]
+        args: launchArgs
       });
       
       console.log('✅ Browser instance created successfully');

@@ -41,6 +41,9 @@ COPY package*.json ./
 # Clean install dependencies with forced resolution
 RUN npm install --omit=dev --no-audit --legacy-peer-deps --force
 
+# Install Puppeteer browser for Railway automation
+RUN npx puppeteer browsers install chrome
+
 # Copy source code
 COPY . .
 
