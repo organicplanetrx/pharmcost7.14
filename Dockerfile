@@ -54,13 +54,12 @@ RUN mkdir -p /home/pharmcost/.cache /home/pharmcost/.local/share/applications
 RUN chown -R pharmcost:pharmcost /home/pharmcost
 USER pharmcost
 
-# Expose port - Railway will provide PORT via environment
+# Railway will provide dynamic PORT via environment variable
 EXPOSE 5000
 
 # Set environment variables
 ENV NODE_ENV=production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-ENV PORT=5000
 
 # Start the application
 CMD ["npm", "start"]

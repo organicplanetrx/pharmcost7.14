@@ -338,6 +338,9 @@ Changelog:
 - July 21, 2025: RAILWAY SIGTERM FIX: Server starting correctly but terminated by Railway - added graceful shutdown handling
 - July 21, 2025: Enhanced Railway environment detection and added health check configuration
 - July 21, 2025: Application now starts successfully with memory storage while PostgreSQL service remains crashed
+- July 21, 2025: RAILWAY PORT FIX: Identified Railway continuously killing container due to health check failures
+- July 21, 2025: Fixed PORT environment variable handling and removed hardcoded port configurations
+- July 21, 2025: Added dedicated /health endpoint for Railway load balancer with improved networking configuration
 ```
 
 ## User Preferences

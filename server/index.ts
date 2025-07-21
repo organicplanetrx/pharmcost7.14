@@ -105,9 +105,11 @@ app.use((req, res, next) => {
     }
   }
 
-  // Use Railway's PORT environment variable - critical for Railway deployment
-  const port = parseInt(process.env.PORT || "5000");
+  // Use Railway's dynamic PORT - CRITICAL for Railway deployment
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
   console.log(`Railway PORT environment variable:`, process.env.PORT);
+  console.log(`Server will bind to port: ${port}`);
+  console.log(`Railway deployment: ${process.env.RAILWAY_DEPLOYMENT_ID ? 'YES' : 'NO'}`);
   console.log(`Attempting to start server on port ${port}...`);
   
   // Railway-specific server configuration
