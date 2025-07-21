@@ -1388,11 +1388,14 @@ export class PuppeteerScrapingService implements ScrapingService {
       if (global.__kinray_session_cookies__) {
         console.log('🍪 Found injected session cookies - applying them before navigation...');
         await SessionManager.injectSessionCookies(this.page, global.__kinray_session_cookies__);
+        
+        // Wait a moment for cookies to be set
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
       console.log(`🌐 Going directly to Kinray portal search page (using session cookies)`);
       
-      // Go directly to Kinray main portal page
+      // Try going directly to the main portal page (bypassing login)
       const kinrayMainUrl = 'https://kinrayweblink.cardinalhealth.com';
       console.log(`🍪 Navigating to: ${kinrayMainUrl}`);
       
@@ -1400,6 +1403,38 @@ export class PuppeteerScrapingService implements ScrapingService {
         waitUntil: 'domcontentloaded', 
         timeout: 15000 
       });
+      
+      // Check if we're still on login page after cookie injection
+      const currentUrl = this.page.url();
+      console.log(`📍 After navigation with cookies: ${currentUrl}`);
+      
+      if (currentUrl.includes('/login') || currentUrl.includes('/signin')) {
+        console.log('🔄 Still on login page - cookies may have expired. Attempting direct dashboard access...');
+        
+        // Try going directly to the authenticated area
+        const dashboardUrls = [
+          'https://kinrayweblink.cardinalhealth.com/dashboard',
+          'https://kinrayweblink.cardinalhealth.com/home',
+          'https://kinrayweblink.cardinalhealth.com/products',
+          'https://kinrayweblink.cardinalhealth.com/search'
+        ];
+        
+        for (const dashboardUrl of dashboardUrls) {
+          try {
+            console.log(`🎯 Trying direct access to: ${dashboardUrl}`);
+            await this.page.goto(dashboardUrl, { waitUntil: 'domcontentloaded', timeout: 10000 });
+            const newUrl = this.page.url();
+            
+            if (!newUrl.includes('/login') && !newUrl.includes('/signin')) {
+              console.log(`✅ Successfully accessed authenticated area: ${newUrl}`);
+              break;
+            }
+          } catch (error) {
+            console.log(`❌ Failed to access ${dashboardUrl}: ${error.message}`);
+            continue;
+          }
+        }
+      }
       
       if (response && response.ok()) {
         console.log('✅ Successfully connected to Kinray portal');

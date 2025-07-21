@@ -1,0 +1,150 @@
+After 2FA bypass attempt: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+=== LOGIN DECISION ===
+
+Final result: true
+
+Reasons: URL(false), Elements(true), NoForm(true), 2FA(true), NoError(true)
+
+✅ LOGIN SUCCESSFUL - Proceeding to search
+
+🔑 Kinray login result: true
+
+✅ Login successful to Kinray (Cardinal Health) - proceeding with search...
+
+🔍 Calling searchMedication for "lisinopril" (name)
+
+🔍 Starting medication search for "lisinopril" (name)
+
+📊 Current vendor: Kinray (Cardinal Health)
+
+📊 Page available: true
+
+🔍 Testing browser automation availability...
+
+🔍 Starting browser path detection...
+
+which command failed, trying manual paths...
+
+🚂 Railway environment detected - trying bundled browser first
+
+📦 Puppeteer bundled browser path: /usr/bin/google-chrome-stable
+
+✅ Using Puppeteer bundled browser for Railway: /usr/bin/google-chrome-stable
+
+📊 Browser path found: /usr/bin/google-chrome-stable
+
+✅ Browser instance created successfully
+
+✅ Browser closed successfully
+
+✅ Browser automation available
+
+🍪 Using session cookie injection - bypassing login
+
+✅ Browser initialized successfully
+
+🌐 Going directly to Kinray portal search page (using session cookies)
+
+🍪 Navigating to: https://kinrayweblink.cardinalhealth.com
+
+✅ Successfully connected to Kinray portal
+
+Current page: https://kinrayweblink.cardinalhealth.com/login
+
+Page title: Kinray Weblink
+
+🎯 Connected to Kinray portal - attempting real search
+
+🔍 Performing live Kinray portal search for: lisinopril (name)
+
+📊 Current page URL: https://kinrayweblink.cardinalhealth.com/login
+
+📸 Taking screenshot for debugging...
+
+✅ Screenshot saved
+
+📊 Page title: Kinray Weblink
+
+📊 Found 4 input elements: [
+
+  {
+
+    "tag": "INPUT",
+
+    "type": "text",
+
+    "name": "username",
+
+    "id": "okta-signin-username",
+
+    "placeholder": "",
+
+    "className": ""
+
+  },
+
+  {
+
+    "tag": "INPUT",
+
+    "type": "password",
+
+    "name": "password",
+
+    "id": "okta-signin-password",
+
+    "placeholder": "",
+
+    "className": "password-with-toggle"
+
+  },
+
+  {
+
+    "tag": "INPUT",
+
+    "type": "checkbox",
+
+    "name": "remember",
+
+    "id": "input41",
+
+    "placeholder": "",
+
+    "className": ""
+
+  },
+
+  {
+
+    "tag": "INPUT",
+
+    "type": "submit",
+
+    "name": "",
+
+    "id": "okta-signin-submit",
+
+    "placeholder": "",
+
+    "className": "button button-primary"
+
+  }
+
+]
+
+🔍 Navigating to search interface...
+
+Found search link: a[href*="product"]
+
+Navigated using: a[href*="product"]
+
+🍪 Received 1 cookies for injection
+
+10:41:10 PM [express] POST /api/inject-cookies 200 in 1ms :: {"success":true,"message":"Session cooki…
+
+❌ Search input input[name="search"] not found, trying next...
+
+❌ Search input input[id*="search"] not found, trying next...
+

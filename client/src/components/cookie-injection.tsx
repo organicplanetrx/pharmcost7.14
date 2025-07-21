@@ -23,24 +23,51 @@ export function CookieInjection() {
       try {
         // Try JSON format first
         cookies = JSON.parse(cookieData);
-      } catch {
+        console.log('Parsed cookies:', cookies);
+        
+        // Validate that cookies is an array
+        if (!Array.isArray(cookies)) {
+          throw new Error('Cookies must be an array');
+        }
+        
+        // Validate cookie structure
+        const validCookies = cookies.filter(cookie => 
+          cookie && 
+          typeof cookie === 'object' && 
+          cookie.name && 
+          cookie.value
+        );
+        
+        if (validCookies.length === 0) {
+          throw new Error('No valid cookies found');
+        }
+        
+        cookies = validCookies;
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
         // Try parsing Netscape format or other formats
         cookies = parseCookieString(cookieData);
       }
 
+      console.log('Sending cookies to API:', cookies);
+      
       const response = await apiRequest('/api/inject-cookies', {
         method: 'POST',
         body: JSON.stringify({ cookies }),
       });
 
       if (response.ok) {
-        setInjectionResult({ success: true, message: 'Session cookies injected successfully! You can now search without authentication.' });
+        const result = await response.json();
+        setInjectionResult({ success: true, message: result.message || 'Session cookies injected successfully! You can now search without authentication.' });
         setCookieData('');
       } else {
-        throw new Error('Cookie injection failed');
+        const errorText = await response.text();
+        console.error('API error response:', errorText);
+        throw new Error(`Cookie injection failed: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      setInjectionResult({ success: false, message: 'Failed to inject cookies. Please check the format and try again.' });
+      console.error('Cookie injection error:', error);
+      setInjectionResult({ success: false, message: `Failed to inject cookies: ${error.message}. Please check the format and try again.` });
     } finally {
       setIsInjecting(false);
     }
@@ -74,13 +101,17 @@ export function CookieInjection() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>How to extract cookies:</strong>
+            <strong>How to extract fresh cookies:</strong>
             <ol className="list-decimal list-inside mt-2 space-y-1">
-              <li>Go to Kinray portal in your browser (where you're logged in)</li>
+              <li>Go to Kinray portal and ensure you're logged in (refresh if needed)</li>
               <li>Press F12 → Application tab → Cookies → kinrayweblink.cardinalhealth.com</li>
-              <li>Copy all cookies or use browser extension to export as JSON</li>
-              <li>Paste the cookie data below</li>
+              <li>Right-click each cookie → Copy or use the format below</li>
+              <li>**Important**: Get fresh cookies if yours have expired</li>
             </ol>
+            <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
+              <strong>Compact Format:</strong> Copy and paste this single line format:<br/>
+              <code>[{"{"}name:"_abck",value:"YOUR_VALUE",domain:".cardinalhealth.com",path:"/"{"}"},{"{"}name:"okta-oauth-nonce",value:"YOUR_VALUE",domain:".cardinalhealth.com",path:"/"{"}"}]</code>
+            </div>
           </AlertDescription>
         </Alert>
 
