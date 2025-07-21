@@ -1772,7 +1772,7 @@ var PuppeteerScrapingService = class {
       if (currentUrl.includes("kinrayweblink") || currentUrl.includes("cardinalhealth")) {
         console.log("\u{1F3AF} Connected to Kinray portal - attempting real search");
         try {
-          const realResults = await this.performKinraySearch(searchTerm, searchType);
+          const realResults = await this.searchKinray(searchTerm, searchType);
           if (realResults && realResults.length > 0) {
             console.log(`\u2705 Successfully extracted ${realResults.length} live results from Kinray portal`);
             return realResults;
@@ -1912,6 +1912,188 @@ var PuppeteerScrapingService = class {
     } catch (error) {
       console.error("Cardinal search error:", error);
       return [];
+    }
+  }
+  async searchKinray(searchTerm, searchType) {
+    if (!this.page) return [];
+    try {
+      console.log(`\u{1F50D} Performing live Kinray portal search for: ${searchTerm} (${searchType})`);
+      const currentUrl = this.page.url();
+      if (!currentUrl.includes("search") && !currentUrl.includes("product")) {
+        console.log("\u{1F50D} Navigating to search interface...");
+        await this.navigateToSearch();
+      }
+      const searchSelectors = [
+        'input[name="search"]',
+        'input[id*="search"]',
+        'input[placeholder*="search"]',
+        'input[placeholder*="product"]',
+        ".search-input",
+        "#searchInput",
+        'input[type="text"]'
+      ];
+      let searchInput = null;
+      for (const selector of searchSelectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 3e3 });
+          searchInput = await this.page.$(selector);
+          if (searchInput) {
+            console.log(`\u2705 Found search input: ${selector}`);
+            break;
+          }
+        } catch (e) {
+          console.log(`\u274C Search input ${selector} not found, trying next...`);
+        }
+      }
+      if (!searchInput) {
+        console.log("\u274C No search input found on page");
+        throw new Error("Could not locate search input on Kinray portal");
+      }
+      await searchInput.click({ clickCount: 3 });
+      await searchInput.type(searchTerm);
+      console.log(`\u2705 Entered search term: ${searchTerm}`);
+      const submitSelectors = [
+        'button[type="submit"]',
+        'input[type="submit"]',
+        ".search-btn",
+        ".search-button",
+        'button:has-text("Search")',
+        '[value*="Search"]'
+      ];
+      let submitted = false;
+      for (const selector of submitSelectors) {
+        try {
+          const submitBtn = await this.page.$(selector);
+          if (submitBtn) {
+            await submitBtn.click();
+            console.log(`\u2705 Clicked submit button: ${selector}`);
+            submitted = true;
+            break;
+          }
+        } catch (e) {
+          console.log(`\u274C Submit button ${selector} not found, trying next...`);
+        }
+      }
+      if (!submitted) {
+        await searchInput.press("Enter");
+        console.log("\u2705 Pressed Enter to submit search");
+      }
+      const resultSelectors = [
+        ".search-results",
+        ".product-results",
+        ".results-table",
+        "table tbody tr",
+        ".product-list",
+        ".medication-list"
+      ];
+      let resultsFound = false;
+      for (const selector of resultSelectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 1e4 });
+          resultsFound = true;
+          console.log(`\u2705 Found results container: ${selector}`);
+          break;
+        } catch (e) {
+          console.log(`\u274C Results container ${selector} not found, trying next...`);
+        }
+      }
+      if (!resultsFound) {
+        console.log("\u274C No results container found after search");
+        return [];
+      }
+      const results = await this.page.evaluate((vendorName) => {
+        const medicationResults = [];
+        const resultContainers = [
+          ".search-results tr",
+          ".product-results .product",
+          "table tbody tr",
+          ".product-list .product",
+          ".medication-list .medication",
+          '[class*="result"] tr'
+        ];
+        for (const containerSelector of resultContainers) {
+          const rows = document.querySelectorAll(containerSelector);
+          if (rows.length > 0) {
+            console.log(`Found ${rows.length} result rows with selector: ${containerSelector}`);
+            rows.forEach((row, index) => {
+              try {
+                const nameSelectors = [
+                  ".product-name",
+                  ".drug-name",
+                  ".medication-name",
+                  ".name",
+                  "td:nth-child(1)",
+                  "td:first-child",
+                  '[class*="name"]',
+                  '[class*="product"]'
+                ];
+                let nameEl = null;
+                for (const nameSelector of nameSelectors) {
+                  nameEl = row.querySelector(nameSelector);
+                  if (nameEl && nameEl.textContent?.trim()) break;
+                }
+                if (nameEl && nameEl.textContent?.trim()) {
+                  const name = nameEl.textContent.trim();
+                  const ndcSelectors = [".ndc", ".product-code", ".code", "td:nth-child(2)", '[class*="ndc"]'];
+                  let ndc = null;
+                  for (const ndcSelector of ndcSelectors) {
+                    const ndcEl = row.querySelector(ndcSelector);
+                    if (ndcEl && ndcEl.textContent?.trim()) {
+                      ndc = ndcEl.textContent.trim();
+                      break;
+                    }
+                  }
+                  const priceSelectors = [".price", ".cost", ".amount", "td:nth-child(3)", "td:nth-child(4)", '[class*="price"]'];
+                  let cost = "0.00";
+                  for (const priceSelector of priceSelectors) {
+                    const priceEl = row.querySelector(priceSelector);
+                    if (priceEl && priceEl.textContent?.trim()) {
+                      const priceText = priceEl.textContent.trim();
+                      const priceMatch = priceText.match(/[\d,]+\.?\d*/);
+                      if (priceMatch) {
+                        cost = priceMatch[0].replace(/,/g, "");
+                        break;
+                      }
+                    }
+                  }
+                  const statusSelectors = [".status", ".availability", ".stock", "td:last-child", '[class*="status"]'];
+                  let availability = "In Stock";
+                  for (const statusSelector of statusSelectors) {
+                    const statusEl = row.querySelector(statusSelector);
+                    if (statusEl && statusEl.textContent?.trim()) {
+                      availability = statusEl.textContent.trim();
+                      break;
+                    }
+                  }
+                  medicationResults.push({
+                    medication: {
+                      id: index,
+                      name,
+                      genericName: null,
+                      ndc,
+                      packageSize: null,
+                      strength: null,
+                      dosageForm: null
+                    },
+                    cost,
+                    availability,
+                    vendor: vendorName
+                  });
+                }
+              } catch (rowError) {
+                console.log(`Error processing row ${index}:`, rowError);
+              }
+            });
+            if (medicationResults.length > 0) break;
+          }
+        }
+        return medicationResults;
+      }, this.currentVendor?.name || "Kinray Portal");
+      console.log(`\u2705 Extracted ${results.length} results from Kinray portal`);
+      return results;
+    } catch (error) {
+      console.error("\u274C Kinray search error:", error);
+      throw new Error(`Kinray portal search failed: ${error.message}`);
     }
   }
   async cleanup() {

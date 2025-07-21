@@ -1216,7 +1216,7 @@ export class PuppeteerScrapingService implements ScrapingService {
         
         // Try to perform actual search on the portal
         try {
-          const realResults = await this.performKinraySearch(searchTerm, searchType);
+          const realResults = await this.searchKinray(searchTerm, searchType);
           if (realResults && realResults.length > 0) {
             console.log(`✅ Successfully extracted ${realResults.length} live results from Kinray portal`);
             return realResults;
@@ -1395,6 +1395,223 @@ export class PuppeteerScrapingService implements ScrapingService {
     } catch (error) {
       console.error('Cardinal search error:', error);
       return [];
+    }
+  }
+
+  private async searchKinray(searchTerm: string, searchType: string): Promise<MedicationSearchResult[]> {
+    if (!this.page) return [];
+    
+    try {
+      console.log(`🔍 Performing live Kinray portal search for: ${searchTerm} (${searchType})`);
+      
+      // Navigate to search page if needed
+      const currentUrl = this.page.url();
+      if (!currentUrl.includes('search') && !currentUrl.includes('product')) {
+        console.log('🔍 Navigating to search interface...');
+        await this.navigateToSearch();
+      }
+      
+      // Look for search form with Kinray-specific selectors
+      const searchSelectors = [
+        'input[name="search"]',
+        'input[id*="search"]',
+        'input[placeholder*="search"]',
+        'input[placeholder*="product"]',
+        '.search-input',
+        '#searchInput',
+        'input[type="text"]'
+      ];
+      
+      let searchInput = null;
+      for (const selector of searchSelectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 3000 });
+          searchInput = await this.page.$(selector);
+          if (searchInput) {
+            console.log(`✅ Found search input: ${selector}`);
+            break;
+          }
+        } catch (e) {
+          console.log(`❌ Search input ${selector} not found, trying next...`);
+        }
+      }
+      
+      if (!searchInput) {
+        console.log('❌ No search input found on page');
+        throw new Error('Could not locate search input on Kinray portal');
+      }
+      
+      // Clear and enter search term
+      await searchInput.click({ clickCount: 3 }); // Select all text
+      await searchInput.type(searchTerm);
+      console.log(`✅ Entered search term: ${searchTerm}`);
+      
+      // Submit search
+      const submitSelectors = [
+        'button[type="submit"]',
+        'input[type="submit"]',
+        '.search-btn',
+        '.search-button',
+        'button:has-text("Search")',
+        '[value*="Search"]'
+      ];
+      
+      let submitted = false;
+      for (const selector of submitSelectors) {
+        try {
+          const submitBtn = await this.page.$(selector);
+          if (submitBtn) {
+            await submitBtn.click();
+            console.log(`✅ Clicked submit button: ${selector}`);
+            submitted = true;
+            break;
+          }
+        } catch (e) {
+          console.log(`❌ Submit button ${selector} not found, trying next...`);
+        }
+      }
+      
+      if (!submitted) {
+        // Try pressing Enter as fallback
+        await searchInput.press('Enter');
+        console.log('✅ Pressed Enter to submit search');
+      }
+      
+      // Wait for results with timeout
+      const resultSelectors = [
+        '.search-results',
+        '.product-results',
+        '.results-table',
+        'table tbody tr',
+        '.product-list',
+        '.medication-list'
+      ];
+      
+      let resultsFound = false;
+      for (const selector of resultSelectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 10000 });
+          resultsFound = true;
+          console.log(`✅ Found results container: ${selector}`);
+          break;
+        } catch (e) {
+          console.log(`❌ Results container ${selector} not found, trying next...`);
+        }
+      }
+      
+      if (!resultsFound) {
+        console.log('❌ No results container found after search');
+        return []; // Return empty array instead of throwing error
+      }
+      
+      // Extract results from the page
+      const results = await this.page.evaluate((vendorName) => {
+        const medicationResults: any[] = [];
+        
+        // Try multiple selector strategies for extracting results
+        const resultContainers = [
+          '.search-results tr',
+          '.product-results .product',
+          'table tbody tr',
+          '.product-list .product',
+          '.medication-list .medication',
+          '[class*="result"] tr'
+        ];
+        
+        for (const containerSelector of resultContainers) {
+          const rows = document.querySelectorAll(containerSelector);
+          if (rows.length > 0) {
+            console.log(`Found ${rows.length} result rows with selector: ${containerSelector}`);
+            
+            rows.forEach((row, index) => {
+              try {
+                // Multiple strategies for finding name
+                const nameSelectors = [
+                  '.product-name', '.drug-name', '.medication-name', '.name',
+                  'td:nth-child(1)', 'td:first-child',
+                  '[class*="name"]', '[class*="product"]'
+                ];
+                
+                let nameEl = null;
+                for (const nameSelector of nameSelectors) {
+                  nameEl = row.querySelector(nameSelector);
+                  if (nameEl && nameEl.textContent?.trim()) break;
+                }
+                
+                if (nameEl && nameEl.textContent?.trim()) {
+                  const name = nameEl.textContent.trim();
+                  
+                  // Extract NDC
+                  const ndcSelectors = ['.ndc', '.product-code', '.code', 'td:nth-child(2)', '[class*="ndc"]'];
+                  let ndc = null;
+                  for (const ndcSelector of ndcSelectors) {
+                    const ndcEl = row.querySelector(ndcSelector);
+                    if (ndcEl && ndcEl.textContent?.trim()) {
+                      ndc = ndcEl.textContent.trim();
+                      break;
+                    }
+                  }
+                  
+                  // Extract price
+                  const priceSelectors = ['.price', '.cost', '.amount', 'td:nth-child(3)', 'td:nth-child(4)', '[class*="price"]'];
+                  let cost = '0.00';
+                  for (const priceSelector of priceSelectors) {
+                    const priceEl = row.querySelector(priceSelector);
+                    if (priceEl && priceEl.textContent?.trim()) {
+                      const priceText = priceEl.textContent.trim();
+                      const priceMatch = priceText.match(/[\d,]+\.?\d*/);
+                      if (priceMatch) {
+                        cost = priceMatch[0].replace(/,/g, '');
+                        break;
+                      }
+                    }
+                  }
+                  
+                  // Extract availability
+                  const statusSelectors = ['.status', '.availability', '.stock', 'td:last-child', '[class*="status"]'];
+                  let availability = 'In Stock';
+                  for (const statusSelector of statusSelectors) {
+                    const statusEl = row.querySelector(statusSelector);
+                    if (statusEl && statusEl.textContent?.trim()) {
+                      availability = statusEl.textContent.trim();
+                      break;
+                    }
+                  }
+                  
+                  medicationResults.push({
+                    medication: {
+                      id: index,
+                      name: name,
+                      genericName: null,
+                      ndc: ndc,
+                      packageSize: null,
+                      strength: null,
+                      dosageForm: null,
+                    },
+                    cost: cost,
+                    availability: availability,
+                    vendor: vendorName,
+                  });
+                }
+              } catch (rowError) {
+                console.log(`Error processing row ${index}:`, rowError);
+              }
+            });
+            
+            // If we found results, break out of container loop
+            if (medicationResults.length > 0) break;
+          }
+        }
+        
+        return medicationResults;
+      }, this.currentVendor?.name || 'Kinray Portal');
+      
+      console.log(`✅ Extracted ${results.length} results from Kinray portal`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Kinray search error:', error);
+      throw new Error(`Kinray portal search failed: ${error.message}`);
     }
   }
 
