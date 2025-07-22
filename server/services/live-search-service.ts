@@ -644,9 +644,36 @@ export class LiveSearchService {
 
     try {
       const results = await this.page.evaluate(() => {
+        console.log('🔍 COMPREHENSIVE KINRAY ANALYSIS STARTING...');
+        
+        // First, capture complete page structure for debugging
+        const pageStructure = {
+          url: location.href,
+          title: document.title,
+          bodyText: document.body.innerText.substring(0, 2000),
+          elementCounts: {
+            tables: document.querySelectorAll('table').length,
+            rows: document.querySelectorAll('tr').length,
+            divs: document.querySelectorAll('div').length
+          }
+        };
+        
+        console.log('📊 PAGE ANALYSIS:');
+        console.log(`URL: ${pageStructure.url}`);
+        console.log(`Title: ${pageStructure.title}`);
+        console.log(`Tables: ${pageStructure.elementCounts.tables}, Rows: ${pageStructure.elementCounts.rows}`);
+        console.log(`Body preview: ${pageStructure.bodyText.substring(0, 300)}`);
+
         const medicationResults: any[] = [];
         
-        // Look for result containers
+        // Strategy 1: Look for pharmaceutical terms first
+        const pharmaceuticalTerms = ['lisinopril', 'aspirin', 'ibuprofen', 'advil', 'tylenol', 'amoxicillin'];
+        const foundTerms = pharmaceuticalTerms.filter(term => 
+          pageStructure.bodyText.toLowerCase().includes(term)
+        );
+        console.log(`🎯 Found pharmaceutical terms: ${foundTerms.join(', ')}`);
+        
+        // Strategy 2: Enhanced result container detection
         const resultSelectors = [
           'table tbody tr',
           '.search-results tr',
@@ -703,10 +730,81 @@ export class LiveSearchService {
           }
         }
 
+        // If no results found with standard selectors, try broader search
+        if (medicationResults.length === 0) {
+          console.log('No results with standard selectors, trying broader extraction...');
+          
+          // Look for any text that might contain medication information
+          const allRows = document.querySelectorAll('tr, div');
+          allRows.forEach((element, index) => {
+            const text = element.textContent?.trim() || '';
+            
+            // Look for pharmaceutical patterns in any element
+            const medicationPattern = /(lisinopril|aspirin|tylenol|acetaminophen|ibuprofen|metformin|atorvastatin|amlodipine|levothyroxine|omeprazole)/i;
+            const genericPattern = /([a-zA-Z]+(?:\s[a-zA-Z]+)*)\s*(\d+(?:\.\d+)?\s*(?:mg|mcg|g|ml))/i;
+            
+            if (medicationPattern.test(text) || (genericPattern.test(text) && text.length < 200)) {
+              const match = genericPattern.exec(text);
+              const name = match ? `${match[1].trim()} ${match[2].trim()}` : text.substring(0, 50).trim();
+              
+              // Look for price in the same element or nearby
+              const priceMatch = text.match(/\$?(\d+\.?\d{2})/);
+              const ndcMatch = text.match(/(\d{5}-\d{3,4}-\d{1,2})/);
+              
+              if (name.length > 3) {
+                medicationResults.push({
+                  medication: {
+                    id: index + 5000,
+                    name: name,
+                    genericName: match ? match[1].trim().toLowerCase() : name.toLowerCase(),
+                    ndc: ndcMatch ? ndcMatch[1] : null,
+                    packageSize: null,
+                    strength: match ? match[2].trim() : null,
+                    dosageForm: 'Tablet',
+                    manufacturer: null
+                  },
+                  cost: priceMatch ? `$${priceMatch[1]}` : '$0.00',
+                  availability: 'Available',
+                  vendor: 'Kinray (Cardinal Health)'
+                });
+              }
+            }
+          });
+        }
+
         return medicationResults;
       });
 
-      console.log(`✅ Extracted ${results.length} results from search`);
+      console.log(`✅ Extracted ${results.length} results from page`);
+      
+      if (results.length === 0) {
+        // Add comprehensive page analysis for debugging
+        const pageDebug = await this.page.evaluate(() => {
+          const debug = {
+            url: location.href,
+            title: document.title,
+            bodyText: document.body.innerText.substring(0, 1000),
+            tableCount: document.querySelectorAll('table').length,
+            rowCount: document.querySelectorAll('tr').length,
+            hasGenericTerms: ['lisinopril', 'aspirin', 'results', 'found', 'search'].some(term => 
+              document.body.innerText.toLowerCase().includes(term)
+            )
+          };
+          return debug;
+        });
+        
+        console.log('🔍 Page debug info:');
+        console.log(`   URL: ${pageDebug.url}`);
+        console.log(`   Title: ${pageDebug.title}`);
+        console.log(`   Tables: ${pageDebug.tableCount}, Rows: ${pageDebug.rowCount}`);
+        console.log(`   Has generic terms: ${pageDebug.hasGenericTerms}`);
+        console.log(`   Body text sample: ${pageDebug.bodyText.substring(0, 200)}...`);
+        
+        // Take screenshot for manual analysis
+        await this.page.screenshot({ path: '/tmp/kinray-no-results-debug.png', fullPage: true });
+        console.log('📷 Debug screenshot saved for manual analysis');
+      }
+      
       return results;
 
     } catch (error) {

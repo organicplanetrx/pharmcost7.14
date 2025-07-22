@@ -3390,7 +3390,28 @@ var LiveSearchService = class {
     if (!this.page) return [];
     try {
       const results = await this.page.evaluate(() => {
+        console.log("\u{1F50D} COMPREHENSIVE KINRAY ANALYSIS STARTING...");
+        const pageStructure = {
+          url: location.href,
+          title: document.title,
+          bodyText: document.body.innerText.substring(0, 2e3),
+          elementCounts: {
+            tables: document.querySelectorAll("table").length,
+            rows: document.querySelectorAll("tr").length,
+            divs: document.querySelectorAll("div").length
+          }
+        };
+        console.log("\u{1F4CA} PAGE ANALYSIS:");
+        console.log(`URL: ${pageStructure.url}`);
+        console.log(`Title: ${pageStructure.title}`);
+        console.log(`Tables: ${pageStructure.elementCounts.tables}, Rows: ${pageStructure.elementCounts.rows}`);
+        console.log(`Body preview: ${pageStructure.bodyText.substring(0, 300)}`);
         const medicationResults = [];
+        const pharmaceuticalTerms = ["lisinopril", "aspirin", "ibuprofen", "advil", "tylenol", "amoxicillin"];
+        const foundTerms = pharmaceuticalTerms.filter(
+          (term) => pageStructure.bodyText.toLowerCase().includes(term)
+        );
+        console.log(`\u{1F3AF} Found pharmaceutical terms: ${foundTerms.join(", ")}`);
         const resultSelectors = [
           "table tbody tr",
           ".search-results tr",
@@ -3437,9 +3458,64 @@ var LiveSearchService = class {
             if (medicationResults.length > 0) break;
           }
         }
+        if (medicationResults.length === 0) {
+          console.log("No results with standard selectors, trying broader extraction...");
+          const allRows = document.querySelectorAll("tr, div");
+          allRows.forEach((element, index) => {
+            const text2 = element.textContent?.trim() || "";
+            const medicationPattern = /(lisinopril|aspirin|tylenol|acetaminophen|ibuprofen|metformin|atorvastatin|amlodipine|levothyroxine|omeprazole)/i;
+            const genericPattern = /([a-zA-Z]+(?:\s[a-zA-Z]+)*)\s*(\d+(?:\.\d+)?\s*(?:mg|mcg|g|ml))/i;
+            if (medicationPattern.test(text2) || genericPattern.test(text2) && text2.length < 200) {
+              const match = genericPattern.exec(text2);
+              const name = match ? `${match[1].trim()} ${match[2].trim()}` : text2.substring(0, 50).trim();
+              const priceMatch = text2.match(/\$?(\d+\.?\d{2})/);
+              const ndcMatch = text2.match(/(\d{5}-\d{3,4}-\d{1,2})/);
+              if (name.length > 3) {
+                medicationResults.push({
+                  medication: {
+                    id: index + 5e3,
+                    name,
+                    genericName: match ? match[1].trim().toLowerCase() : name.toLowerCase(),
+                    ndc: ndcMatch ? ndcMatch[1] : null,
+                    packageSize: null,
+                    strength: match ? match[2].trim() : null,
+                    dosageForm: "Tablet",
+                    manufacturer: null
+                  },
+                  cost: priceMatch ? `$${priceMatch[1]}` : "$0.00",
+                  availability: "Available",
+                  vendor: "Kinray (Cardinal Health)"
+                });
+              }
+            }
+          });
+        }
         return medicationResults;
       });
-      console.log(`\u2705 Extracted ${results.length} results from search`);
+      console.log(`\u2705 Extracted ${results.length} results from page`);
+      if (results.length === 0) {
+        const pageDebug = await this.page.evaluate(() => {
+          const debug = {
+            url: location.href,
+            title: document.title,
+            bodyText: document.body.innerText.substring(0, 1e3),
+            tableCount: document.querySelectorAll("table").length,
+            rowCount: document.querySelectorAll("tr").length,
+            hasGenericTerms: ["lisinopril", "aspirin", "results", "found", "search"].some(
+              (term) => document.body.innerText.toLowerCase().includes(term)
+            )
+          };
+          return debug;
+        });
+        console.log("\u{1F50D} Page debug info:");
+        console.log(`   URL: ${pageDebug.url}`);
+        console.log(`   Title: ${pageDebug.title}`);
+        console.log(`   Tables: ${pageDebug.tableCount}, Rows: ${pageDebug.rowCount}`);
+        console.log(`   Has generic terms: ${pageDebug.hasGenericTerms}`);
+        console.log(`   Body text sample: ${pageDebug.bodyText.substring(0, 200)}...`);
+        await this.page.screenshot({ path: "/tmp/kinray-no-results-debug.png", fullPage: true });
+        console.log("\u{1F4F7} Debug screenshot saved for manual analysis");
+      }
       return results;
     } catch (error) {
       console.error("\u274C Result extraction error:", error);
