@@ -1,0 +1,163 @@
+You reached the start of the range → Jul 22, 2025, 5:38 PM
+
+Starting Container
+
+🚂 Railway PharmaCost Pro Server Starting...
+
+=== RAILWAY ENVIRONMENT DEBUG ===
+
+Raw PORT env: 8080
+
+Railway detected: YES
+
+NODE_ENV: production
+
+PORT type: string
+
+PORT env var: 8080
+
+Server will bind to port: 8080
+
+Railway vars found: 22
+
+All environment variables containing RAILWAY: [
+
+Will use port: 8080
+
+  'RAILWAY_REPLICA_REGION: us-east4-eqdc4a',
+
+==============================
+
+  'RAILWAY_PUBLIC_DOMAIN: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_REPLICA_ID: 0fbc37f2-bdf1-482a-9dc2-4a6a8e697ea3',
+
+✓ Express app created
+
+  'RAILWAY_GIT_AUTHOR: organicplanetrx',
+
+✓ Express middleware configured
+
+  'RAILWAY_GIT_BRANCH: main',
+
+  'RAILWAY_STATIC_URL: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_SERVICE_NAME: pharmcost7.14',
+
+  'RAILWAY_DEPLOYMENT_ID',
+
+Starting server initialization...
+
+  'RAILWAY_PRIVATE_DOMAIN: pharmcost7-14.railway.internal',
+
+Routes registered successfully
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL',
+
+  'RAILWAY_PROJECT_NAME: accomplished-flexibility',
+
+Setting up static file serving...
+
+  'RAILWAY_SERVICE_ID: 23a0149f-ae92-4056-8d79-528be3717919',
+
+  'RAILWAY_PROJECT_ID',
+
+Static files directory: /app/dist/public
+
+  'RAILWAY_GIT_COMMIT_MESSAGE: Improve website login process by actively monitoring authentication status\n' +
+
+  'RAILWAY_GIT_REPO_OWNER',
+
+    '\n' +
+
+✅ Static files configured for Railway deployment
+
+  'RAILWAY_ENVIRONMENT',
+
+=== RAILWAY PORT DEBUGGING ===
+
+    'Enhance SimpleCookieExtractor to monitor authentication completion, handle 2FA, and include additional cookie names for Cardinal Health.\n' +
+
+    '\n' +
+
+  'RAILWAY_ENVIRONMENT_ID',
+
+Railway PORT environment variable: "8080"
+
+    'Replit-Commit-Author: Agent\n' +
+
+  'RAILWAY_BETA_ENABLE_RUNTIME_V2',
+
+Parsed port number: 8080
+
+    'Replit-Commit-Session-Id: 028a46d3-4c44-4bf1-b639-37b69a33736e\n' +
+
+  'RAILWAY_SNAPSHOT_ID',
+
+Is Railway deployment: YES
+
+    'Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/27c7860c-6b7c-4071-b6ec-59c6d7082d49/028a46d3-4c44-4bf1-b639-37b69a33736e/eOnnaUh';,
+
+  'RAILWAY_GIT_REPO_NAME',
+
+  'RAILWAY_ENVIRONMENT_NAME: production',
+
+All Railway env vars: [
+
+  'RAILWAY_GIT_COMMIT_SHA'
+
+  'RAILWAY_DEPLOYMENT_ID: 4ccd5cfe-d914-4411-acb8-85a562a8192b',
+
+  'RAILWAY_REPLICA_REGION',
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_PUBLIC_DOMAIN',
+
+]
+
+  'RAILWAY_PROJECT_ID: 3fb5727b-290e-4d77-be0e-0301636c227d',
+
+  'RAILWAY_REPLICA_ID',
+
+  'RAILWAY_GIT_REPO_OWNER: organicplanetrx',
+
+Server will bind to port: 8080
+
+  'RAILWAY_ENVIRONMENT: production',
+
+===============================
+
+  'RAILWAY_GIT_AUTHOR',
+
+  'RAILWAY_ENVIRONMENT_ID: 7545f10b-d513-4031-9d9b-03b17b9ed615',
+
+  'RAILWAY_GIT_BRANCH',
+
+✅ Main application loaded successfully
+
+  'RAILWAY_BETA_ENABLE_RUNTIME_V2: 1',
+
+  'RAILWAY_STATIC_URL',
+
+  'RAILWAY_SNAPSHOT_ID: 13e48cd2-78e1-4a7a-a97a-772a76186b6f',
+
+🚀 PharmaCost Pro successfully started
+
+  'RAILWAY_SERVICE_NAME',
+
+  'RAILWAY_GIT_REPO_NAME: pharmcost7.14',
+
+🌐 Server listening on 0.0.0.0:8080
+
+  'RAILWAY_PRIVATE_DOMAIN',
+
+  'RAILWAY_GIT_COMMIT_SHA: 3ecc384132e66863aba45075ffb053d764f61ee6'
+
+🔗 Health check endpoint: /health
+
+]
+
+  'RAILWAY_PROJECT_NAME',
+
+===================================
