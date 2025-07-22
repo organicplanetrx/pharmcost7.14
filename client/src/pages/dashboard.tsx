@@ -32,90 +32,71 @@ export default function Dashboard() {
           </div>
       </header>
 
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Credentials */}
-          <div className="lg:col-span-1">
-            <div className="pharma-card">
-              <CredentialForm />
-            </div>
-            
-            {/* Enhanced Session Detection */}
-            <div className="mt-6">
+        <main className="space-y-8">
+          {/* Top Row - Authentication Status */}
+          <div className="pharma-card">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">Authentication Status</h3>
               <EnhancedSessionDetector />
-            </div>
-            
-            {/* Cookie Extraction Tool */}
-            <div className="mt-6">
-              <EnhancedCookieInterface />
-            </div>
-            
-            {/* Quick Actions */}
-            <div className="pharma-card mt-6">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Actions</h3>
-                <div className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-slate-700"
-                  >
-                    <i className="fas fa-history mr-3" />
-                    View Search History
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-slate-700"
-                  >
-                    <i className="fas fa-download mr-3" />
-                    Export All Data
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-slate-700"
-                  >
-                    <i className="fas fa-upload mr-3" />
-                    Import Medication List
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Right Column - Search Interface */}
-          <div className="lg:col-span-2">
+          {/* Main Content - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column - Search Interface */}
             <div className="pharma-card">
               <SearchInterface />
             </div>
 
-            {/* Dashboard Stats */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">
-                    {statsLoading ? "..." : stats?.totalSearchesToday || 0}
+            {/* Right Column - Stats */}
+            <div className="space-y-6">
+              {!statsLoading && stats && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="pharma-stat-card">
+                    <div className="p-4 text-center">
+                      <Shield className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-slate-900">{stats.totalVendors}</p>
+                      <p className="text-sm text-slate-600">Vendors</p>
+                    </div>
                   </div>
-                  <div className="text-lg opacity-90">Searches Today</div>
+                  
+                  <div className="pharma-stat-card">
+                    <div className="p-4 text-center">
+                      <Settings className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                      <p className="text-2xl font-bold text-slate-900">{stats.totalSearches}</p>
+                      <p className="text-sm text-slate-600">Searches</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="stat-card">
-                <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">
-                    ${statsLoading ? "..." : stats?.totalCostAnalysis || "0.00"}
-                  </div>
-                  <div className="text-lg opacity-90">Total Cost Analysis</div>
-                </div>
-              </div>
-
-              <div className="stat-card">
-                <div className="text-center">
-                  <div className="text-3xl font-bold mb-2">
-                    {statsLoading ? "..." : stats?.csvExportsGenerated || 0}
-                  </div>
-                  <div className="text-lg opacity-90">CSV Exports Generated</div>
+              {/* Activity Log */}
+              <div className="pharma-card">
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent Activity</h3>
+                  <ActivityLog />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Collapsible Management Tools */}
+          <details className="pharma-card">
+            <summary className="p-6 cursor-pointer border-b">
+              <h3 className="text-lg font-semibold text-slate-800 inline">Advanced Tools</h3>
+              <p className="text-sm text-slate-600 mt-1">Session management and credential tools</p>
+            </summary>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+              <div>
+                <h4 className="font-medium text-slate-700 mb-3">Session Management</h4>
+                <EnhancedCookieInterface />
+              </div>
+              <div>
+                <h4 className="font-medium text-slate-700 mb-3">Vendor Credentials</h4>
+                <CredentialForm />
+              </div>
+            </div>
+          </details>
         </main>
 
         {/* Activity Log */}
