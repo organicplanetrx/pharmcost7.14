@@ -83,26 +83,66 @@ export class SimpleCookieExtractor {
         await passwordField.type(password);
       }
       
-      // Submit form - try simple approach
+      // Enhanced form submission with authentication completion monitoring
       console.log('🚀 Submitting form...');
       await passwordField?.press('Enter');
       
-      // Wait and check for redirect
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      const currentUrl = this.page.url();
-      console.log(`📍 Current URL: ${currentUrl}`);
+      // Enhanced authentication monitoring with proper waiting
+      console.log('⏳ Monitoring authentication completion...');
+      let authenticatedUrl = '';
+      let finalCookies = [];
       
-      // Extract cookies regardless of authentication success
+      for (let i = 0; i < 20; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const currentUrl = this.page.url();
+        const pageTitle = await this.page.title();
+        
+        console.log(`   ${(i+1)*2}s - URL: ${currentUrl} | Title: ${pageTitle}`);
+        
+        // Check for 2FA/verification pages
+        if (currentUrl.includes('verify') || currentUrl.includes('mfa') || currentUrl.includes('2fa')) {
+          console.log('🔐 2FA verification detected - waiting for completion...');
+          continue;
+        }
+        
+        // Check for authentication success indicators
+        const isAuthenticated = !currentUrl.includes('login') && 
+                               !currentUrl.includes('signin') && 
+                               (currentUrl.includes('home') || 
+                                currentUrl.includes('dashboard') || 
+                                currentUrl.includes('portal') ||
+                                (pageTitle.toLowerCase().includes('kinray') && !pageTitle.toLowerCase().includes('login')));
+        
+        if (isAuthenticated) {
+          console.log(`✅ Authentication completed at ${(i+1)*2}s - URL: ${currentUrl}`);
+          authenticatedUrl = currentUrl;
+          break;
+        }
+        
+        // If still on login page after 30+ seconds, credentials might be wrong
+        if (i > 15 && currentUrl.includes('login')) {
+          console.log('⚠️ Still on login page after 30+ seconds - credentials may be incorrect');
+          break;
+        }
+      }
+      
+      // Extract cookies after authentication attempt completion
       const cookies = await this.page.cookies();
       const relevantCookies = cookies.filter((cookie: any) => 
         cookie.domain.includes('cardinalhealth.com') || 
         cookie.name.includes('session') ||
         cookie.name.includes('auth') ||
         cookie.name.includes('okta') ||
-        cookie.name.includes('_abck')
+        cookie.name.includes('_abck') ||
+        cookie.name.includes('JSESSIONID') ||
+        cookie.name.includes('AWSALB') ||
+        cookie.name.includes('AWSELB')
       );
       
-      console.log(`✅ Extracted ${relevantCookies.length} cookies`);
+      console.log(`✅ Extracted ${relevantCookies.length} cookies from ${authenticatedUrl || 'login page'}`);
+      
+      // Log cookie names for debugging
+      console.log('📋 Cookie names:', relevantCookies.map(c => c.name).join(', '));
       
       return relevantCookies.map((cookie: any) => ({
         name: cookie.name,

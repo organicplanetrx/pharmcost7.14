@@ -78,14 +78,35 @@ var init_simple_cookie_extractor = __esm({
           }
           console.log("\u{1F680} Submitting form...");
           await passwordField?.press("Enter");
-          await new Promise((resolve) => setTimeout(resolve, 5e3));
-          const currentUrl = this.page.url();
-          console.log(`\u{1F4CD} Current URL: ${currentUrl}`);
+          console.log("\u23F3 Monitoring authentication completion...");
+          let authenticatedUrl = "";
+          let finalCookies = [];
+          for (let i = 0; i < 20; i++) {
+            await new Promise((resolve) => setTimeout(resolve, 2e3));
+            const currentUrl = this.page.url();
+            const pageTitle = await this.page.title();
+            console.log(`   ${(i + 1) * 2}s - URL: ${currentUrl} | Title: ${pageTitle}`);
+            if (currentUrl.includes("verify") || currentUrl.includes("mfa") || currentUrl.includes("2fa")) {
+              console.log("\u{1F510} 2FA verification detected - waiting for completion...");
+              continue;
+            }
+            const isAuthenticated = !currentUrl.includes("login") && !currentUrl.includes("signin") && (currentUrl.includes("home") || currentUrl.includes("dashboard") || currentUrl.includes("portal") || pageTitle.toLowerCase().includes("kinray") && !pageTitle.toLowerCase().includes("login"));
+            if (isAuthenticated) {
+              console.log(`\u2705 Authentication completed at ${(i + 1) * 2}s - URL: ${currentUrl}`);
+              authenticatedUrl = currentUrl;
+              break;
+            }
+            if (i > 15 && currentUrl.includes("login")) {
+              console.log("\u26A0\uFE0F Still on login page after 30+ seconds - credentials may be incorrect");
+              break;
+            }
+          }
           const cookies = await this.page.cookies();
           const relevantCookies = cookies.filter(
-            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck")
+            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck") || cookie.name.includes("JSESSIONID") || cookie.name.includes("AWSALB") || cookie.name.includes("AWSELB")
           );
-          console.log(`\u2705 Extracted ${relevantCookies.length} cookies`);
+          console.log(`\u2705 Extracted ${relevantCookies.length} cookies from ${authenticatedUrl || "login page"}`);
+          console.log("\u{1F4CB} Cookie names:", relevantCookies.map((c) => c.name).join(", "));
           return relevantCookies.map((cookie) => ({
             name: cookie.name,
             value: cookie.value,
