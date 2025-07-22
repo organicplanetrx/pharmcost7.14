@@ -3451,6 +3451,9 @@ app.use((req, res, next) => {
       console.log("Static files directory:", staticPath);
       if (fs2.existsSync(staticPath)) {
         app.use(express2.static(staticPath));
+        app.get("/debug", (req, res) => {
+          res.sendFile(path3.join(process.cwd(), "debug-deployment.html"));
+        });
         app.get("*", (req, res) => {
           if (req.path.startsWith("/api")) {
             return res.status(404).json({ message: "API endpoint not found" });

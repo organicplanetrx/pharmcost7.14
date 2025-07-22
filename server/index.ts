@@ -98,6 +98,11 @@ app.use((req, res, next) => {
     
     if (fs.existsSync(staticPath)) {
       app.use(express.static(staticPath));
+      // Debug route
+      app.get("/debug", (req, res) => {
+        res.sendFile(path.join(process.cwd(), 'debug-deployment.html'));
+      });
+      
       // Handle client-side routing
       app.get("*", (req, res) => {
         if (req.path.startsWith('/api')) {
