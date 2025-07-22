@@ -1504,14 +1504,14 @@ export class PuppeteerScrapingService implements ScrapingService {
       // Wait for page to load and check current status
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      const currentUrl = this.page.url();
-      console.log(`Current page: ${currentUrl}`);
+      const finalPageUrl = this.page.url();
+      console.log(`Current page: ${finalPageUrl}`);
       
       const pageTitle = await this.page.title();
       console.log(`Page title: ${pageTitle}`);
       
       // Check if we're logged in or need to authenticate
-      if (currentUrl.includes('kinrayweblink') || currentUrl.includes('cardinalhealth')) {
+      if (finalPageUrl.includes('kinrayweblink') || finalPageUrl.includes('cardinalhealth')) {
         console.log('🎯 Connected to Kinray portal - attempting real search');
         
         // Try to perform actual search on the portal

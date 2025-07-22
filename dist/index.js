@@ -748,6 +748,59 @@ var storage = createSmartStorage();
 // server/services/scraper.ts
 import puppeteer from "puppeteer";
 import { execSync } from "child_process";
+
+// server/services/session-manager.ts
+var SessionManager = class {
+  /**
+   * Inject pre-authenticated session cookies into the browser
+   */
+  static async injectSessionCookies(page, cookies) {
+    console.log("\u{1F36A} Injecting session cookies to bypass authentication...");
+    for (const cookie of cookies) {
+      try {
+        await page.setCookie({
+          name: cookie.name,
+          value: cookie.value,
+          domain: cookie.domain,
+          path: cookie.path,
+          expires: cookie.expires
+        });
+        console.log(`\u2705 Injected cookie: ${cookie.name}`);
+      } catch (error) {
+        console.log(`\u274C Failed to inject cookie ${cookie.name}:`, error);
+      }
+    }
+  }
+  /**
+   * Check if session is still valid
+   */
+  static async validateSession(page) {
+    try {
+      const currentUrl = page.url();
+      const hasLoginForm = await page.$('input[name="username"], input[type="password"]') !== null;
+      return !currentUrl.includes("login") && !currentUrl.includes("signin") && !hasLoginForm;
+    } catch (error) {
+      return false;
+    }
+  }
+  /**
+   * Extract common Kinray session cookie names
+   */
+  static getKinraySessionCookieNames() {
+    return [
+      "JSESSIONID",
+      "SESSION",
+      "auth-token",
+      "kinray-session",
+      "cardinal-auth",
+      "_session",
+      "okta-oauth-state",
+      "DT"
+    ];
+  }
+};
+
+// server/services/scraper.ts
 var PuppeteerScrapingService = class {
   browser = null;
   page = null;
@@ -1878,6 +1931,20 @@ var PuppeteerScrapingService = class {
       return false;
     }
   }
+  async injectSessionCookies(cookies) {
+    try {
+      if (!this.page) {
+        await this.initBrowser();
+        if (!this.page) throw new Error("Failed to initialize browser");
+      }
+      console.log("\u{1F36A} Injecting session cookies to bypass authentication...");
+      await SessionManager.injectSessionCookies(this.page, cookies);
+      return true;
+    } catch (error) {
+      console.error("Cookie injection failed:", error);
+      return false;
+    }
+  }
   async searchMedication(searchTerm, searchType) {
     console.log(`\u{1F50D} Starting medication search for "${searchTerm}" (${searchType})`);
     console.log(`\u{1F4CA} Current vendor:`, this.currentVendor?.name);
@@ -1888,7 +1955,7 @@ var PuppeteerScrapingService = class {
       throw new Error("Browser automation not available for live scraping");
     }
     console.log("\u2705 Browser automation available");
-    console.log("\u{1F36A} Using existing browser session - bypassing login");
+    console.log("\u{1F36A} Using session cookie injection - bypassing login");
     try {
       await this.initBrowser();
       if (!this.page) throw new Error("Failed to initialize browser page");
@@ -1903,12 +1970,100 @@ var PuppeteerScrapingService = class {
       portalUrl: "https://kinrayweblink.cardinalhealth.com"
     };
     try {
-      console.log(`\u{1F310} Attempting real search on ${this.currentVendor.name} portal`);
+      if (global.__kinray_session_cookies__) {
+        console.log("\u{1F36A} Found injected session cookies - applying them before navigation...");
+        await SessionManager.injectSessionCookies(this.page, global.__kinray_session_cookies__);
+        await new Promise((resolve) => setTimeout(resolve, 1e3));
+      }
+      console.log(`\u{1F310} Going directly to Kinray portal search page (using session cookies)`);
+      const kinrayMainUrl = "https://kinrayweblink.cardinalhealth.com";
+      console.log(`\u{1F36A} Navigating to: ${kinrayMainUrl}`);
+      const response = await this.page.goto(kinrayMainUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 15e3
+      });
       const currentUrl = this.page.url();
-      console.log(`Current page: ${currentUrl}`);
+      console.log(`\u{1F4CD} After navigation with cookies: ${currentUrl}`);
+      if (currentUrl.includes("/login") || currentUrl.includes("/signin")) {
+        console.log("\u{1F504} Still on login page after cookie injection - trying enhanced authentication bypass...");
+        const authBypassStrategies = [
+          {
+            name: "Direct Dashboard Access",
+            urls: [
+              "https://kinrayweblink.cardinalhealth.com/dashboard",
+              "https://kinrayweblink.cardinalhealth.com/home"
+            ]
+          },
+          {
+            name: "Product Search Area",
+            urls: [
+              "https://kinrayweblink.cardinalhealth.com/products",
+              "https://kinrayweblink.cardinalhealth.com/search",
+              "https://kinrayweblink.cardinalhealth.com/catalog"
+            ]
+          },
+          {
+            name: "Main Portal Areas",
+            urls: [
+              "https://kinrayweblink.cardinalhealth.com/orders",
+              "https://kinrayweblink.cardinalhealth.com/inventory",
+              "https://kinrayweblink.cardinalhealth.com/main"
+            ]
+          }
+        ];
+        let authenticationBypassed = false;
+        for (const strategy of authBypassStrategies) {
+          console.log(`\u{1F3AF} Trying ${strategy.name} bypass strategy...`);
+          for (const url of strategy.urls) {
+            try {
+              console.log(`\u{1F310} Direct access attempt: ${url}`);
+              if (global.__kinray_session_cookies__) {
+                await SessionManager.injectSessionCookies(this.page, global.__kinray_session_cookies__);
+                await new Promise((resolve) => setTimeout(resolve, 500));
+              }
+              await this.page.goto(url, {
+                waitUntil: "domcontentloaded",
+                timeout: 15e3
+              });
+              const finalUrl = this.page.url();
+              console.log(`\u{1F4CD} Final URL after redirect: ${finalUrl}`);
+              if (!finalUrl.includes("/login") && !finalUrl.includes("/signin") && !finalUrl.includes("/verify")) {
+                console.log(`\u2705 AUTHENTICATION BYPASS SUCCESSFUL via ${strategy.name}: ${finalUrl}`);
+                authenticationBypassed = true;
+                break;
+              } else {
+                console.log(`\u274C Still redirected to auth page: ${finalUrl}`);
+              }
+            } catch (error) {
+              console.log(`\u274C Error accessing ${url}: ${error.message}`);
+              continue;
+            }
+          }
+          if (authenticationBypassed) break;
+        }
+        if (!authenticationBypassed) {
+          console.log("\u{1F6A8} AUTHENTICATION BYPASS FAILED - Session cookies may have expired");
+          console.log("\u{1F4A1} User needs to provide fresh session cookies from their browser");
+          try {
+            await this.page.screenshot({ path: "auth-bypass-failed.png" });
+            console.log("\u{1F4F8} Authentication failure screenshot saved");
+          } catch (screenshotError) {
+            console.log("\u274C Screenshot failed:", screenshotError.message);
+          }
+          console.log("\u26A0\uFE0F Proceeding with search attempt despite authentication challenges...");
+        }
+      } else {
+        console.log(`\u2705 Authentication successful - already on authenticated page: ${currentUrl}`);
+      }
+      if (response && response.ok()) {
+        console.log("\u2705 Successfully connected to Kinray portal");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      const finalPageUrl = this.page.url();
+      console.log(`Current page: ${finalPageUrl}`);
       const pageTitle = await this.page.title();
       console.log(`Page title: ${pageTitle}`);
-      if (currentUrl.includes("kinrayweblink") || currentUrl.includes("cardinalhealth")) {
+      if (finalPageUrl.includes("kinrayweblink") || finalPageUrl.includes("cardinalhealth")) {
         console.log("\u{1F3AF} Connected to Kinray portal - attempting real search");
         try {
           const realResults = await this.searchKinray(searchTerm, searchType);
@@ -2424,6 +2579,20 @@ async function registerRoutes(app2) {
       res.json(newCredential);
     } catch (error) {
       res.status(500).json({ message: "Failed to save credentials" });
+    }
+  });
+  app2.post("/api/inject-cookies", async (req, res) => {
+    try {
+      const { cookies } = req.body;
+      if (!cookies || !Array.isArray(cookies)) {
+        return res.status(400).json({ error: "Invalid cookie data" });
+      }
+      console.log(`\u{1F36A} Received ${cookies.length} cookies for injection`);
+      global.__kinray_session_cookies__ = cookies;
+      res.json({ success: true, message: "Session cookies stored successfully" });
+    } catch (error) {
+      console.error("Cookie injection error:", error);
+      res.status(500).json({ error: "Failed to inject cookies" });
     }
   });
   app2.post("/api/credentials/test-connection", async (req, res) => {
