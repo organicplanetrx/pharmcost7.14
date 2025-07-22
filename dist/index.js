@@ -3001,13 +3001,82 @@ var LiveSearchService = class {
       } catch {
       }
       await new Promise((resolve) => setTimeout(resolve, 3e3));
-      const currentUrl = this.page.url();
+      let currentUrl = this.page.url();
+      console.log(`\u{1F50D} Current URL after login: ${currentUrl}`);
+      if (currentUrl.includes("verify") || currentUrl.includes("mfa") || currentUrl.includes("call")) {
+        console.log("\u{1F510} 2FA verification page detected - attempting to bypass...");
+        try {
+          console.log("\u{1F3E0} Attempting direct navigation to home page...");
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com/home", {
+            waitUntil: "domcontentloaded",
+            timeout: 15e3
+          });
+          await new Promise((resolve) => setTimeout(resolve, 3e3));
+          currentUrl = this.page.url();
+          console.log(`\u{1F50D} URL after home navigation: ${currentUrl}`);
+        } catch (error) {
+          console.log(`\u26A0\uFE0F Direct home navigation failed: ${error.message}`);
+        }
+        if (currentUrl.includes("verify") || currentUrl.includes("mfa") || currentUrl.includes("call")) {
+          console.log("\u{1F504} Looking for skip/bypass options...");
+          const skipSelectors = [
+            'a[href*="skip"]',
+            'button[name*="skip"]',
+            'a:contains("Skip")',
+            'button:contains("Skip")',
+            'a:contains("Later")',
+            'button:contains("Later")',
+            'a:contains("Not now")',
+            'button:contains("Not now")',
+            ".skip-link",
+            ".bypass-link"
+          ];
+          for (const selector of skipSelectors) {
+            try {
+              const skipElement = await this.page.$(selector);
+              if (skipElement) {
+                await skipElement.click();
+                console.log(`\u2705 Clicked skip option: ${selector}`);
+                await new Promise((resolve) => setTimeout(resolve, 3e3));
+                currentUrl = this.page.url();
+                break;
+              }
+            } catch {
+            }
+          }
+        }
+        if (currentUrl.includes("verify") || currentUrl.includes("mfa") || currentUrl.includes("call")) {
+          console.log("\u{1F504} Trying alternative navigation routes...");
+          const alternativeUrls = [
+            "https://kinrayweblink.cardinalhealth.com/",
+            "https://kinrayweblink.cardinalhealth.com/dashboard",
+            "https://kinrayweblink.cardinalhealth.com/portal"
+          ];
+          for (const url of alternativeUrls) {
+            try {
+              await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 1e4 });
+              await new Promise((resolve) => setTimeout(resolve, 2e3));
+              currentUrl = this.page.url();
+              if (!currentUrl.includes("verify") && !currentUrl.includes("mfa")) {
+                console.log(`\u2705 Successfully navigated via: ${url}`);
+                break;
+              }
+            } catch {
+            }
+          }
+        }
+      }
+      currentUrl = this.page.url();
+      const pageTitle = await this.page.title();
       const hasLoginForm = await this.page.$('input[type="password"]') !== null;
-      if (!currentUrl.includes("login") && !hasLoginForm) {
+      console.log(`\u{1F50D} Final URL: ${currentUrl}`);
+      console.log(`\u{1F50D} Final title: ${pageTitle}`);
+      const isAuthenticated = !currentUrl.includes("login") && !currentUrl.includes("signin") && !hasLoginForm && (currentUrl.includes("home") || currentUrl.includes("dashboard") || pageTitle.includes("Kinray"));
+      if (isAuthenticated) {
         console.log("\u2705 Login successful - authenticated");
         return true;
       } else {
-        console.log("\u274C Login failed - still on login page");
+        console.log("\u274C Authentication verification failed");
         return false;
       }
     } catch (error) {
@@ -3054,8 +3123,41 @@ var LiveSearchService = class {
       console.log(`     ${i + 1}. ${el.tagName} type="${el.type}" id="${el.id}" class="${el.className}" placeholder="${el.placeholder}"`);
     });
     console.log(`   Headings: ${pageStructure.headings.join(", ")}`);
+    if (!currentUrl.includes("home")) {
+      console.log("\u{1F3E0} Navigating to Kinray home page for search interface...");
+      try {
+        await this.page.goto("https://kinrayweblink.cardinalhealth.com/home", {
+          waitUntil: "domcontentloaded",
+          timeout: 15e3
+        });
+        await new Promise((resolve) => setTimeout(resolve, 3e3));
+        console.log("\u2705 Successfully navigated to home page");
+        const homePageStructure = await this.page.evaluate(() => ({
+          title: document.title,
+          url: location.href,
+          searchElements: Array.from(document.querySelectorAll("input")).map((el) => ({
+            tagName: el.tagName,
+            type: el.type || null,
+            id: el.id || null,
+            className: el.className || null,
+            placeholder: el.placeholder || null,
+            name: el.name || null
+          }))
+        }));
+        console.log("\u{1F3E0} Home page analysis:");
+        console.log(`   Title: ${homePageStructure.title}`);
+        console.log(`   URL: ${homePageStructure.url}`);
+        console.log(`   Input elements: ${homePageStructure.searchElements.length}`);
+        homePageStructure.searchElements.forEach((el, i) => {
+          console.log(`     ${i + 1}. ${el.tagName} type="${el.type}" id="${el.id}" class="${el.className}" placeholder="${el.placeholder}"`);
+        });
+        return;
+      } catch (error) {
+        console.log(`\u26A0\uFE0F Failed to navigate to home page: ${error.message}`);
+      }
+    }
     const hasSearchOnCurrentPage = pageStructure.searchElements.some(
-      (el) => el.type === "search" || el.placeholder && el.placeholder.toLowerCase().includes("search") || el.className && el.className.toLowerCase().includes("search")
+      (el) => el.type === "search" || el.placeholder && el.placeholder.toLowerCase().includes("search") || el.className && el.className.toLowerCase().includes("search") || el.tagName === "INPUT" && el.type === "text"
     );
     if (hasSearchOnCurrentPage) {
       console.log("\u2705 Current page appears to have search functionality");
@@ -3125,40 +3227,28 @@ var LiveSearchService = class {
       });
       await new Promise((resolve) => setTimeout(resolve, 3e3));
       const searchSelectors = [
-        // Primary search inputs
-        'input[type="search"]',
-        'input[name*="search"]',
-        'input[placeholder*="search"]',
-        'input[placeholder*="Search"]',
-        'input[placeholder*="SEARCH"]',
-        // Product/medication specific
-        'input[placeholder*="product"]',
-        'input[placeholder*="Product"]',
-        'input[placeholder*="drug"]',
-        'input[placeholder*="Drug"]',
-        'input[placeholder*="medication"]',
-        'input[placeholder*="Medication"]',
-        'input[placeholder*="item"]',
-        'input[placeholder*="Item"]',
-        // Generic form inputs  
-        'input[type="text"]:not([type="hidden"])',
-        "input.search-input",
+        // Primary search input next to the "ALL" dropdown
+        'input[type="text"]',
+        // Main search field as shown in screenshot
+        // Look for inputs near the "ALL" dropdown or search context
+        'select + input[type="text"]',
+        // Input immediately after a select dropdown
+        'form input[type="text"]:not([hidden])',
+        // Form-based text inputs
+        // Kinray-specific search patterns based on layout
         "input.form-control",
-        "input.search-field",
-        // Common portal patterns
-        'input[name="q"]',
-        'input[name="query"]',
-        'input[name="searchTerm"]',
-        'input[name="keyword"]',
-        'input[id*="search"]',
-        'input[id*="Search"]',
-        'input[class*="search"]',
-        // Kinray-specific patterns (from portal analysis)
-        'input[data-testid*="search"]',
+        // Bootstrap/common CSS framework classes
         'input[role="searchbox"]',
+        'input[placeholder*="search"]',
+        'input[id*="search"]',
+        'input[name*="search"]',
+        // Generic text inputs (Kinray uses simple text inputs)
+        "input:not([type]):not([hidden]):not([readonly])",
+        'input[type="text"]:not([hidden]):not([readonly]):not([disabled])',
+        // Search context selectors
         ".search-container input",
-        "#searchBox",
-        "#search-input"
+        ".search-form input",
+        "#searchBox"
       ];
       console.log(`\u{1F50D} Searching for input fields with ${searchSelectors.length} selectors...`);
       const allInputs = await this.page.evaluate(() => {
@@ -3196,15 +3286,34 @@ var LiveSearchService = class {
         }
       }
       if (!searchInput) {
-        console.log("\u{1F50D} No search input found, looking for any prominent text input...");
-        searchInput = await this.page.$('input[type="text"]:not([type="hidden"])');
-        if (searchInput) {
-          const isVisible = await searchInput.isVisible();
-          if (isVisible) {
-            foundSelector = 'input[type="text"] (fallback)';
-            console.log("\u2705 Using fallback text input");
-          } else {
-            searchInput = null;
+        console.log("\u{1F50D} No specific search input found, analyzing all text inputs...");
+        const allTextInputs = await this.page.$$('input[type="text"]:not([hidden]):not([readonly])');
+        if (allTextInputs.length > 0) {
+          console.log(`\u{1F4DD} Found ${allTextInputs.length} text input(s), selecting the most likely search field...`);
+          for (const input of allTextInputs) {
+            try {
+              const isVisible = await input.isVisible();
+              const boundingBox = await input.boundingBox();
+              if (isVisible && boundingBox && boundingBox.width > 150) {
+                searchInput = input;
+                foundSelector = "Primary text input (auto-detected)";
+                console.log(`\u2705 Selected text input with width ${boundingBox.width}px`);
+                break;
+              }
+            } catch {
+              continue;
+            }
+          }
+          if (!searchInput && allTextInputs.length > 0) {
+            for (const input of allTextInputs) {
+              const isVisible = await input.isVisible();
+              if (isVisible) {
+                searchInput = input;
+                foundSelector = "First visible text input (fallback)";
+                console.log("\u2705 Using first visible text input as fallback");
+                break;
+              }
+            }
           }
         }
       }

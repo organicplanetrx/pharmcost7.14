@@ -1,0 +1,142 @@
+✅ API: Returning search 1 with 0 results
+
+8:19:39 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: 5z7ibc
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+8:19:41 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+✅ Login successful - authenticated
+
+🔍 Navigating to search interface...
+
+📍 Starting from URL: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+📷 Post-login screenshot saved
+
+📊 Current page analysis:
+
+   Title: Kinray Weblink
+
+   URL: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+   Navigation links: 0
+
+   Search-related elements: 3
+
+     1. FORM type="null" id="form64" class="mfa-verify-passcode o-form o-form-edit-mode" placeholder="null"
+
+     2. INPUT type="tel" id="input71" class="null" placeholder="null"
+
+     3. INPUT type="submit" id="null" class="button button-primary" placeholder="null"
+
+   Headings: Voice Call Authentication
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/search
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/products
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: 5z7ibc
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+8:19:43 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/catalog
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: 5z7ibc
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+8:19:45 PM [express] GET /api/search/1 304 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/inventory
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: 5z7ibc
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
+8:19:47 PM [express] GET /api/search/1 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/product-search
+
+🔄 Trying direct URL: https://kinrayweblink.cardinalhealth.com/portal/search
+
+⚠️ No dedicated search interface found, will attempt search on current page
+
+🎯 Executing search for: lisinopril
+
+🔍 Current page URL: https://kinrayweblink.cardinalhealth.com/login
+
+🔍 Page title: Kinray Weblink
+
+📷 Screenshot saved to /tmp/kinray-search-page.png
+
+⚠️ Navigation wait timed out, continuing...
+
+🔍 API: Fetching search 1
+
+🔍 getSearchWithResults called for searchId: 1
+
+📊 Storage instance: MemStorage - Global ID: 5z7ibc
+
+📊 Available searches: 1 - IDs: [1]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 1
+
+✅ API: Returning search 1 with 0 results
+
