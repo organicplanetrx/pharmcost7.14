@@ -88,7 +88,7 @@ export class SimpleCookieExtractor {
       await passwordField?.press('Enter');
       
       // Wait and check for redirect
-      await this.page.waitForTimeout(5000);
+      await new Promise(resolve => setTimeout(resolve, 5000));
       const currentUrl = this.page.url();
       console.log(`📍 Current URL: ${currentUrl}`);
       

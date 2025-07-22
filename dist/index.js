@@ -78,7 +78,7 @@ var init_simple_cookie_extractor = __esm({
           }
           console.log("\u{1F680} Submitting form...");
           await passwordField?.press("Enter");
-          await this.page.waitForTimeout(5e3);
+          await new Promise((resolve) => setTimeout(resolve, 5e3));
           const currentUrl = this.page.url();
           console.log(`\u{1F4CD} Current URL: ${currentUrl}`);
           const cookies = await this.page.cookies();
@@ -251,14 +251,14 @@ var init_cookie_extractor = __esm({
             }
           }
           console.log("\u23F3 Waiting for authentication to complete...");
-          await this.page.waitForTimeout(5e3);
+          await new Promise((resolve) => setTimeout(resolve, 5e3));
           const loginUrl = this.page.url();
           console.log(`\u{1F4CD} Current URL after login: ${loginUrl}`);
           if (loginUrl.includes("verify") || loginUrl.includes("2fa")) {
             console.log("\u{1F510} 2FA detected - waiting for manual completion...");
             console.log("\u{1F4A1} Please complete 2FA in your browser, then the system will extract the authenticated cookies");
             for (let i = 0; i < 24; i++) {
-              await this.page.waitForTimeout(5e3);
+              await new Promise((resolve) => setTimeout(resolve, 5e3));
               const newUrl = this.page.url();
               if (!newUrl.includes("verify") && !newUrl.includes("2fa") && !newUrl.includes("login")) {
                 console.log("\u2705 2FA completed - authenticated session detected");

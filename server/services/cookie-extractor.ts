@@ -191,7 +191,7 @@ export class CookieExtractor {
 
       // Wait for navigation and potential redirects
       console.log('⏳ Waiting for authentication to complete...');
-      await this.page.waitForTimeout(5000);
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       // Handle potential 2FA or additional authentication steps
       const loginUrl = this.page.url();
@@ -203,7 +203,7 @@ export class CookieExtractor {
         
         // Wait for user to complete 2FA (up to 2 minutes)
         for (let i = 0; i < 24; i++) {
-          await this.page.waitForTimeout(5000);
+          await new Promise(resolve => setTimeout(resolve, 5000));
           const newUrl = this.page.url();
           
           if (!newUrl.includes('verify') && !newUrl.includes('2fa') && !newUrl.includes('login')) {
