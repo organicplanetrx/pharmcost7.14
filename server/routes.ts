@@ -377,6 +377,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cookie status endpoint
+  app.get('/api/cookie-status', async (req, res) => {
+    const hasSessionCookies = global.__kinray_session_cookies__ && 
+                              Array.isArray(global.__kinray_session_cookies__) && 
+                              global.__kinray_session_cookies__.length > 0;
+    
+    res.json({
+      hasSessionCookies,
+      cookieCount: hasSessionCookies ? global.__kinray_session_cookies__.length : 0,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Automatic cookie extraction endpoint
   app.post('/api/extract-cookies', async (req, res) => {
     try {
@@ -387,8 +400,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('🍪 Starting automatic cookie extraction...');
-      const { cookieExtractor } = await import('./services/cookie-extractor.js');
       
+      // Try simple extractor first (more reliable)
+      try {
+        const { simpleCookieExtractor } = await import('./services/simple-cookie-extractor.js');
+        const extractedCookies = await simpleCookieExtractor.extractSessionCookies(username, password);
+        
+        if (extractedCookies.length > 0) {
+          // Success with simple extractor
+          global.__kinray_session_cookies__ = extractedCookies;
+          
+          console.log(`✅ Simple extractor: ${extractedCookies.length} cookies`);
+          
+          return res.json({
+            success: true,
+            message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
+            cookieCount: extractedCookies.length,
+            cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
+          });
+        }
+      } catch (simpleError) {
+        console.log('⚠️ Simple extractor failed, trying advanced...');
+      }
+      
+      // Fallback to advanced extractor
+      const { cookieExtractor } = await import('./services/cookie-extractor.js');
       const extractedCookies = await cookieExtractor.extractSessionCookies(username, password);
       
       if (extractedCookies.length > 0) {

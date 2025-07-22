@@ -8,13 +8,114 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// server/services/simple-cookie-extractor.ts
+var simple_cookie_extractor_exports = {};
+__export(simple_cookie_extractor_exports, {
+  SimpleCookieExtractor: () => SimpleCookieExtractor,
+  simpleCookieExtractor: () => simpleCookieExtractor
+});
+import puppeteer2 from "puppeteer";
+var SimpleCookieExtractor, simpleCookieExtractor;
+var init_simple_cookie_extractor = __esm({
+  "server/services/simple-cookie-extractor.ts"() {
+    "use strict";
+    SimpleCookieExtractor = class {
+      browser = null;
+      page = null;
+      async extractSessionCookies(username, password) {
+        console.log("\u{1F36A} Starting simple automatic cookie extraction...");
+        try {
+          const launchConfig = {
+            headless: true,
+            args: [
+              "--no-sandbox",
+              "--disable-setuid-sandbox",
+              "--disable-dev-shm-usage",
+              "--disable-accelerated-2d-canvas",
+              "--no-first-run",
+              "--no-zygote",
+              "--disable-gpu",
+              "--disable-web-security"
+            ]
+          };
+          if (process.env.RAILWAY_ENVIRONMENT) {
+            console.log("\u{1F682} Railway detected - using Chrome");
+            launchConfig.executablePath = "/usr/bin/google-chrome-stable";
+          }
+          this.browser = await puppeteer2.launch(launchConfig);
+          this.page = await this.browser.newPage();
+          await this.page.setViewport({ width: 1920, height: 1080 });
+          console.log("\u{1F310} Navigating to Kinray login...");
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
+            waitUntil: "networkidle2",
+            timeout: 3e4
+          });
+          console.log("\u{1F50D} Waiting for form fields...");
+          await this.page.waitForSelector("input", { timeout: 1e4 });
+          const usernameSelectors = [
+            'input[name="username"]',
+            'input[type="email"]',
+            "#username",
+            'input[placeholder*="username" i]',
+            'input[placeholder*="email" i]'
+          ];
+          let usernameField = null;
+          for (const selector of usernameSelectors) {
+            try {
+              usernameField = await this.page.$(selector);
+              if (usernameField) {
+                console.log(`\u2705 Found username field: ${selector}`);
+                await usernameField.type(username);
+                break;
+              }
+            } catch (e) {
+            }
+          }
+          const passwordField = await this.page.$('input[type="password"]');
+          if (passwordField) {
+            console.log("\u2705 Found password field");
+            await passwordField.type(password);
+          }
+          console.log("\u{1F680} Submitting form...");
+          await passwordField?.press("Enter");
+          await this.page.waitForTimeout(5e3);
+          const currentUrl = this.page.url();
+          console.log(`\u{1F4CD} Current URL: ${currentUrl}`);
+          const cookies = await this.page.cookies();
+          const relevantCookies = cookies.filter(
+            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck")
+          );
+          console.log(`\u2705 Extracted ${relevantCookies.length} cookies`);
+          return relevantCookies.map((cookie) => ({
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path,
+            expires: cookie.expires,
+            httpOnly: cookie.httpOnly,
+            secure: cookie.secure
+          }));
+        } catch (error) {
+          console.error("\u274C Simple extraction failed:", error.message);
+          throw new Error(`Simple extraction failed: ${error.message}`);
+        } finally {
+          if (this.browser) {
+            await this.browser.close();
+          }
+        }
+      }
+    };
+    simpleCookieExtractor = new SimpleCookieExtractor();
+  }
+});
+
 // server/services/cookie-extractor.ts
 var cookie_extractor_exports = {};
 __export(cookie_extractor_exports, {
   CookieExtractor: () => CookieExtractor,
   cookieExtractor: () => cookieExtractor
 });
-import puppeteer2 from "puppeteer";
+import puppeteer3 from "puppeteer";
 var CookieExtractor, cookieExtractor;
 var init_cookie_extractor = __esm({
   "server/services/cookie-extractor.ts"() {
@@ -43,7 +144,7 @@ var init_cookie_extractor = __esm({
             console.log("\u{1F682} Railway detected - using optimized browser config");
             launchConfig.executablePath = "/usr/bin/google-chrome-stable";
           }
-          this.browser = await puppeteer2.launch(launchConfig);
+          this.browser = await puppeteer3.launch(launchConfig);
           this.page = await this.browser.newPage();
           await this.page.setViewport({ width: 1920, height: 1080 });
           await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -54,28 +155,106 @@ var init_cookie_extractor = __esm({
           });
           await this.page.screenshot({ path: "cookie-extraction-start.png", fullPage: true });
           console.log("\u{1F4F8} Initial page screenshot saved");
+          const pageTitle = await this.page.title();
+          const pageUrl = this.page.url();
+          console.log(`\u{1F4C4} Page title: "${pageTitle}"`);
+          console.log(`\u{1F310} Current URL: ${pageUrl}`);
           console.log("\u{1F511} Performing automated login...");
-          await this.page.waitForSelector('input[name="username"], input[type="email"], #username', { timeout: 1e4 });
-          const usernameField = await this.page.$('input[name="username"], input[type="email"], #username');
+          console.log("\u{1F50D} Waiting for login form...");
+          const usernameSelectors = [
+            'input[name="username"]',
+            'input[type="email"]',
+            "#username",
+            "#email",
+            'input[placeholder*="username"]',
+            'input[placeholder*="email"]',
+            'input[class*="username"]',
+            'input[class*="email"]'
+          ];
+          const passwordSelectors = [
+            'input[name="password"]',
+            'input[type="password"]',
+            "#password",
+            'input[placeholder*="password"]',
+            'input[class*="password"]'
+          ];
+          let usernameField = null;
+          for (const selector of usernameSelectors) {
+            try {
+              await this.page.waitForSelector(selector, { timeout: 2e3 });
+              usernameField = await this.page.$(selector);
+              if (usernameField) {
+                console.log(`\u{1F3AF} Found username field: ${selector}`);
+                break;
+              }
+            } catch (e) {
+            }
+          }
+          let passwordField = null;
+          for (const selector of passwordSelectors) {
+            try {
+              passwordField = await this.page.$(selector);
+              if (passwordField) {
+                console.log(`\u{1F3AF} Found password field: ${selector}`);
+                break;
+              }
+            } catch (e) {
+            }
+          }
+          if (!usernameField || !passwordField) {
+            console.log("\u274C Could not find login form fields");
+            throw new Error("Login form fields not found");
+          }
           if (usernameField) {
             await usernameField.type(username);
             console.log("\u2705 Username entered");
           }
-          const passwordField = await this.page.$('input[name="password"], input[type="password"], #password');
           if (passwordField) {
             await passwordField.type(password);
             console.log("\u2705 Password entered");
           }
-          const submitButton = await this.page.$('input[type="submit"], button[type="submit"], button:contains("Sign In"), button:contains("Login")');
+          console.log("\u{1F50D} Looking for submit button...");
+          const buttonSelectors = [
+            'input[type="submit"]',
+            'button[type="submit"]',
+            'button[class*="submit"]',
+            'button[class*="login"]',
+            'button[class*="sign"]',
+            ".btn-primary",
+            ".submit-btn",
+            'input[value*="Sign"]',
+            'input[value*="Log"]',
+            "button"
+          ];
+          let submitButton = null;
+          for (const selector of buttonSelectors) {
+            try {
+              submitButton = await this.page.$(selector);
+              if (submitButton) {
+                const buttonText = await this.page.evaluate((btn) => btn.textContent || btn.value || "", submitButton);
+                console.log(`\u{1F3AF} Found button with selector "${selector}": "${buttonText}"`);
+                if (buttonText.toLowerCase().includes("sign") || buttonText.toLowerCase().includes("log") || buttonText.toLowerCase().includes("submit") || selector.includes("submit")) {
+                  console.log(`\u2705 Using button: "${buttonText}"`);
+                  break;
+                }
+              }
+            } catch (e) {
+            }
+          }
           if (submitButton) {
             await submitButton.click();
             console.log("\u2705 Login form submitted");
+          } else {
+            console.log("\u23CE No submit button found, trying Enter key on password field");
+            if (passwordField) {
+              await passwordField.press("Enter");
+            }
           }
           console.log("\u23F3 Waiting for authentication to complete...");
           await this.page.waitForTimeout(5e3);
-          const currentUrl = this.page.url();
-          console.log(`\u{1F4CD} Current URL after login: ${currentUrl}`);
-          if (currentUrl.includes("verify") || currentUrl.includes("2fa")) {
+          const loginUrl = this.page.url();
+          console.log(`\u{1F4CD} Current URL after login: ${loginUrl}`);
+          if (loginUrl.includes("verify") || loginUrl.includes("2fa")) {
             console.log("\u{1F510} 2FA detected - waiting for manual completion...");
             console.log("\u{1F4A1} Please complete 2FA in your browser, then the system will extract the authenticated cookies");
             for (let i = 0; i < 24; i++) {
@@ -2923,6 +3102,14 @@ async function registerRoutes(app2) {
       res.status(500).json({ error: "Failed to inject cookies" });
     }
   });
+  app2.get("/api/cookie-status", async (req, res) => {
+    const hasSessionCookies = global.__kinray_session_cookies__ && Array.isArray(global.__kinray_session_cookies__) && global.__kinray_session_cookies__.length > 0;
+    res.json({
+      hasSessionCookies,
+      cookieCount: hasSessionCookies ? global.__kinray_session_cookies__.length : 0,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  });
   app2.post("/api/extract-cookies", async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -2930,6 +3117,22 @@ async function registerRoutes(app2) {
         return res.status(400).json({ error: "Username and password required for automatic cookie extraction" });
       }
       console.log("\u{1F36A} Starting automatic cookie extraction...");
+      try {
+        const { simpleCookieExtractor: simpleCookieExtractor2 } = await Promise.resolve().then(() => (init_simple_cookie_extractor(), simple_cookie_extractor_exports));
+        const extractedCookies2 = await simpleCookieExtractor2.extractSessionCookies(username, password);
+        if (extractedCookies2.length > 0) {
+          global.__kinray_session_cookies__ = extractedCookies2;
+          console.log(`\u2705 Simple extractor: ${extractedCookies2.length} cookies`);
+          return res.json({
+            success: true,
+            message: `Successfully extracted and injected ${extractedCookies2.length} session cookies`,
+            cookieCount: extractedCookies2.length,
+            cookies: extractedCookies2.map((c) => ({ name: c.name, domain: c.domain }))
+          });
+        }
+      } catch (simpleError) {
+        console.log("\u26A0\uFE0F Simple extractor failed, trying advanced...");
+      }
       const { cookieExtractor: cookieExtractor2 } = await Promise.resolve().then(() => (init_cookie_extractor(), cookie_extractor_exports));
       const extractedCookies = await cookieExtractor2.extractSessionCookies(username, password);
       if (extractedCookies.length > 0) {

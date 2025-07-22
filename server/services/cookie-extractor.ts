@@ -35,7 +35,7 @@ export class CookieExtractor {
       ];
 
       // Try different browser launch strategies
-      let launchConfig = { headless: true, args: browserArgs };
+      let launchConfig: any = { headless: true, args: browserArgs };
       
       // Railway environment detection
       if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_DEPLOYMENT_ID) {
@@ -58,35 +58,135 @@ export class CookieExtractor {
         timeout: 30000
       });
 
-      // Take screenshot for debugging
+      // Take screenshot for debugging and analyze page structure
       await this.page.screenshot({ path: 'cookie-extraction-start.png', fullPage: true });
       console.log('📸 Initial page screenshot saved');
+      
+      // Log page title and URL for debugging
+      const pageTitle = await this.page.title();
+      const pageUrl = this.page.url();
+      console.log(`📄 Page title: "${pageTitle}"`);
+      console.log(`🌐 Current URL: ${pageUrl}`);
 
       // Perform login to generate session cookies
       console.log('🔑 Performing automated login...');
       
-      // Wait for login form
-      await this.page.waitForSelector('input[name="username"], input[type="email"], #username', { timeout: 10000 });
+      // Wait for login form with multiple selector strategies
+      console.log('🔍 Waiting for login form...');
+      
+      const usernameSelectors = [
+        'input[name="username"]',
+        'input[type="email"]', 
+        '#username',
+        '#email',
+        'input[placeholder*="username"]',
+        'input[placeholder*="email"]',
+        'input[class*="username"]',
+        'input[class*="email"]'
+      ];
+      
+      const passwordSelectors = [
+        'input[name="password"]',
+        'input[type="password"]',
+        '#password',
+        'input[placeholder*="password"]',
+        'input[class*="password"]'
+      ];
+      
+      // Wait for any username field
+      let usernameField = null;
+      for (const selector of usernameSelectors) {
+        try {
+          await this.page.waitForSelector(selector, { timeout: 2000 });
+          usernameField = await this.page.$(selector);
+          if (usernameField) {
+            console.log(`🎯 Found username field: ${selector}`);
+            break;
+          }
+        } catch (e) {
+          // Continue to next selector
+        }
+      }
+      
+      // Find password field
+      let passwordField = null;
+      for (const selector of passwordSelectors) {
+        try {
+          passwordField = await this.page.$(selector);
+          if (passwordField) {
+            console.log(`🎯 Found password field: ${selector}`);
+            break;
+          }
+        } catch (e) {
+          // Continue to next selector
+        }
+      }
+      
+      if (!usernameField || !passwordField) {
+        console.log('❌ Could not find login form fields');
+        throw new Error('Login form fields not found');
+      }
       
       // Fill username
-      const usernameField = await this.page.$('input[name="username"], input[type="email"], #username');
       if (usernameField) {
         await usernameField.type(username);
         console.log('✅ Username entered');
       }
 
-      // Fill password
-      const passwordField = await this.page.$('input[name="password"], input[type="password"], #password');
+      // Fill password  
       if (passwordField) {
         await passwordField.type(password);
         console.log('✅ Password entered');
       }
 
-      // Submit login form
-      const submitButton = await this.page.$('input[type="submit"], button[type="submit"], button:contains("Sign In"), button:contains("Login")');
+      // Submit login form with multiple selector strategies
+      console.log('🔍 Looking for submit button...');
+      
+      // Try multiple button selectors
+      const buttonSelectors = [
+        'input[type="submit"]',
+        'button[type="submit"]', 
+        'button[class*="submit"]',
+        'button[class*="login"]',
+        'button[class*="sign"]',
+        '.btn-primary',
+        '.submit-btn',
+        'input[value*="Sign"]',
+        'input[value*="Log"]',
+        'button'
+      ];
+      
+      let submitButton = null;
+      for (const selector of buttonSelectors) {
+        try {
+          submitButton = await this.page.$(selector);
+          if (submitButton) {
+            const buttonText = await this.page.evaluate((btn: any) => btn.textContent || btn.value || '', submitButton);
+            console.log(`🎯 Found button with selector "${selector}": "${buttonText}"`);
+            
+            // Check if it looks like a login button
+            if (buttonText.toLowerCase().includes('sign') || 
+                buttonText.toLowerCase().includes('log') || 
+                buttonText.toLowerCase().includes('submit') ||
+                selector.includes('submit')) {
+              console.log(`✅ Using button: "${buttonText}"`);
+              break;
+            }
+          }
+        } catch (e) {
+          // Continue to next selector
+        }
+      }
+      
       if (submitButton) {
         await submitButton.click();
         console.log('✅ Login form submitted');
+      } else {
+        // Try pressing Enter on password field as fallback
+        console.log('⏎ No submit button found, trying Enter key on password field');
+        if (passwordField) {
+          await passwordField.press('Enter');
+        }
       }
 
       // Wait for navigation and potential redirects
@@ -94,10 +194,10 @@ export class CookieExtractor {
       await this.page.waitForTimeout(5000);
 
       // Handle potential 2FA or additional authentication steps
-      const currentUrl = this.page.url();
-      console.log(`📍 Current URL after login: ${currentUrl}`);
+      const loginUrl = this.page.url();
+      console.log(`📍 Current URL after login: ${loginUrl}`);
 
-      if (currentUrl.includes('verify') || currentUrl.includes('2fa')) {
+      if (loginUrl.includes('verify') || loginUrl.includes('2fa')) {
         console.log('🔐 2FA detected - waiting for manual completion...');
         console.log('💡 Please complete 2FA in your browser, then the system will extract the authenticated cookies');
         
@@ -122,7 +222,7 @@ export class CookieExtractor {
       const cookies = await this.page.cookies();
       
       // Filter for relevant Kinray/Cardinal Health cookies
-      const relevantCookies = cookies.filter(cookie => 
+      const relevantCookies = cookies.filter((cookie: any) => 
         cookie.domain.includes('cardinalhealth.com') || 
         cookie.domain.includes('kinray') ||
         cookie.name.includes('session') ||
@@ -138,7 +238,7 @@ export class CookieExtractor {
       await this.page.screenshot({ path: 'cookie-extraction-complete.png', fullPage: true });
       console.log('📸 Final authenticated page screenshot saved');
 
-      return relevantCookies.map(cookie => ({
+      return relevantCookies.map((cookie: any) => ({
         name: cookie.name,
         value: cookie.value,
         domain: cookie.domain,
@@ -148,7 +248,7 @@ export class CookieExtractor {
         secure: cookie.secure
       }));
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Cookie extraction failed:', error.message);
       throw new Error(`Cookie extraction failed: ${error.message}`);
     } finally {
@@ -169,7 +269,7 @@ export class CookieExtractor {
       console.log('💡 For now, use the automatic login method or manual cookie injection');
       
       return [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Running session extraction failed:', error.message);
       throw error;
     }

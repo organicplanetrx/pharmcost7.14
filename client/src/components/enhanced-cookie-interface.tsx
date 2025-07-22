@@ -152,6 +152,10 @@ export function EnhancedCookieInterface() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Cookie Status Display */}
+        <div className="mb-6">
+          <CookieStatus />
+        </div>
         <Tabs defaultValue="automatic" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="automatic" className="flex items-center gap-2">
