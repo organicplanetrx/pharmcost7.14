@@ -349,6 +349,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cookie injection endpoint
+  app.post('/api/inject-cookies', async (req, res) => {
+    try {
+      const { cookies } = req.body;
+      
+      if (!cookies || !Array.isArray(cookies)) {
+        return res.status(400).json({ error: 'Invalid cookies format' });
+      }
+
+      // Store cookies globally for scraper access
+      global.__kinray_session_cookies__ = cookies;
+      
+      console.log(`🍪 Session cookies stored globally: ${cookies.length} cookies`);
+      cookies.forEach(cookie => {
+        console.log(`   - ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Successfully stored ${cookies.length} session cookies`,
+        cookieCount: cookies.length
+      });
+    } catch (error) {
+      console.error('Cookie injection error:', error);
+      res.status(500).json({ error: 'Failed to inject cookies' });
+    }
+  });
+
+  // Automatic cookie extraction endpoint
+  app.post('/api/extract-cookies', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password required for automatic cookie extraction' });
+      }
+
+      console.log('🍪 Starting automatic cookie extraction...');
+      const { cookieExtractor } = await import('./services/cookie-extractor.js');
+      
+      const extractedCookies = await cookieExtractor.extractSessionCookies(username, password);
+      
+      if (extractedCookies.length > 0) {
+        // Automatically inject the extracted cookies
+        global.__kinray_session_cookies__ = extractedCookies;
+        
+        console.log(`✅ Automatically extracted and injected ${extractedCookies.length} session cookies`);
+        
+        res.json({
+          success: true,
+          message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
+          cookieCount: extractedCookies.length,
+          cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
+        });
+      } else {
+        res.status(400).json({ 
+          error: 'No relevant cookies extracted from authentication session',
+          message: 'Login may have failed or 2FA required'
+        });
+      }
+    } catch (error) {
+      console.error('❌ Automatic cookie extraction failed:', error);
+      res.status(500).json({ 
+        error: 'Cookie extraction failed', 
+        message: error.message,
+        suggestion: 'Try manual cookie injection or check credentials'
+      });
+    }
+  });
+
   // Async function to perform the actual search
   async function performSearch(searchId: number, searchData: any) {
     try {

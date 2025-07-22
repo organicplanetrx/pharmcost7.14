@@ -1,8 +1,137 @@
 var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
+
+// server/services/cookie-extractor.ts
+var cookie_extractor_exports = {};
+__export(cookie_extractor_exports, {
+  CookieExtractor: () => CookieExtractor,
+  cookieExtractor: () => cookieExtractor
+});
+import puppeteer2 from "puppeteer";
+var CookieExtractor, cookieExtractor;
+var init_cookie_extractor = __esm({
+  "server/services/cookie-extractor.ts"() {
+    "use strict";
+    CookieExtractor = class {
+      browser = null;
+      page = null;
+      async extractSessionCookies(username, password) {
+        console.log("\u{1F36A} Starting automatic cookie extraction from Kinray portal...");
+        try {
+          console.log("\u{1F310} Launching browser for cookie extraction...");
+          const browserArgs = [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--no-first-run",
+            "--no-zygote",
+            "--disable-gpu",
+            "--disable-web-security",
+            "--disable-features=VizDisplayCompositor",
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+          ];
+          let launchConfig = { headless: true, args: browserArgs };
+          if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_DEPLOYMENT_ID) {
+            console.log("\u{1F682} Railway detected - using optimized browser config");
+            launchConfig.executablePath = "/usr/bin/google-chrome-stable";
+          }
+          this.browser = await puppeteer2.launch(launchConfig);
+          this.page = await this.browser.newPage();
+          await this.page.setViewport({ width: 1920, height: 1080 });
+          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+          console.log("\u{1F310} Navigating to Kinray login page...");
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
+            waitUntil: "networkidle2",
+            timeout: 3e4
+          });
+          await this.page.screenshot({ path: "cookie-extraction-start.png", fullPage: true });
+          console.log("\u{1F4F8} Initial page screenshot saved");
+          console.log("\u{1F511} Performing automated login...");
+          await this.page.waitForSelector('input[name="username"], input[type="email"], #username', { timeout: 1e4 });
+          const usernameField = await this.page.$('input[name="username"], input[type="email"], #username');
+          if (usernameField) {
+            await usernameField.type(username);
+            console.log("\u2705 Username entered");
+          }
+          const passwordField = await this.page.$('input[name="password"], input[type="password"], #password');
+          if (passwordField) {
+            await passwordField.type(password);
+            console.log("\u2705 Password entered");
+          }
+          const submitButton = await this.page.$('input[type="submit"], button[type="submit"], button:contains("Sign In"), button:contains("Login")');
+          if (submitButton) {
+            await submitButton.click();
+            console.log("\u2705 Login form submitted");
+          }
+          console.log("\u23F3 Waiting for authentication to complete...");
+          await this.page.waitForTimeout(5e3);
+          const currentUrl = this.page.url();
+          console.log(`\u{1F4CD} Current URL after login: ${currentUrl}`);
+          if (currentUrl.includes("verify") || currentUrl.includes("2fa")) {
+            console.log("\u{1F510} 2FA detected - waiting for manual completion...");
+            console.log("\u{1F4A1} Please complete 2FA in your browser, then the system will extract the authenticated cookies");
+            for (let i = 0; i < 24; i++) {
+              await this.page.waitForTimeout(5e3);
+              const newUrl = this.page.url();
+              if (!newUrl.includes("verify") && !newUrl.includes("2fa") && !newUrl.includes("login")) {
+                console.log("\u2705 2FA completed - authenticated session detected");
+                break;
+              }
+              if (i === 23) {
+                console.log("\u23F0 2FA timeout - extracting available cookies anyway");
+              }
+            }
+          }
+          console.log("\u{1F36A} Extracting session cookies...");
+          const cookies = await this.page.cookies();
+          const relevantCookies = cookies.filter(
+            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.domain.includes("kinray") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck") || cookie.name.includes("rxVisitor")
+          );
+          console.log(`\u2705 Extracted ${relevantCookies.length} relevant cookies from authenticated session`);
+          await this.page.screenshot({ path: "cookie-extraction-complete.png", fullPage: true });
+          console.log("\u{1F4F8} Final authenticated page screenshot saved");
+          return relevantCookies.map((cookie) => ({
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path,
+            expires: cookie.expires,
+            httpOnly: cookie.httpOnly,
+            secure: cookie.secure
+          }));
+        } catch (error) {
+          console.error("\u274C Cookie extraction failed:", error.message);
+          throw new Error(`Cookie extraction failed: ${error.message}`);
+        } finally {
+          if (this.browser) {
+            await this.browser.close();
+            console.log("\u{1F512} Browser closed after cookie extraction");
+          }
+        }
+      }
+      async extractCookiesFromRunningSession() {
+        console.log("\u{1F36A} Attempting to extract cookies from any running browser sessions...");
+        try {
+          console.log("\u26A0\uFE0F This feature requires browser debugging port to be enabled");
+          console.log("\u{1F4A1} For now, use the automatic login method or manual cookie injection");
+          return [];
+        } catch (error) {
+          console.error("\u274C Running session extraction failed:", error.message);
+          throw error;
+        }
+      }
+    };
+    cookieExtractor = new CookieExtractor();
+  }
+});
 
 // server/index.ts
 import express2 from "express";
@@ -2771,6 +2900,60 @@ async function registerRoutes(app2) {
       res.json(medications2);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch medications" });
+    }
+  });
+  app2.post("/api/inject-cookies", async (req, res) => {
+    try {
+      const { cookies } = req.body;
+      if (!cookies || !Array.isArray(cookies)) {
+        return res.status(400).json({ error: "Invalid cookies format" });
+      }
+      global.__kinray_session_cookies__ = cookies;
+      console.log(`\u{1F36A} Session cookies stored globally: ${cookies.length} cookies`);
+      cookies.forEach((cookie) => {
+        console.log(`   - ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
+      });
+      res.json({
+        success: true,
+        message: `Successfully stored ${cookies.length} session cookies`,
+        cookieCount: cookies.length
+      });
+    } catch (error) {
+      console.error("Cookie injection error:", error);
+      res.status(500).json({ error: "Failed to inject cookies" });
+    }
+  });
+  app2.post("/api/extract-cookies", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password required for automatic cookie extraction" });
+      }
+      console.log("\u{1F36A} Starting automatic cookie extraction...");
+      const { cookieExtractor: cookieExtractor2 } = await Promise.resolve().then(() => (init_cookie_extractor(), cookie_extractor_exports));
+      const extractedCookies = await cookieExtractor2.extractSessionCookies(username, password);
+      if (extractedCookies.length > 0) {
+        global.__kinray_session_cookies__ = extractedCookies;
+        console.log(`\u2705 Automatically extracted and injected ${extractedCookies.length} session cookies`);
+        res.json({
+          success: true,
+          message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
+          cookieCount: extractedCookies.length,
+          cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
+        });
+      } else {
+        res.status(400).json({
+          error: "No relevant cookies extracted from authentication session",
+          message: "Login may have failed or 2FA required"
+        });
+      }
+    } catch (error) {
+      console.error("\u274C Automatic cookie extraction failed:", error);
+      res.status(500).json({
+        error: "Cookie extraction failed",
+        message: error.message,
+        suggestion: "Try manual cookie injection or check credentials"
+      });
     }
   });
   async function performSearch(searchId, searchData) {
