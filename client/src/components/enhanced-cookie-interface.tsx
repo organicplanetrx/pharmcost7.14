@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Upload, User, Lock, Cookie, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { CookieStatus } from '@/components/cookie-status';
 
 export function EnhancedCookieInterface() {
   // Automatic extraction state
@@ -134,7 +135,8 @@ export function EnhancedCookieInterface() {
       }
     } catch (error) {
       console.error('Cookie injection error:', error);
-      setInjectionResult({ success: false, message: `Failed to inject cookies: ${error.message}` });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setInjectionResult({ success: false, message: `Failed to inject cookies: ${errorMessage}` });
     } finally {
       setIsInjecting(false);
     }
