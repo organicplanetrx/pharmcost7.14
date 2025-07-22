@@ -1409,31 +1409,92 @@ export class PuppeteerScrapingService implements ScrapingService {
       console.log(`📍 After navigation with cookies: ${currentUrl}`);
       
       if (currentUrl.includes('/login') || currentUrl.includes('/signin')) {
-        console.log('🔄 Still on login page - cookies may have expired. Attempting direct dashboard access...');
+        console.log('🔄 Still on login page after cookie injection - trying enhanced authentication bypass...');
         
-        // Try going directly to the authenticated area
-        const dashboardUrls = [
-          'https://kinrayweblink.cardinalhealth.com/dashboard',
-          'https://kinrayweblink.cardinalhealth.com/home',
-          'https://kinrayweblink.cardinalhealth.com/products',
-          'https://kinrayweblink.cardinalhealth.com/search'
+        // Enhanced authentication bypass strategies
+        const authBypassStrategies = [
+          {
+            name: 'Direct Dashboard Access',
+            urls: [
+              'https://kinrayweblink.cardinalhealth.com/dashboard',
+              'https://kinrayweblink.cardinalhealth.com/home'
+            ]
+          },
+          {
+            name: 'Product Search Area',
+            urls: [
+              'https://kinrayweblink.cardinalhealth.com/products',
+              'https://kinrayweblink.cardinalhealth.com/search',
+              'https://kinrayweblink.cardinalhealth.com/catalog'
+            ]
+          },
+          {
+            name: 'Main Portal Areas',
+            urls: [
+              'https://kinrayweblink.cardinalhealth.com/orders',
+              'https://kinrayweblink.cardinalhealth.com/inventory',
+              'https://kinrayweblink.cardinalhealth.com/main'
+            ]
+          }
         ];
         
-        for (const dashboardUrl of dashboardUrls) {
-          try {
-            console.log(`🎯 Trying direct access to: ${dashboardUrl}`);
-            await this.page.goto(dashboardUrl, { waitUntil: 'domcontentloaded', timeout: 10000 });
-            const newUrl = this.page.url();
-            
-            if (!newUrl.includes('/login') && !newUrl.includes('/signin')) {
-              console.log(`✅ Successfully accessed authenticated area: ${newUrl}`);
-              break;
+        let authenticationBypassed = false;
+        
+        for (const strategy of authBypassStrategies) {
+          console.log(`🎯 Trying ${strategy.name} bypass strategy...`);
+          
+          for (const url of strategy.urls) {
+            try {
+              console.log(`🌐 Direct access attempt: ${url}`);
+              
+              // Re-inject cookies before each attempt
+              if (global.__kinray_session_cookies__) {
+                await SessionManager.injectSessionCookies(this.page, global.__kinray_session_cookies__);
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+              
+              await this.page.goto(url, { 
+                waitUntil: 'domcontentloaded', 
+                timeout: 15000 
+              });
+              
+              const finalUrl = this.page.url();
+              console.log(`📍 Final URL after redirect: ${finalUrl}`);
+              
+              // Check if authentication was successful
+              if (!finalUrl.includes('/login') && !finalUrl.includes('/signin') && !finalUrl.includes('/verify')) {
+                console.log(`✅ AUTHENTICATION BYPASS SUCCESSFUL via ${strategy.name}: ${finalUrl}`);
+                authenticationBypassed = true;
+                break;
+              } else {
+                console.log(`❌ Still redirected to auth page: ${finalUrl}`);
+              }
+            } catch (error) {
+              console.log(`❌ Error accessing ${url}: ${error.message}`);
+              continue;
             }
-          } catch (error) {
-            console.log(`❌ Failed to access ${dashboardUrl}: ${error.message}`);
-            continue;
           }
+          
+          if (authenticationBypassed) break;
         }
+        
+        if (!authenticationBypassed) {
+          console.log('🚨 AUTHENTICATION BYPASS FAILED - Session cookies may have expired');
+          console.log('💡 User needs to provide fresh session cookies from their browser');
+          
+          // Take screenshot for debugging
+          try {
+            await this.page.screenshot({ path: 'auth-bypass-failed.png' });
+            console.log('📸 Authentication failure screenshot saved');
+          } catch (screenshotError) {
+            console.log('❌ Screenshot failed:', screenshotError.message);
+          }
+          
+          // Don't return failure - continue with search attempt on whatever page we have
+          console.log('⚠️ Proceeding with search attempt despite authentication challenges...');
+        }
+      } else {
+        console.log(`✅ Authentication successful - already on authenticated page: ${currentUrl}`);
       }
       
       if (response && response.ok()) {

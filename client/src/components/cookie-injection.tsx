@@ -108,9 +108,13 @@ export function CookieInjection() {
               <li>Right-click each cookie → Copy or use the format below</li>
               <li>**Important**: Get fresh cookies if yours have expired</li>
             </ol>
-            <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
-              <strong>Compact Format:</strong> Copy and paste this single line format:<br/>
-              <code>[{"{"}name:"_abck",value:"YOUR_VALUE",domain:".cardinalhealth.com",path:"/"{"}"},{"{"}name:"okta-oauth-nonce",value:"YOUR_VALUE",domain:".cardinalhealth.com",path:"/"{"}"}]</code>
+            <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+              <strong>Status:</strong> Session cookies are working partially - bypassing initial login but hitting 2FA verification.<br/>
+              <strong>Current Progress:</strong> Authentication bypass system attempts multiple portal access routes after cookie injection.
+            </div>
+            <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+              <strong>Compact Format (if cookies expired):</strong><br/>
+              <code>[{"{"}name:"_abck",value:"YOUR_NEW_VALUE",domain:".cardinalhealth.com",path:"/"{"}"},{"{"}name:"okta-oauth-nonce",value:"YOUR_NEW_VALUE",domain:".cardinalhealth.com",path:"/"{"}"}]</code>
             </div>
           </AlertDescription>
         </Alert>
