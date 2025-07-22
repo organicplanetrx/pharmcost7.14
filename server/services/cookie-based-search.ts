@@ -48,10 +48,7 @@ export class CookieBasedSearchService {
       
     } catch (error) {
       console.error('❌ Cookie-based search failed:', error);
-      
-      // Return sample results to show functionality
-      console.log('🎯 Returning sample results to demonstrate system is working');
-      return this.generateSampleResults(searchTerm);
+      throw error;
       
     } finally {
       await this.cleanup();
@@ -166,37 +163,117 @@ export class CookieBasedSearchService {
       // Wait for results to load
       await new Promise(resolve => setTimeout(resolve, 5000));
       
+      // Take screenshot for debugging
+      await this.page!.screenshot({ path: '/tmp/kinray-search-results.png', fullPage: true });
+      console.log('📷 Results page screenshot saved');
+
+      // Debug: Get page HTML for analysis
+      const pageHTML = await this.page!.content();
+      console.log(`📄 Page HTML length: ${pageHTML.length} characters`);
+      
+      // Check if we have the results table
+      const hasResultsTable = await this.page!.evaluate(() => {
+        const table = document.querySelector('table');
+        const resultCount = document.querySelector('[class*="result"]')?.textContent || '';
+        const allRows = document.querySelectorAll('tr').length;
+        
+        return {
+          hasTable: !!table,
+          resultCountText: resultCount,
+          totalRows: allRows,
+          url: window.location.href
+        };
+      });
+      
+      console.log('📊 Page analysis:', JSON.stringify(hasResultsTable, null, 2));
+
       // Extract results from the table structure shown in your screenshot
       const results = await this.page!.evaluate(() => {
-        const resultRows = document.querySelectorAll('tr[class*="ng-star-inserted"]');
+        console.log('🔍 Starting result extraction...');
+        
+        // Look for all possible table structures
+        const allTables = document.querySelectorAll('table');
+        console.log(`Found ${allTables.length} tables on page`);
+        
         const extractedResults: any[] = [];
         
-        resultRows.forEach((row: Element) => {
-          const cells = row.querySelectorAll('td');
-          if (cells.length >= 8) {
-            // Extract data based on your screenshot table structure
-            const description = cells[3]?.textContent?.trim() || '';
-            const ndcElement = cells[5]?.textContent?.trim() || '';
-            const priceElement = cells[6]?.textContent?.trim() || '';
-            
-            if (description && ndcElement && priceElement) {
-              // Parse price (remove $ and convert to number)
-              const priceMatch = priceElement.match(/\$?([\d.]+)/);
-              const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
-              
-              extractedResults.push({
-                id: `kinray_${ndcElement}`,
-                medication_name: description,
-                ndc: ndcElement,
-                cost: price,
-                manufacturer: 'Kinray/Cardinal Health',
-                availability: 'Available',
-                vendor_id: 1
-              });
-            }
-          }
-        });
+        // Try multiple extraction strategies
+        const strategies = [
+          // Strategy 1: Angular table rows
+          () => document.querySelectorAll('tr[class*="ng-star-inserted"]'),
+          // Strategy 2: All table rows
+          () => document.querySelectorAll('tr'),
+          // Strategy 3: Table body rows
+          () => document.querySelectorAll('tbody tr'),
+          // Strategy 4: Any row with multiple cells
+          () => document.querySelectorAll('tr:has(td)')
+        ];
         
+        for (let i = 0; i < strategies.length; i++) {
+          try {
+            const rows = strategies[i]();
+            console.log(`Strategy ${i + 1}: Found ${rows.length} rows`);
+            
+            rows.forEach((row: Element, rowIndex: number) => {
+              const cells = row.querySelectorAll('td');
+              console.log(`Row ${rowIndex}: ${cells.length} cells`);
+              
+              if (cells.length >= 6) {
+                const allText = Array.from(cells).map(cell => cell.textContent?.trim() || '');
+                console.log(`Row ${rowIndex} data:`, allText);
+                
+                // Look for medication patterns in any cell
+                const rowText = row.textContent?.toLowerCase() || '';
+                if (rowText.includes('lisinopril') || rowText.includes('mg')) {
+                  
+                  // Try to extract structured data
+                  let medicationName = '', ndc = '', price = 0;
+                  
+                  for (let cellIndex = 0; cellIndex < cells.length; cellIndex++) {
+                    const cellText = cells[cellIndex].textContent?.trim() || '';
+                    
+                    // Look for medication name (contains "mg" or drug name)
+                    if (cellText.includes('mg') || cellText.toUpperCase().includes('LISINOPRIL')) {
+                      medicationName = cellText;
+                    }
+                    
+                    // Look for NDC (numeric pattern)
+                    if (/^\d{11}$/.test(cellText.replace(/\D/g, '')) && cellText.length >= 10) {
+                      ndc = cellText;
+                    }
+                    
+                    // Look for price (contains $ or decimal)
+                    if (cellText.includes('$') || /^\d+\.\d{2}$/.test(cellText)) {
+                      const priceMatch = cellText.match(/\$?([\d.]+)/);
+                      if (priceMatch) price = parseFloat(priceMatch[1]);
+                    }
+                  }
+                  
+                  if (medicationName && (ndc || price > 0)) {
+                    extractedResults.push({
+                      id: `kinray_row_${rowIndex}`,
+                      medication_name: medicationName,
+                      ndc: ndc || `temp-${Date.now()}-${rowIndex}`,
+                      cost: price,
+                      manufacturer: 'Kinray/Cardinal Health',
+                      availability: 'Available',
+                      vendor_id: 1
+                    });
+                  }
+                }
+              }
+            });
+            
+            if (extractedResults.length > 0) {
+              console.log(`Strategy ${i + 1} successful: ${extractedResults.length} results`);
+              break;
+            }
+          } catch (strategyError) {
+            console.log(`Strategy ${i + 1} failed:`, strategyError);
+          }
+        }
+        
+        console.log(`Final extraction: ${extractedResults.length} results`);
         return extractedResults;
       });
       
@@ -220,25 +297,8 @@ export class CookieBasedSearchService {
         const allRows = document.querySelectorAll('tr');
         const foundResults: any[] = [];
         
-        allRows.forEach((row: Element, index: number) => {
-          const rowText = row.textContent || '';
-          
-          // Look for rows containing lisinopril and price patterns
-          if (rowText.toLowerCase().includes('lisinopril') && rowText.includes('$')) {
-            const cells = row.querySelectorAll('td, th');
-            if (cells.length > 3) {
-              foundResults.push({
-                id: `kinray_row_${index}`,
-                medication_name: `LISINOPRIL ${Math.floor(Math.random() * 40) + 5}MG TABLETS`,
-                ndc: `68180${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}01`,
-                cost: Math.round((Math.random() * 50 + 5) * 100) / 100,
-                manufacturer: 'Various Manufacturers',
-                availability: 'Available',
-                vendor_id: 1
-              });
-            }
-          }
-        });
+        // DO NOT GENERATE FAKE DATA - REMOVE THIS ENTIRE SECTION
+        console.log('⚠️ Alternative extraction disabled - no fake data generation allowed');
         
         return foundResults;
       });
@@ -258,37 +318,8 @@ export class CookieBasedSearchService {
   }
 
   private generateSampleResults(searchTerm: string): MedicationSearchResult[] {
-    const drug = searchTerm.split(',')[0].toUpperCase();
-    
-    return [
-      {
-        id: `kinray_${searchTerm}_1`,
-        medication_name: `${drug} 10mg Tablets`,
-        ndc: '68180-001-01',
-        cost: 15.99,
-        manufacturer: 'Generic Pharmaceuticals Inc',
-        availability: 'Available',
-        vendor_id: 1
-      },
-      {
-        id: `kinray_${searchTerm}_2`, 
-        medication_name: `${drug} 20mg Tablets`,
-        ndc: '68180-001-02',
-        cost: 28.75,
-        manufacturer: 'Brand Pharmaceuticals LLC',
-        availability: 'Available', 
-        vendor_id: 1
-      },
-      {
-        id: `kinray_${searchTerm}_3`,
-        medication_name: `${drug} 5mg Tablets`,
-        ndc: '68180-001-03',
-        cost: 12.50,
-        manufacturer: 'Value Pharmaceuticals',
-        availability: 'Limited Stock',
-        vendor_id: 1
-      }
-    ];
+    // DO NOT RETURN FAKE DATA - only real extracted data allowed
+    throw new Error(`No real results extracted from Kinray portal for ${searchTerm}. Check portal structure and extraction logic.`);
   }
 
   private async cleanup(): Promise<void> {

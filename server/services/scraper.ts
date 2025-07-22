@@ -165,9 +165,8 @@ export class PuppeteerScrapingService implements ScrapingService {
   }
 
   private generateDemoResults(searchTerm: string, searchType: string): MedicationSearchResult[] {
-    // Demo data generation disabled - only live scraping allowed
-    console.log(`❌ Demo data generation disabled. Only authentic Kinray portal data allowed.`);
-    return [];
+    // FAKE DATA GENERATION PERMANENTLY DISABLED
+    throw new Error(`FAKE DATA GENERATION BLOCKED: No fake results will ever be returned for ${searchTerm}. Only authentic Kinray portal data allowed.`);
     
     if (isLisinopril) {
       return [

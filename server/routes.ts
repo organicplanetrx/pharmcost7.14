@@ -9,9 +9,8 @@ import { z } from "zod";
 
 // Generate authentic Kinray pricing data using REAL NDCs from portal screenshots
 function generateDemoResults(searchTerm: string, searchType: string, vendorName: string): MedicationSearchResult[] {
-  // Demo data generation DISABLED - only authentic portal data allowed
-  console.log(`❌ Demo data generation disabled for ${searchTerm}. Only live Kinray portal scraping allowed.`);
-  return [];
+  // FAKE DATA GENERATION PERMANENTLY DISABLED
+  throw new Error(`FAKE DATA GENERATION BLOCKED: No fake results will ever be returned for ${searchTerm}. Only authentic Kinray portal data allowed.`);
   
   // Real NDCs and pricing from authentic Kinray portal screenshots
   if (searchTerm.toLowerCase() === "atorvastatin") {
@@ -518,8 +517,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`⚠️ Cookie-based search failed: ${cookieError.message}`);
           console.log('🔄 Falling back to credential-based search...');
           
-          // Fall back to credential-based search
-          results = await performCredentialBasedSearch(searchData);
+          try {
+            // Fall back to credential-based search
+            results = await performCredentialBasedSearch(searchData);
+          } catch (credentialError) {
+            console.log(`❌ Both cookie and credential searches failed: ${credentialError.message}`);
+            throw new Error(`All search methods failed: ${cookieError.message} | ${credentialError.message}`);
+          }
         }
       } else {
         console.log('🔑 No session cookies found - using credential-based search');

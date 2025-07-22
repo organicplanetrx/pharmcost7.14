@@ -374,8 +374,7 @@ var init_cookie_based_search = __esm({
           }
         } catch (error) {
           console.error("\u274C Cookie-based search failed:", error);
-          console.log("\u{1F3AF} Returning sample results to demonstrate system is working");
-          return this.generateSampleResults(searchTerm);
+          throw error;
         } finally {
           await this.cleanup();
         }
@@ -459,30 +458,86 @@ var init_cookie_based_search = __esm({
           await this.page.keyboard.press("Enter");
           console.log("\u{1F50D} Search submitted");
           await new Promise((resolve) => setTimeout(resolve, 5e3));
+          await this.page.screenshot({ path: "/tmp/kinray-search-results.png", fullPage: true });
+          console.log("\u{1F4F7} Results page screenshot saved");
+          const pageHTML = await this.page.content();
+          console.log(`\u{1F4C4} Page HTML length: ${pageHTML.length} characters`);
+          const hasResultsTable = await this.page.evaluate(() => {
+            const table = document.querySelector("table");
+            const resultCount = document.querySelector('[class*="result"]')?.textContent || "";
+            const allRows = document.querySelectorAll("tr").length;
+            return {
+              hasTable: !!table,
+              resultCountText: resultCount,
+              totalRows: allRows,
+              url: window.location.href
+            };
+          });
+          console.log("\u{1F4CA} Page analysis:", JSON.stringify(hasResultsTable, null, 2));
           const results = await this.page.evaluate(() => {
-            const resultRows = document.querySelectorAll('tr[class*="ng-star-inserted"]');
+            console.log("\u{1F50D} Starting result extraction...");
+            const allTables = document.querySelectorAll("table");
+            console.log(`Found ${allTables.length} tables on page`);
             const extractedResults = [];
-            resultRows.forEach((row) => {
-              const cells = row.querySelectorAll("td");
-              if (cells.length >= 8) {
-                const description = cells[3]?.textContent?.trim() || "";
-                const ndcElement = cells[5]?.textContent?.trim() || "";
-                const priceElement = cells[6]?.textContent?.trim() || "";
-                if (description && ndcElement && priceElement) {
-                  const priceMatch = priceElement.match(/\$?([\d.]+)/);
-                  const price = priceMatch ? parseFloat(priceMatch[1]) : 0;
-                  extractedResults.push({
-                    id: `kinray_${ndcElement}`,
-                    medication_name: description,
-                    ndc: ndcElement,
-                    cost: price,
-                    manufacturer: "Kinray/Cardinal Health",
-                    availability: "Available",
-                    vendor_id: 1
-                  });
+            const strategies = [
+              // Strategy 1: Angular table rows
+              () => document.querySelectorAll('tr[class*="ng-star-inserted"]'),
+              // Strategy 2: All table rows
+              () => document.querySelectorAll("tr"),
+              // Strategy 3: Table body rows
+              () => document.querySelectorAll("tbody tr"),
+              // Strategy 4: Any row with multiple cells
+              () => document.querySelectorAll("tr:has(td)")
+            ];
+            for (let i = 0; i < strategies.length; i++) {
+              try {
+                const rows = strategies[i]();
+                console.log(`Strategy ${i + 1}: Found ${rows.length} rows`);
+                rows.forEach((row, rowIndex) => {
+                  const cells = row.querySelectorAll("td");
+                  console.log(`Row ${rowIndex}: ${cells.length} cells`);
+                  if (cells.length >= 6) {
+                    const allText = Array.from(cells).map((cell) => cell.textContent?.trim() || "");
+                    console.log(`Row ${rowIndex} data:`, allText);
+                    const rowText = row.textContent?.toLowerCase() || "";
+                    if (rowText.includes("lisinopril") || rowText.includes("mg")) {
+                      let medicationName = "", ndc = "", price = 0;
+                      for (let cellIndex = 0; cellIndex < cells.length; cellIndex++) {
+                        const cellText = cells[cellIndex].textContent?.trim() || "";
+                        if (cellText.includes("mg") || cellText.toUpperCase().includes("LISINOPRIL")) {
+                          medicationName = cellText;
+                        }
+                        if (/^\d{11}$/.test(cellText.replace(/\D/g, "")) && cellText.length >= 10) {
+                          ndc = cellText;
+                        }
+                        if (cellText.includes("$") || /^\d+\.\d{2}$/.test(cellText)) {
+                          const priceMatch = cellText.match(/\$?([\d.]+)/);
+                          if (priceMatch) price = parseFloat(priceMatch[1]);
+                        }
+                      }
+                      if (medicationName && (ndc || price > 0)) {
+                        extractedResults.push({
+                          id: `kinray_row_${rowIndex}`,
+                          medication_name: medicationName,
+                          ndc: ndc || `temp-${Date.now()}-${rowIndex}`,
+                          cost: price,
+                          manufacturer: "Kinray/Cardinal Health",
+                          availability: "Available",
+                          vendor_id: 1
+                        });
+                      }
+                    }
+                  }
+                });
+                if (extractedResults.length > 0) {
+                  console.log(`Strategy ${i + 1} successful: ${extractedResults.length} results`);
+                  break;
                 }
+              } catch (strategyError) {
+                console.log(`Strategy ${i + 1} failed:`, strategyError);
               }
-            });
+            }
+            console.log(`Final extraction: ${extractedResults.length} results`);
             return extractedResults;
           });
           console.log(`\u2705 Extracted ${results.length} results from Kinray portal`);
@@ -497,23 +552,7 @@ var init_cookie_based_search = __esm({
             console.log("Result count text:", resultText);
             const allRows = document.querySelectorAll("tr");
             const foundResults = [];
-            allRows.forEach((row, index) => {
-              const rowText = row.textContent || "";
-              if (rowText.toLowerCase().includes("lisinopril") && rowText.includes("$")) {
-                const cells = row.querySelectorAll("td, th");
-                if (cells.length > 3) {
-                  foundResults.push({
-                    id: `kinray_row_${index}`,
-                    medication_name: `LISINOPRIL ${Math.floor(Math.random() * 40) + 5}MG TABLETS`,
-                    ndc: `68180${String(Math.floor(Math.random() * 1e3)).padStart(3, "0")}01`,
-                    cost: Math.round((Math.random() * 50 + 5) * 100) / 100,
-                    manufacturer: "Various Manufacturers",
-                    availability: "Available",
-                    vendor_id: 1
-                  });
-                }
-              }
-            });
+            console.log("\u26A0\uFE0F Alternative extraction disabled - no fake data generation allowed");
             return foundResults;
           });
           if (alternativeResults.length > 0) {
@@ -528,36 +567,7 @@ var init_cookie_based_search = __esm({
         }
       }
       generateSampleResults(searchTerm) {
-        const drug = searchTerm.split(",")[0].toUpperCase();
-        return [
-          {
-            id: `kinray_${searchTerm}_1`,
-            medication_name: `${drug} 10mg Tablets`,
-            ndc: "68180-001-01",
-            cost: 15.99,
-            manufacturer: "Generic Pharmaceuticals Inc",
-            availability: "Available",
-            vendor_id: 1
-          },
-          {
-            id: `kinray_${searchTerm}_2`,
-            medication_name: `${drug} 20mg Tablets`,
-            ndc: "68180-001-02",
-            cost: 28.75,
-            manufacturer: "Brand Pharmaceuticals LLC",
-            availability: "Available",
-            vendor_id: 1
-          },
-          {
-            id: `kinray_${searchTerm}_3`,
-            medication_name: `${drug} 5mg Tablets`,
-            ndc: "68180-001-03",
-            cost: 12.5,
-            manufacturer: "Value Pharmaceuticals",
-            availability: "Limited Stock",
-            vendor_id: 1
-          }
-        ];
+        throw new Error(`No real results extracted from Kinray portal for ${searchTerm}. Check portal structure and extraction logic.`);
       }
       async cleanup() {
         try {
@@ -1501,8 +1511,7 @@ var PuppeteerScrapingService = class {
     }
   }
   generateDemoResults(searchTerm, searchType) {
-    console.log(`\u274C Demo data generation disabled. Only authentic Kinray portal data allowed.`);
-    return [];
+    throw new Error(`FAKE DATA GENERATION BLOCKED: No fake results will ever be returned for ${searchTerm}. Only authentic Kinray portal data allowed.`);
     if (isLisinopril) {
       return [
         {
@@ -4184,7 +4193,12 @@ async function registerRoutes(app2) {
         } catch (cookieError) {
           console.log(`\u26A0\uFE0F Cookie-based search failed: ${cookieError.message}`);
           console.log("\u{1F504} Falling back to credential-based search...");
-          results = await performCredentialBasedSearch(searchData);
+          try {
+            results = await performCredentialBasedSearch(searchData);
+          } catch (credentialError) {
+            console.log(`\u274C Both cookie and credential searches failed: ${credentialError.message}`);
+            throw new Error(`All search methods failed: ${cookieError.message} | ${credentialError.message}`);
+          }
         }
       } else {
         console.log("\u{1F511} No session cookies found - using credential-based search");
