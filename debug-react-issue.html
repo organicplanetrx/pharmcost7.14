@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>PharmaCost Pro - React Debug</title>
+    <link rel="stylesheet" crossorigin href="/assets/index-CBze2JUE.css">
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        margin: 0; 
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        min-height: 100vh;
+      }
+      .debug-panel {
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        backdrop-filter: blur(10px);
+      }
+      .error { color: #ff6b6b; }
+      .success { color: #51cf66; }
+      .warning { color: #ffd93d; }
+      #console-output {
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PharmaCost Pro - React Loading Debug</h1>
+    
+    <div class="debug-panel">
+      <h2>Asset Loading Test</h2>
+      <div id="asset-status"></div>
+    </div>
+
+    <div class="debug-panel">
+      <h2>React Mount Test</h2>
+      <div id="root">
+        <div style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+          <h3>⚠️ React Not Mounted</h3>
+          <p>If you see this message, React hasn't loaded or mounted successfully.</p>
+          <p>The React app should replace this content.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="debug-panel">
+      <h2>Console Output</h2>
+      <div id="console-output"></div>
+    </div>
+
+    <script>
+      const output = document.getElementById('console-output');
+      const assetStatus = document.getElementById('asset-status');
+      
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+        output.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        output.scrollTop = output.scrollHeight;
+        console.log(message);
+      }
+
+      // Capture console errors
+      window.addEventListener('error', (e) => {
+        log(`ERROR: ${e.message} (${e.filename}:${e.lineno})`, 'error');
+      });
+
+      window.addEventListener('unhandledrejection', (e) => {
+        log(`UNHANDLED PROMISE REJECTION: ${e.reason}`, 'error');
+      });
+
+      // Override console methods
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      
+      console.log = (...args) => {
+        log(args.join(' '), 'info');
+        originalLog.apply(console, args);
+      };
+      
+      console.error = (...args) => {
+        log(args.join(' '), 'error');
+        originalError.apply(console, args);
+      };
+      
+      console.warn = (...args) => {
+        log(args.join(' '), 'warning');
+        originalWarn.apply(console, args);
+      };
+
+      log('Debug page loaded');
+      log('Testing asset accessibility...');
+
+      // Test CSS loading
+      const cssLink = document.querySelector('link[href*="index-CBze2JUE.css"]');
+      if (cssLink) {
+        log('✅ CSS link found in DOM', 'success');
+      } else {
+        log('❌ CSS link not found', 'error');
+      }
+
+      // Test if we can fetch the JavaScript
+      fetch('/assets/index-B6CnPaRo.js')
+        .then(response => {
+          if (response.ok) {
+            log(`✅ JavaScript file accessible (${response.status})`, 'success');
+            return response.text();
+          } else {
+            throw new Error(`HTTP ${response.status}`);
+          }
+        })
+        .then(jsContent => {
+          if (jsContent.includes('React')) {
+            log('✅ JavaScript contains React code', 'success');
+          } else {
+            log('⚠️ JavaScript might not contain React', 'warning');
+          }
+          assetStatus.innerHTML = `<span class="success">✅ Assets Loading Successfully</span>`;
+        })
+        .catch(error => {
+          log(`❌ JavaScript file fetch failed: ${error.message}`, 'error');
+          assetStatus.innerHTML = `<span class="error">❌ Asset Loading Failed: ${error.message}</span>`;
+        });
+
+      // Test API connectivity
+      fetch('/api/health')
+        .then(r => r.json())
+        .then(data => {
+          log(`✅ API health check: ${data.status}`, 'success');
+        })
+        .catch(e => {
+          log(`❌ API health check failed: ${e.message}`, 'error');
+        });
+
+      // Check if root element is available
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        log('✅ Root element found', 'success');
+        
+        // Monitor for changes in root element (React mounting)
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+              log('📋 Root element content changed - React might be mounting', 'info');
+            }
+          });
+        });
+        
+        observer.observe(rootElement, { 
+          childList: true, 
+          subtree: true 
+        });
+        
+        // Check for React mounting after a delay
+        setTimeout(() => {
+          const reactContent = rootElement.querySelector('[data-reactroot], .react-content, .dashboard-container');
+          if (reactContent) {
+            log('✅ React successfully mounted!', 'success');
+          } else {
+            log('❌ React not mounted after 5 seconds', 'error');
+            log('Root element HTML: ' + rootElement.innerHTML.substring(0, 200), 'info');
+          }
+        }, 5000);
+      } else {
+        log('❌ Root element not found', 'error');
+      }
+    </script>
+
+    <!-- Load the React app -->
+    <script type="module" crossorigin src="/assets/index-B6CnPaRo.js"></script>
+  </body>
+</html>

@@ -3454,6 +3454,12 @@ app.use((req, res, next) => {
         app.get("/debug", (req, res) => {
           res.sendFile(path3.join(process.cwd(), "debug-deployment.html"));
         });
+        app.get("/debug-react", (req, res) => {
+          res.sendFile(path3.join(process.cwd(), "debug-react-issue.html"));
+        });
+        app.get("/simple-test", (req, res) => {
+          res.sendFile(path3.join(process.cwd(), "simple-test.html"));
+        });
         app.get("*", (req, res) => {
           if (req.path.startsWith("/api")) {
             return res.status(404).json({ message: "API endpoint not found" });

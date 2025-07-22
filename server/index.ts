@@ -98,9 +98,17 @@ app.use((req, res, next) => {
     
     if (fs.existsSync(staticPath)) {
       app.use(express.static(staticPath));
-      // Debug route
+      // Debug routes
       app.get("/debug", (req, res) => {
         res.sendFile(path.join(process.cwd(), 'debug-deployment.html'));
+      });
+      
+      app.get("/debug-react", (req, res) => {
+        res.sendFile(path.join(process.cwd(), 'debug-react-issue.html'));
+      });
+      
+      app.get("/simple-test", (req, res) => {
+        res.sendFile(path.join(process.cwd(), 'simple-test.html'));
       });
       
       // Handle client-side routing

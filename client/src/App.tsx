@@ -18,11 +18,15 @@ function Router() {
 }
 
 function App() {
+  console.log('PharmaCost Pro App component rendering...');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700">
+          <Toaster />
+          <Router />
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
   );

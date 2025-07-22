@@ -1,0 +1,161 @@
+You reached the start of the range → Jul 22, 2025, 2:39 PM
+
+Starting Container
+
+🚂 Railway PharmaCost Pro Server Starting...
+
+=== RAILWAY ENVIRONMENT DEBUG ===
+
+Railway detected: YES
+
+NODE_ENV: production
+
+PORT env var: 8080
+
+Server will bind to port: 8080
+
+All environment variables containing RAILWAY: [
+
+  'RAILWAY_REPLICA_REGION: us-east4-eqdc4a',
+
+  'RAILWAY_PUBLIC_DOMAIN: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_REPLICA_ID: 666d1f32-00a0-4f6c-a9b0-4c073161326a',
+
+  'RAILWAY_GIT_AUTHOR: organicplanetrx',
+
+  'RAILWAY_GIT_BRANCH: main',
+
+  'RAILWAY_STATIC_URL: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_SERVICE_NAME: pharmcost7.14',
+
+  'RAILWAY_PRIVATE_DOMAIN: pharmcost7-14.railway.internal',
+
+  'RAILWAY_PROJECT_NAME: accomplished-flexibility',
+
+  'RAILWAY_SERVICE_ID: 23a0149f-ae92-4056-8d79-528be3717919',
+
+  'RAILWAY_GIT_COMMIT_MESSAGE: Address issue where pharmaceutical dashboard interface was not loading\n' +
+
+    '\n' +
+
+    'Updates asset references in `dist/public/index.html` and adds a `/debug` route to resolve Railway deployment asset hash mismatch and facilitate easier debugging.\n' +
+
+    '\n' +
+
+Environment: production
+
+    'Replit-Commit-Author: Agent\n' +
+
+=== RAILWAY PORT DETECTION ===
+
+    'Replit-Commit-Session-Id: 028a46d3-4c44-4bf1-b639-37b69a33736e\n' +
+
+Raw PORT env: 8080
+
+    'Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/27c7860c-6b7c-4071-b6ec-59c6d7082d49/028a46d3-4c44-4bf1-b639-37b69a33736e/eOnnaUh';,
+
+PORT type: string
+
+  'RAILWAY_ENVIRONMENT_NAME: production',
+
+Railway vars found: 22
+
+  'RAILWAY_PROJECT_ID: 3fb5727b-290e-4d77-be0e-0301636c227d',
+
+Will use port: 8080
+
+  'RAILWAY_DEPLOYMENT_ID: eece7b16-3328-4ef8-9388-6de297ee1cac',
+
+==============================
+
+✓ Express app created
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL: pharmcost714-production.up.railway.app',
+
+✓ Express middleware configured
+
+  'RAILWAY_GIT_REPO_OWNER: organicplanetrx',
+
+Starting server initialization...
+
+  'RAILWAY_ENVIRONMENT: production',
+
+Routes registered successfully
+
+  'RAILWAY_ENVIRONMENT_ID: 7545f10b-d513-4031-9d9b-03b17b9ed615',
+
+  'RAILWAY_BETA_ENABLE_RUNTIME_V2: 1',
+
+Setting up static file serving...
+
+Static files directory: /app/dist/public
+
+  'RAILWAY_SNAPSHOT_ID: 94518a1a-910d-47bb-94b2-d86e25a2bfb0',
+
+✅ Static files configured for Railway deployment
+
+  'RAILWAY_GIT_COMMIT_SHA: ade09f24059146c352cc5042d0858e0d30435717',
+
+=== RAILWAY PORT DEBUGGING ===
+
+  'RAILWAY_GIT_REPO_NAME: pharmcost7.14'
+
+Railway PORT environment variable: "8080"
+
+]
+
+Parsed port number: 8080
+
+===================================
+
+Is Railway deployment: YES
+
+💾 PostgreSQL not available - using memory storage
+
+All Railway env vars: [
+
+   DATABASE_URL missing or invalid - check Railway PostgreSQL service
+
+  'RAILWAY_REPLICA_REGION',
+
+🗄️ Creating GLOBAL singleton MemStorage instance - ID: iz9now
+
+  'RAILWAY_PUBLIC_DOMAIN',
+
+🔍 MemStorage constructor called - instance creation - ID: mfmeok
+
+  'RAILWAY_REPLICA_ID',
+
+🚀 Starting PharmaCost Pro server...
+
+  'RAILWAY_GIT_AUTHOR',
+
+  'RAILWAY_GIT_BRANCH',
+
+  'RAILWAY_STATIC_URL',
+
+  'RAILWAY_SERVICE_NAME',
+
+  'RAILWAY_PRIVATE_DOMAIN',
+
+  'RAILWAY_PROJECT_NAME',
+
+  'RAILWAY_SERVICE_ID',
+
+  'RAILWAY_GIT_COMMIT_MESSAGE',
+
+  'RAILWAY_ENVIRONMENT_NAME',
+
+  'RAILWAY_PROJECT_ID',
+
+  'RAILWAY_DEPLOYMENT_ID',
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL',
+
+  'RAILWAY_GIT_REPO_OWNER',
+
+  'RAILWAY_ENVIRONMENT',
+
+  'RAILWAY_ENVIRONMENT_ID',
