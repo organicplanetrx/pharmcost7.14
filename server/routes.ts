@@ -393,6 +393,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Automatic cookie extraction endpoint
+  // Smart authentication status check
+  app.get('/api/check-auth-status', async (req, res) => {
+    try {
+      console.log('🔍 Smart auth check: Looking for existing session...');
+      
+      // Check if we already have stored cookies
+      const existingCookies = global.__kinray_session_cookies__;
+      
+      if (existingCookies && existingCookies.length > 5) {
+        console.log(`✅ Found existing session with ${existingCookies.length} cookies`);
+        return res.json({
+          authenticated: true,
+          cookieCount: existingCookies.length,
+          message: 'Session ready for searches'
+        });
+      }
+      
+      console.log('⚠️ No authenticated session found');
+      res.json({
+        authenticated: false,
+        cookieCount: 0,
+        message: 'Please log into Kinray and extract session cookies'
+      });
+      
+    } catch (error) {
+      console.error('❌ Auth status check failed:', error);
+      res.status(500).json({
+        authenticated: false,
+        error: 'Failed to check authentication status'
+      });
+    }
+  });
+
   app.post('/api/extract-cookies', async (req, res) => {
     try {
       const { username, password } = req.body;

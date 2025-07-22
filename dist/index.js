@@ -2945,9 +2945,11 @@ var LiveSearchService = class {
       if (!browserPath) {
         throw new Error("No browser executable found");
       }
+      const userDataDir = "/tmp/chrome-user-data";
       this.browser = await puppeteer2.launch({
         headless: true,
         executablePath: browserPath,
+        userDataDir,
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",
@@ -2956,12 +2958,17 @@ var LiveSearchService = class {
           "--disable-web-security",
           "--disable-extensions",
           "--no-first-run",
-          "--single-process"
+          "--single-process",
+          "--disable-background-networking",
+          "--disable-default-apps",
+          "--disable-sync",
+          "--no-default-browser-check",
+          "--no-first-run"
         ]
       });
       this.page = await this.browser.newPage();
       await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-      console.log("\u2705 Browser initialized successfully");
+      console.log("\u2705 Browser initialized with session sharing");
     } catch (error) {
       throw new Error(`Browser initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -3842,6 +3849,32 @@ async function registerRoutes(app2) {
       cookieCount: hasSessionCookies ? globalCookies.length : 0,
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
+  });
+  app2.get("/api/check-auth-status", async (req, res) => {
+    try {
+      console.log("\u{1F50D} Smart auth check: Looking for existing session...");
+      const existingCookies = global.__kinray_session_cookies__;
+      if (existingCookies && existingCookies.length > 5) {
+        console.log(`\u2705 Found existing session with ${existingCookies.length} cookies`);
+        return res.json({
+          authenticated: true,
+          cookieCount: existingCookies.length,
+          message: "Session ready for searches"
+        });
+      }
+      console.log("\u26A0\uFE0F No authenticated session found");
+      res.json({
+        authenticated: false,
+        cookieCount: 0,
+        message: "Please log into Kinray and extract session cookies"
+      });
+    } catch (error) {
+      console.error("\u274C Auth status check failed:", error);
+      res.status(500).json({
+        authenticated: false,
+        error: "Failed to check authentication status"
+      });
+    }
   });
   app2.post("/api/extract-cookies", async (req, res) => {
     try {

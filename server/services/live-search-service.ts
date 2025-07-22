@@ -61,9 +61,13 @@ export class LiveSearchService {
         throw new Error('No browser executable found');
       }
 
+      // Use user data directory to share session with existing browser
+      const userDataDir = '/tmp/chrome-user-data';
+      
       this.browser = await puppeteer.launch({
         headless: true,
         executablePath: browserPath,
+        userDataDir: userDataDir,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -72,16 +76,21 @@ export class LiveSearchService {
           '--disable-web-security',
           '--disable-extensions',
           '--no-first-run',
-          '--single-process'
+          '--single-process',
+          '--disable-background-networking',
+          '--disable-default-apps',
+          '--disable-sync',
+          '--no-default-browser-check',
+          '--no-first-run'
         ]
       });
 
       this.page = await this.browser.newPage();
       
-      // Set realistic user agent
+      // Set realistic user agent matching typical browser
       await this.page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
-      console.log('✅ Browser initialized successfully');
+      console.log('✅ Browser initialized with session sharing');
     } catch (error) {
       throw new Error(`Browser initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
