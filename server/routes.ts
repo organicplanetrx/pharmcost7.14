@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🍪 Received ${cookies.length} cookies for injection`);
       
       // Store cookies globally for use in searches
-      global.__kinray_session_cookies__ = cookies;
+      (global as any).__kinray_session_cookies__ = cookies;
       
       res.json({ success: true, message: 'Session cookies stored successfully' });
     } catch (error) {
@@ -257,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`✅ API: Returning search ${id} with ${searchWithResults.results.length} results`);
       res.json(searchWithResults);
     } catch (error) {
-      console.error(`❌ API: Failed to fetch search ${id}:`, error);
+      console.error(`❌ API: Failed to fetch search ${req.params.id}:`, error);
       res.status(500).json({ message: "Failed to fetch search" });
     }
   });
@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Store cookies globally for scraper access
-      global.__kinray_session_cookies__ = cookies;
+      (global as any).__kinray_session_cookies__ = cookies;
       
       console.log(`🍪 Session cookies stored globally: ${cookies.length} cookies`);
       cookies.forEach(cookie => {
@@ -380,13 +380,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Cookie status endpoint
   app.get('/api/cookie-status', async (req, res) => {
-    const hasSessionCookies = global.__kinray_session_cookies__ && 
-                              Array.isArray(global.__kinray_session_cookies__) && 
-                              global.__kinray_session_cookies__.length > 0;
+    const globalCookies = (global as any).__kinray_session_cookies__;
+    const hasSessionCookies = globalCookies && 
+                              Array.isArray(globalCookies) && 
+                              globalCookies.length > 0;
     
     res.json({
       hasSessionCookies,
-      cookieCount: hasSessionCookies ? global.__kinray_session_cookies__.length : 0,
+      cookieCount: hasSessionCookies ? globalCookies.length : 0,
       timestamp: new Date().toISOString()
     });
   });
@@ -409,7 +410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (extractedCookies.length > 0) {
           // Success with simple extractor
-          global.__kinray_session_cookies__ = extractedCookies;
+          (global as any).__kinray_session_cookies__ = extractedCookies;
           
           console.log(`✅ Simple extractor: ${extractedCookies.length} cookies`);
           
@@ -430,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (extractedCookies.length > 0) {
         // Automatically inject the extracted cookies
-        global.__kinray_session_cookies__ = extractedCookies;
+        (global as any).__kinray_session_cookies__ = extractedCookies;
         
         console.log(`✅ Automatically extracted and injected ${extractedCookies.length} session cookies`);
         
@@ -458,11 +459,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Live search function using direct credential-based authentication
   async function performLiveSearch(searchId: number, searchData: any): Promise<void> {
+    console.log(`🔥 performLiveSearch STARTED for search ${searchId} - "${searchData.searchTerm}"`);
+    
     try {
       console.log(`🔍 Starting live credential-based search ${searchId} for "${searchData.searchTerm}"`);
 
       // Update search status
       await storage.updateSearch(searchId, { status: "in_progress" });
+      console.log(`📊 Updated search ${searchId} status to in_progress`);
 
       // Get credentials (prioritize environment variables)
       let credentials = null;
@@ -471,7 +475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: process.env.KINRAY_USERNAME,
           password: process.env.KINRAY_PASSWORD
         };
-        console.log(`✅ Using environment credentials for Kinray portal`);
+        console.log(`✅ Using environment credentials for Kinray portal - user: ${credentials.username}`);
       } else {
         const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
         if (storedCredential) {
@@ -479,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             username: storedCredential.username,
             password: storedCredential.password
           };
-          console.log(`✅ Using stored credentials for Kinray portal`);
+          console.log(`✅ Using stored credentials for Kinray portal - user: ${credentials.username}`);
         }
       }
 
@@ -488,8 +492,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Perform live search with direct credentials
+      console.log(`🚀 Creating LiveSearchService instance...`);
       const liveSearchService = new LiveSearchService();
-      console.log(`🚀 Executing live search with fresh authentication...`);
+      console.log(`🎯 Executing live search with fresh authentication...`);
       
       const results = await liveSearchService.performLiveSearch(
         credentials,
@@ -536,6 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error(`❌ Live search ${searchId} failed:`, error);
+      console.error(`❌ Error stack:`, error.stack);
       
       await storage.updateSearch(searchId, { 
         status: "failed", 
@@ -550,6 +556,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchId,
       });
     }
+    
+    console.log(`🏁 performLiveSearch FINISHED for search ${searchId}`);
   }
 
   // Async function to perform the actual search

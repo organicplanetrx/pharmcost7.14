@@ -586,10 +586,10 @@ var RailwayDatabaseStorage = class {
       return [];
     }
   }
-  async getVendor(id2) {
+  async getVendor(id) {
     await this.ensureConnection();
     try {
-      const result = await this.db.select().from(vendors).where(eq(vendors.id, id2));
+      const result = await this.db.select().from(vendors).where(eq(vendors.id, id));
       return result[0];
     } catch (error) {
       console.error("\u274C Error fetching vendor:", error);
@@ -627,20 +627,20 @@ var RailwayDatabaseStorage = class {
     const result = await this.db.insert(credentials).values(credential).returning();
     return result[0];
   }
-  async updateCredential(id2, credential) {
+  async updateCredential(id, credential) {
     await this.ensureConnection();
     try {
-      const result = await this.db.update(credentials).set(credential).where(eq(credentials.id, id2)).returning();
+      const result = await this.db.update(credentials).set(credential).where(eq(credentials.id, id)).returning();
       return result[0];
     } catch (error) {
       console.error("\u274C Error updating credential:", error);
       return void 0;
     }
   }
-  async deleteCredential(id2) {
+  async deleteCredential(id) {
     await this.ensureConnection();
     try {
-      await this.db.delete(credentials).where(eq(credentials.id, id2));
+      await this.db.delete(credentials).where(eq(credentials.id, id));
       return true;
     } catch (error) {
       console.error("\u274C Error deleting credential:", error);
@@ -673,10 +673,10 @@ var RailwayDatabaseStorage = class {
     const result = await this.db.insert(medications).values(medication).returning();
     return result[0];
   }
-  async updateMedication(id2, medication) {
+  async updateMedication(id, medication) {
     await this.ensureConnection();
     try {
-      const result = await this.db.update(medications).set(medication).where(eq(medications.id, id2)).returning();
+      const result = await this.db.update(medications).set(medication).where(eq(medications.id, id)).returning();
       return result[0];
     } catch (error) {
       console.error("\u274C Error updating medication:", error);
@@ -694,22 +694,22 @@ var RailwayDatabaseStorage = class {
       return [];
     }
   }
-  async getSearch(id2) {
+  async getSearch(id) {
     await this.ensureConnection();
     try {
-      const result = await this.db.select().from(searches).where(eq(searches.id, id2));
+      const result = await this.db.select().from(searches).where(eq(searches.id, id));
       return result[0];
     } catch (error) {
       console.error("\u274C Error fetching search:", error);
       return void 0;
     }
   }
-  async getSearchWithResults(id2) {
+  async getSearchWithResults(id) {
     await this.ensureConnection();
     try {
-      const search = await this.getSearch(id2);
+      const search = await this.getSearch(id);
       if (!search) return void 0;
-      const searchResultsData = await this.getSearchResults(id2);
+      const searchResultsData = await this.getSearchResults(id);
       const results = searchResultsData.map((sr) => ({
         ...sr,
         medication: {
@@ -734,10 +734,10 @@ var RailwayDatabaseStorage = class {
     const result = await this.db.insert(searches).values(search).returning();
     return result[0];
   }
-  async updateSearch(id2, search) {
+  async updateSearch(id, search) {
     await this.ensureConnection();
     try {
-      const result = await this.db.update(searches).set(search).where(eq(searches.id, id2)).returning();
+      const result = await this.db.update(searches).set(search).where(eq(searches.id, id)).returning();
       return result[0];
     } catch (error) {
       console.error("\u274C Error updating search:", error);
@@ -840,8 +840,8 @@ var MemStorage = class {
   async getVendors() {
     return Array.from(this.vendors.values()).filter((v) => v.isActive);
   }
-  async getVendor(id2) {
-    return this.vendors.get(id2);
+  async getVendor(id) {
+    return this.vendors.get(id);
   }
   async createVendor(vendor) {
     const newVendor = {
@@ -870,15 +870,15 @@ var MemStorage = class {
     this.credentials.set(newCredential.id, newCredential);
     return newCredential;
   }
-  async updateCredential(id2, credential) {
-    const existing = this.credentials.get(id2);
+  async updateCredential(id, credential) {
+    const existing = this.credentials.get(id);
     if (!existing) return void 0;
     const updated = { ...existing, ...credential };
-    this.credentials.set(id2, updated);
+    this.credentials.set(id, updated);
     return updated;
   }
-  async deleteCredential(id2) {
-    return this.credentials.delete(id2);
+  async deleteCredential(id) {
+    return this.credentials.delete(id);
   }
   // Medications
   async getMedications() {
@@ -901,37 +901,37 @@ var MemStorage = class {
     this.medications.set(newMedication.id, newMedication);
     return newMedication;
   }
-  async updateMedication(id2, medication) {
-    const existing = this.medications.get(id2);
+  async updateMedication(id, medication) {
+    const existing = this.medications.get(id);
     if (!existing) return void 0;
     const updated = { ...existing, ...medication };
-    this.medications.set(id2, updated);
+    this.medications.set(id, updated);
     return updated;
   }
   // Searches
   async getSearches(limit = 50) {
     return Array.from(this.searches.values()).sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)).slice(0, limit);
   }
-  async getSearch(id2) {
-    return this.searches.get(id2);
+  async getSearch(id) {
+    return this.searches.get(id);
   }
-  async getSearchWithResults(id2) {
+  async getSearchWithResults(id) {
     const storageId = global.__pharma_storage_id__ || "unknown";
-    console.log(`\u{1F50D} getSearchWithResults called for searchId: ${id2}`);
+    console.log(`\u{1F50D} getSearchWithResults called for searchId: ${id}`);
     console.log(`\u{1F4CA} Storage instance: ${this.constructor.name} - Global ID: ${storageId}`);
     console.log(`\u{1F4CA} Available searches: ${this.searches.size} - IDs: [${Array.from(this.searches.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available results: ${this.searchResults.size} - IDs: [${Array.from(this.searchResults.keys()).join(", ")}]`);
     console.log(`\u{1F4CA} Available medications: ${this.medications.size} - IDs: [${Array.from(this.medications.keys()).join(", ")}]`);
-    const search = this.searches.get(id2);
+    const search = this.searches.get(id);
     if (!search) {
-      console.log(`\u274C Search ${id2} not found in storage`);
+      console.log(`\u274C Search ${id} not found in storage`);
       return void 0;
     }
-    const results = Array.from(this.searchResults.values()).filter((sr) => sr.searchId === id2).map((sr) => ({
+    const results = Array.from(this.searchResults.values()).filter((sr) => sr.searchId === id).map((sr) => ({
       ...sr,
       medication: this.medications.get(sr.medicationId)
     }));
-    console.log(`\u{1F4CB} Found ${results.length} results for search ${id2}`);
+    console.log(`\u{1F4CB} Found ${results.length} results for search ${id}`);
     return { ...search, results };
   }
   async createSearch(search) {
@@ -947,11 +947,11 @@ var MemStorage = class {
     console.log(`\u{1F504} Created search ${newSearch.id} - Total searches: ${this.searches.size}`);
     return newSearch;
   }
-  async updateSearch(id2, search) {
-    const existing = this.searches.get(id2);
+  async updateSearch(id, search) {
+    const existing = this.searches.get(id);
     if (!existing) return void 0;
     const updated = { ...existing, ...search };
-    this.searches.set(id2, updated);
+    this.searches.set(id, updated);
     return updated;
   }
   // Search Results
@@ -2077,9 +2077,9 @@ var PuppeteerScrapingService = class {
           return elements.some((el) => {
             const text2 = el.textContent?.toLowerCase() || "";
             const className = el.className?.toLowerCase() || "";
-            const id2 = el.id?.toLowerCase() || "";
+            const id = el.id?.toLowerCase() || "";
             return successIndicators.some(
-              (indicator) => text2.includes(indicator) || className.includes(indicator) || id2.includes(indicator)
+              (indicator) => text2.includes(indicator) || className.includes(indicator) || id.includes(indicator)
             );
           });
         });
@@ -2954,18 +2954,21 @@ var LiveSearchService = class {
       "/opt/google/chrome/chrome",
       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     ];
-    if (process.env.RAILWAY_ENVIRONMENT) {
+    if (process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === "production") {
       possiblePaths.unshift("/usr/bin/google-chrome-stable");
+      console.log("\u{1F433} Railway/Production environment detected - prioritizing /usr/bin/google-chrome-stable");
     }
     for (const path4 of possiblePaths) {
       try {
         execSync2(`test -x "${path4}"`, { stdio: "ignore" });
-        console.log(`Found browser at: ${path4}`);
+        console.log(`\u2705 Found executable browser at: ${path4}`);
         return path4;
-      } catch {
+      } catch (error) {
+        console.log(`\u274C Browser not found at: ${path4}`);
         continue;
       }
     }
+    console.log("\u274C No browser executable found in any expected location");
     return null;
   }
   async performKinrayLogin(credentials2) {
@@ -3014,66 +3017,263 @@ var LiveSearchService = class {
   }
   async navigateToSearchInterface() {
     if (!this.page) throw new Error("Page not initialized");
+    const currentUrl = this.page.url();
+    console.log(`\u{1F4CD} Starting from URL: ${currentUrl}`);
+    await this.page.screenshot({ path: "/tmp/kinray-after-login.png", fullPage: true });
+    console.log("\u{1F4F7} Post-login screenshot saved");
+    const pageStructure = await this.page.evaluate(() => {
+      const structure = {
+        title: document.title,
+        url: location.href,
+        navLinks: Array.from(document.querySelectorAll("nav a, .nav a, .navbar a")).map((a) => ({
+          text: a.textContent?.trim(),
+          href: a.href
+        })).filter((link) => link.text && link.text.length > 0),
+        searchElements: Array.from(document.querySelectorAll('input, form, [class*="search"], [id*="search"]')).map((el) => ({
+          tagName: el.tagName,
+          type: el.type || null,
+          id: el.id || null,
+          className: el.className || null,
+          placeholder: el.placeholder || null,
+          name: el.name || null
+        })),
+        headings: Array.from(document.querySelectorAll("h1, h2, h3")).map((h) => h.textContent?.trim()).filter(Boolean),
+        mainContent: document.querySelector("main, .main-content, .content")?.textContent?.trim().substring(0, 200) || null
+      };
+      return structure;
+    });
+    console.log("\u{1F4CA} Current page analysis:");
+    console.log(`   Title: ${pageStructure.title}`);
+    console.log(`   URL: ${pageStructure.url}`);
+    console.log(`   Navigation links: ${pageStructure.navLinks.length}`);
+    pageStructure.navLinks.forEach((link, i) => {
+      console.log(`     ${i + 1}. "${link.text}" -> ${link.href}`);
+    });
+    console.log(`   Search-related elements: ${pageStructure.searchElements.length}`);
+    pageStructure.searchElements.forEach((el, i) => {
+      console.log(`     ${i + 1}. ${el.tagName} type="${el.type}" id="${el.id}" class="${el.className}" placeholder="${el.placeholder}"`);
+    });
+    console.log(`   Headings: ${pageStructure.headings.join(", ")}`);
+    const hasSearchOnCurrentPage = pageStructure.searchElements.some(
+      (el) => el.type === "search" || el.placeholder && el.placeholder.toLowerCase().includes("search") || el.className && el.className.toLowerCase().includes("search")
+    );
+    if (hasSearchOnCurrentPage) {
+      console.log("\u2705 Current page appears to have search functionality");
+      return;
+    }
+    const searchNavOptions = [
+      "search",
+      "products",
+      "catalog",
+      "inventory",
+      "browse",
+      "find",
+      "lookup"
+    ];
+    for (const navOption of searchNavOptions) {
+      const matchingLink = pageStructure.navLinks.find(
+        (link) => link.text && link.text.toLowerCase().includes(navOption.toLowerCase())
+      );
+      if (matchingLink) {
+        try {
+          console.log(`\u{1F504} Attempting to navigate to: "${matchingLink.text}" (${matchingLink.href})`);
+          await this.page.goto(matchingLink.href, { waitUntil: "domcontentloaded", timeout: 15e3 });
+          await new Promise((resolve) => setTimeout(resolve, 2e3));
+          const searchInput = await this.page.$('input[type="search"], input[name*="search"], input[placeholder*="search"]');
+          if (searchInput) {
+            console.log(`\u2705 Found search interface at: ${matchingLink.href}`);
+            return;
+          }
+        } catch (error) {
+          console.log(`\u26A0\uFE0F Failed to navigate to ${matchingLink.href}:`, error.message);
+        }
+      }
+    }
     const searchUrls = [
       "https://kinrayweblink.cardinalhealth.com/search",
+      "https://kinrayweblink.cardinalhealth.com/products",
+      "https://kinrayweblink.cardinalhealth.com/catalog",
+      "https://kinrayweblink.cardinalhealth.com/inventory",
       "https://kinrayweblink.cardinalhealth.com/product-search",
-      "https://kinrayweblink.cardinalhealth.com/portal/search",
-      "https://kinrayweblink.cardinalhealth.com/dashboard"
+      "https://kinrayweblink.cardinalhealth.com/portal/search"
     ];
     for (const url of searchUrls) {
       try {
-        console.log(`\u{1F504} Trying search URL: ${url}`);
+        console.log(`\u{1F504} Trying direct URL: ${url}`);
         await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 1e4 });
-        const searchInput = await this.page.$('input[type="search"], input[name*="search"], input[placeholder*="search"], input.search-input');
+        await new Promise((resolve) => setTimeout(resolve, 1e3));
+        const searchInput = await this.page.$('input[type="search"], input[name*="search"], input[placeholder*="search"]');
         if (searchInput) {
           console.log(`\u2705 Found search interface at: ${url}`);
           return;
         }
-      } catch {
-        continue;
+      } catch (error) {
+        console.log(`\u26A0\uFE0F URL ${url} failed:`, error.message);
       }
     }
-    const currentUrl = this.page.url();
-    console.log(`\u{1F50D} Looking for search on current page: ${currentUrl}`);
+    console.log("\u26A0\uFE0F No dedicated search interface found, will attempt search on current page");
   }
   async executeSearch(searchTerm, searchType) {
     if (!this.page) throw new Error("Page not initialized");
     try {
+      console.log("\u{1F50D} Current page URL:", this.page.url());
+      console.log("\u{1F50D} Page title:", await this.page.title());
+      await this.page.screenshot({ path: "/tmp/kinray-search-page.png", fullPage: true });
+      console.log("\u{1F4F7} Screenshot saved to /tmp/kinray-search-page.png");
+      await this.page.waitForNavigation({ waitUntil: "domcontentloaded" }).catch(() => {
+        console.log("\u26A0\uFE0F Navigation wait timed out, continuing...");
+      });
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
       const searchSelectors = [
+        // Primary search inputs
         'input[type="search"]',
         'input[name*="search"]',
         'input[placeholder*="search"]',
+        'input[placeholder*="Search"]',
+        'input[placeholder*="SEARCH"]',
+        // Product/medication specific
         'input[placeholder*="product"]',
+        'input[placeholder*="Product"]',
         'input[placeholder*="drug"]',
+        'input[placeholder*="Drug"]',
         'input[placeholder*="medication"]',
-        ".search-input",
-        'input[type="text"]',
-        "input.form-control"
+        'input[placeholder*="Medication"]',
+        'input[placeholder*="item"]',
+        'input[placeholder*="Item"]',
+        // Generic form inputs  
+        'input[type="text"]:not([type="hidden"])',
+        "input.search-input",
+        "input.form-control",
+        "input.search-field",
+        // Common portal patterns
+        'input[name="q"]',
+        'input[name="query"]',
+        'input[name="searchTerm"]',
+        'input[name="keyword"]',
+        'input[id*="search"]',
+        'input[id*="Search"]',
+        'input[class*="search"]',
+        // Kinray-specific patterns (from portal analysis)
+        'input[data-testid*="search"]',
+        'input[role="searchbox"]',
+        ".search-container input",
+        "#searchBox",
+        "#search-input"
       ];
+      console.log(`\u{1F50D} Searching for input fields with ${searchSelectors.length} selectors...`);
+      const allInputs = await this.page.evaluate(() => {
+        const inputs = document.querySelectorAll("input");
+        return Array.from(inputs).map((input) => ({
+          type: input.type,
+          name: input.name || null,
+          id: input.id || null,
+          placeholder: input.placeholder || null,
+          className: input.className || null,
+          visible: input.offsetParent !== null
+        }));
+      });
+      console.log(`\u{1F4CA} Found ${allInputs.length} input elements on page:`);
+      allInputs.forEach((input, i) => {
+        console.log(`   ${i + 1}. type="${input.type}" name="${input.name}" id="${input.id}" placeholder="${input.placeholder}" visible=${input.visible}`);
+      });
       let searchInput = null;
+      let foundSelector = "";
       for (const selector of searchSelectors) {
         try {
           searchInput = await this.page.$(selector);
           if (searchInput) {
-            console.log(`\u2705 Found search input: ${selector}`);
-            break;
+            const isVisible = await searchInput.isVisible();
+            if (isVisible) {
+              foundSelector = selector;
+              console.log(`\u2705 Found visible search input: ${selector}`);
+              break;
+            } else {
+              console.log(`\u26A0\uFE0F Found hidden search input: ${selector}`);
+            }
           }
-        } catch {
-          continue;
+        } catch (error) {
+          console.log(`\u274C Error checking selector ${selector}:`, error.message);
         }
       }
       if (!searchInput) {
-        throw new Error("No search input found on page");
+        console.log("\u{1F50D} No search input found, looking for any prominent text input...");
+        searchInput = await this.page.$('input[type="text"]:not([type="hidden"])');
+        if (searchInput) {
+          const isVisible = await searchInput.isVisible();
+          if (isVisible) {
+            foundSelector = 'input[type="text"] (fallback)';
+            console.log("\u2705 Using fallback text input");
+          } else {
+            searchInput = null;
+          }
+        }
       }
+      if (!searchInput) {
+        throw new Error(`No search input found on page. Available inputs: ${allInputs.length} total, visible: ${allInputs.filter((i) => i.visible).length}`);
+      }
+      console.log(`\u{1F524} Entering search term "${searchTerm}" into ${foundSelector}`);
       await searchInput.click({ clickCount: 3 });
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await searchInput.type(searchTerm, { delay: 100 });
-      console.log(`\u2705 Entered search term: ${searchTerm}`);
-      await searchInput.press("Enter");
-      console.log("\u2705 Search submitted");
-      await new Promise((resolve) => setTimeout(resolve, 5e3));
+      const enteredValue = await this.page.evaluate((el) => el.value, searchInput);
+      console.log(`\u{1F4DD} Verified entered value: "${enteredValue}"`);
+      console.log("\u{1F4E4} Submitting search...");
+      try {
+        await searchInput.press("Enter");
+        console.log("\u2705 Search submitted with Enter key");
+      } catch (enterError) {
+        console.log("\u26A0\uFE0F Enter key failed, trying form submission...");
+        const buttonSelectors = [
+          'button[type="submit"]',
+          'input[type="submit"]',
+          'button:contains("Search")',
+          'button:contains("SEARCH")',
+          'button:contains("search")',
+          "button.search-btn",
+          "button.btn-search",
+          'button[id*="search"]',
+          'button[class*="search"]',
+          ".search-button"
+        ];
+        let searchButton = null;
+        for (const buttonSelector of buttonSelectors) {
+          try {
+            searchButton = await this.page.$(buttonSelector);
+            if (searchButton) {
+              console.log(`\u2705 Found search button: ${buttonSelector}`);
+              await searchButton.click();
+              console.log("\u2705 Search submitted with button click");
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        if (!searchButton) {
+          throw new Error("Could not submit search - no Enter key or submit button worked");
+        }
+      }
+      console.log("\u23F3 Waiting for search results...");
+      for (let i = 1; i <= 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1e3));
+        const currentUrl = this.page.url();
+        const currentTitle = await this.page.title();
+        console.log(`   ${i}s - URL: ${currentUrl} | Title: ${currentTitle}`);
+        const hasResults = await this.page.$("table tbody tr, .search-results tr, .result-item");
+        const hasLoading = await this.page.$('.loading, .spinner, [data-testid="loading"]');
+        if (hasResults) {
+          console.log(`\u2705 Results detected at ${i} seconds`);
+          break;
+        }
+        if (!hasLoading && i > 5) {
+          console.log(`\u26A0\uFE0F No loading indicator and no results after ${i} seconds`);
+        }
+      }
+      console.log("\u{1F3AF} Extracting search results...");
       const results = await this.extractSearchResults();
       return results;
     } catch (error) {
+      console.error("\u274C Search execution error:", error);
       throw new Error(`Search execution failed: ${error.message}`);
     }
   }
@@ -3113,7 +3313,8 @@ var LiveSearchService = class {
                       ndc: ndc || null,
                       packageSize: null,
                       strength: null,
-                      dosageForm: "Tablet"
+                      dosageForm: "Tablet",
+                      manufacturer: null
                     },
                     cost,
                     availability: "In Stock",
@@ -3286,17 +3487,17 @@ async function registerRoutes(app2) {
   });
   app2.get("/api/search/:id", async (req, res) => {
     try {
-      const id2 = parseInt(req.params.id);
-      console.log(`\u{1F50D} API: Fetching search ${id2}`);
-      const searchWithResults = await storage.getSearchWithResults(id2);
+      const id = parseInt(req.params.id);
+      console.log(`\u{1F50D} API: Fetching search ${id}`);
+      const searchWithResults = await storage.getSearchWithResults(id);
       if (!searchWithResults) {
-        console.log(`\u274C API: Search ${id2} not found`);
+        console.log(`\u274C API: Search ${id} not found`);
         return res.status(404).json({ message: "Search not found" });
       }
-      console.log(`\u2705 API: Returning search ${id2} with ${searchWithResults.results.length} results`);
+      console.log(`\u2705 API: Returning search ${id} with ${searchWithResults.results.length} results`);
       res.json(searchWithResults);
     } catch (error) {
-      console.error(`\u274C API: Failed to fetch search ${id}:`, error);
+      console.error(`\u274C API: Failed to fetch search ${req.params.id}:`, error);
       res.status(500).json({ message: "Failed to fetch search" });
     }
   });
@@ -3395,10 +3596,11 @@ async function registerRoutes(app2) {
     }
   });
   app2.get("/api/cookie-status", async (req, res) => {
-    const hasSessionCookies = global.__kinray_session_cookies__ && Array.isArray(global.__kinray_session_cookies__) && global.__kinray_session_cookies__.length > 0;
+    const globalCookies = global.__kinray_session_cookies__;
+    const hasSessionCookies = globalCookies && Array.isArray(globalCookies) && globalCookies.length > 0;
     res.json({
       hasSessionCookies,
-      cookieCount: hasSessionCookies ? global.__kinray_session_cookies__.length : 0,
+      cookieCount: hasSessionCookies ? globalCookies.length : 0,
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
   });
@@ -3452,16 +3654,18 @@ async function registerRoutes(app2) {
     }
   });
   async function performLiveSearch(searchId, searchData) {
+    console.log(`\u{1F525} performLiveSearch STARTED for search ${searchId} - "${searchData.searchTerm}"`);
     try {
       console.log(`\u{1F50D} Starting live credential-based search ${searchId} for "${searchData.searchTerm}"`);
       await storage.updateSearch(searchId, { status: "in_progress" });
+      console.log(`\u{1F4CA} Updated search ${searchId} status to in_progress`);
       let credentials2 = null;
       if (process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
         credentials2 = {
           username: process.env.KINRAY_USERNAME,
           password: process.env.KINRAY_PASSWORD
         };
-        console.log(`\u2705 Using environment credentials for Kinray portal`);
+        console.log(`\u2705 Using environment credentials for Kinray portal - user: ${credentials2.username}`);
       } else {
         const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
         if (storedCredential) {
@@ -3469,14 +3673,15 @@ async function registerRoutes(app2) {
             username: storedCredential.username,
             password: storedCredential.password
           };
-          console.log(`\u2705 Using stored credentials for Kinray portal`);
+          console.log(`\u2705 Using stored credentials for Kinray portal - user: ${credentials2.username}`);
         }
       }
       if (!credentials2) {
         throw new Error("No valid credentials found for Kinray portal");
       }
+      console.log(`\u{1F680} Creating LiveSearchService instance...`);
       const liveSearchService = new LiveSearchService();
-      console.log(`\u{1F680} Executing live search with fresh authentication...`);
+      console.log(`\u{1F3AF} Executing live search with fresh authentication...`);
       const results = await liveSearchService.performLiveSearch(
         credentials2,
         searchData.searchTerm,
@@ -3511,6 +3716,7 @@ async function registerRoutes(app2) {
       });
     } catch (error) {
       console.error(`\u274C Live search ${searchId} failed:`, error);
+      console.error(`\u274C Error stack:`, error.stack);
       await storage.updateSearch(searchId, {
         status: "failed",
         completedAt: /* @__PURE__ */ new Date()
@@ -3523,6 +3729,7 @@ async function registerRoutes(app2) {
         searchId
       });
     }
+    console.log(`\u{1F3C1} performLiveSearch FINISHED for search ${searchId}`);
   }
   async function performSearch(searchId, searchData) {
     try {
