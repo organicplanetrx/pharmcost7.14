@@ -2522,13 +2522,41 @@ var PuppeteerScrapingService = class {
       console.log(`\u{1F50D} Performing live Kinray portal search for: ${searchTerm} (${searchType})`);
       const currentUrl = this.page.url();
       console.log(`\u{1F4CA} Current page URL: ${currentUrl}`);
-      try {
-        console.log("\u{1F4F8} Taking screenshot for debugging...");
-        await this.page.screenshot({ path: "/tmp/kinray-search-debug.png", fullPage: true });
-        console.log("\u2705 Screenshot saved");
-      } catch (screenshotError) {
-        console.log("\u274C Screenshot failed:", screenshotError.message);
+      if (currentUrl.includes("login") || currentUrl.includes("signin")) {
+        console.log("\u{1F504} Still on login page, attempting to navigate to authenticated area...");
+        const dashboardUrls = [
+          "https://kinrayweblink.cardinalhealth.com/portal",
+          "https://kinrayweblink.cardinalhealth.com/dashboard",
+          "https://kinrayweblink.cardinalhealth.com/home",
+          "https://kinrayweblink.cardinalhealth.com/search",
+          "https://kinrayweblink.cardinalhealth.com/product-search",
+          "https://kinrayweblink.cardinalhealth.com"
+        ];
+        let navigationSuccessful = false;
+        for (const url of dashboardUrls) {
+          try {
+            console.log(`\u{1F504} Trying to navigate to: ${url}`);
+            await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 1e4 });
+            await new Promise((resolve) => setTimeout(resolve, 2e3));
+            const newUrl = this.page.url();
+            console.log(`\u{1F4CD} After navigation, current URL: ${newUrl}`);
+            if (!newUrl.includes("login") && !newUrl.includes("signin")) {
+              console.log(`\u2705 Successfully navigated to authenticated area: ${newUrl}`);
+              navigationSuccessful = true;
+              break;
+            }
+          } catch (navError) {
+            console.log(`\u274C Navigation to ${url} failed: ${navError.message}`);
+            continue;
+          }
+        }
+        if (!navigationSuccessful) {
+          console.log("\u274C Could not navigate to authenticated area - cookies may have expired");
+          throw new Error("Authentication failed - unable to access search functionality");
+        }
       }
+      const finalUrl = this.page.url();
+      console.log(`\u{1F4CA} Final URL for search: ${finalUrl}`);
       const pageTitle = await this.page.title();
       console.log(`\u{1F4CA} Page title: ${pageTitle}`);
       const allInputs = await this.page.evaluate(() => {
@@ -2543,7 +2571,7 @@ var PuppeteerScrapingService = class {
         }));
       });
       console.log(`\u{1F4CA} Found ${allInputs.length} input elements:`, JSON.stringify(allInputs, null, 2));
-      if (!currentUrl.includes("search") && !currentUrl.includes("product")) {
+      if (!finalUrl.includes("search") && !finalUrl.includes("product")) {
         console.log("\u{1F50D} Navigating to search interface...");
         await this.navigateToSearch();
       }

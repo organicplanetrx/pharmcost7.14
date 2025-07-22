@@ -1704,18 +1704,54 @@ export class PuppeteerScrapingService implements ScrapingService {
     try {
       console.log(`🔍 Performing live Kinray portal search for: ${searchTerm} (${searchType})`);
       
-      // Navigate to search page if needed
       const currentUrl = this.page.url();
       console.log(`📊 Current page URL: ${currentUrl}`);
       
-      // Debug: Take a screenshot and analyze page structure
-      try {
-        console.log('📸 Taking screenshot for debugging...');
-        await this.page.screenshot({ path: '/tmp/kinray-search-debug.png', fullPage: true });
-        console.log('✅ Screenshot saved');
-      } catch (screenshotError) {
-        console.log('❌ Screenshot failed:', screenshotError.message);
+      // Check if we're on login page and need to navigate away
+      if (currentUrl.includes('login') || currentUrl.includes('signin')) {
+        console.log('🔄 Still on login page, attempting to navigate to authenticated area...');
+        
+        // Try navigating to the main dashboard/portal area
+        const dashboardUrls = [
+          'https://kinrayweblink.cardinalhealth.com/portal',
+          'https://kinrayweblink.cardinalhealth.com/dashboard',
+          'https://kinrayweblink.cardinalhealth.com/home',
+          'https://kinrayweblink.cardinalhealth.com/search',
+          'https://kinrayweblink.cardinalhealth.com/product-search',
+          'https://kinrayweblink.cardinalhealth.com'
+        ];
+        
+        let navigationSuccessful = false;
+        for (const url of dashboardUrls) {
+          try {
+            console.log(`🔄 Trying to navigate to: ${url}`);
+            await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const newUrl = this.page.url();
+            console.log(`📍 After navigation, current URL: ${newUrl}`);
+            
+            // Check if we successfully moved past login
+            if (!newUrl.includes('login') && !newUrl.includes('signin')) {
+              console.log(`✅ Successfully navigated to authenticated area: ${newUrl}`);
+              navigationSuccessful = true;
+              break;
+            }
+          } catch (navError) {
+            console.log(`❌ Navigation to ${url} failed: ${navError.message}`);
+            continue;
+          }
+        }
+        
+        if (!navigationSuccessful) {
+          console.log('❌ Could not navigate to authenticated area - cookies may have expired');
+          throw new Error('Authentication failed - unable to access search functionality');
+        }
       }
+      
+      // Now try to find search interface
+      const finalUrl = this.page.url();
+      console.log(`📊 Final URL for search: ${finalUrl}`);
       
       // Debug: Get page title and basic structure
       const pageTitle = await this.page.title();
@@ -1735,7 +1771,8 @@ export class PuppeteerScrapingService implements ScrapingService {
       });
       console.log(`📊 Found ${allInputs.length} input elements:`, JSON.stringify(allInputs, null, 2));
       
-      if (!currentUrl.includes('search') && !currentUrl.includes('product')) {
+      // Navigate to search page if we're not there yet
+      if (!finalUrl.includes('search') && !finalUrl.includes('product')) {
         console.log('🔍 Navigating to search interface...');
         await this.navigateToSearch();
       }
