@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🔍 Smart auth check: Looking for existing session...');
       
-      // Check if we already have stored cookies
+      // First check if we already have stored cookies
       const existingCookies = global.__kinray_session_cookies__;
       
       if (existingCookies && existingCookies.length > 5) {
@@ -410,11 +410,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // For server environment, we can't automatically extract from user's browser
+      // The user needs to manually provide session cookies after logging in
+      
       console.log('⚠️ No authenticated session found');
       res.json({
         authenticated: false,
         cookieCount: 0,
-        message: 'Please log into Kinray and extract session cookies'
+        message: 'Please extract session cookies from your logged-in browser'
       });
       
     } catch (error) {

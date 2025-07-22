@@ -7,6 +7,7 @@ import ActivityLog from "@/components/activity-log";
 import { EnhancedCookieInterface } from "@/components/enhanced-cookie-interface";
 import { SeamlessAuthNotice } from "@/components/seamless-auth-notice";
 import { SmartAuthStatus } from "@/components/smart-auth-status";
+import { EnhancedSessionDetector } from "@/components/enhanced-session-detector";
 import LoadingModal from "@/components/loading-modal";
 import { DashboardStats } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -38,9 +39,14 @@ export default function Dashboard() {
               <CredentialForm />
             </div>
             
-            {/* Smart Authentication Status */}
+            {/* Enhanced Session Detection */}
             <div className="mt-6">
-              <SmartAuthStatus />
+              <EnhancedSessionDetector />
+            </div>
+            
+            {/* Cookie Extraction Tool */}
+            <div className="mt-6">
+              <EnhancedCookieInterface />
             </div>
             
             {/* Quick Actions */}

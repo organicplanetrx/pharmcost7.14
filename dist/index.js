@@ -3866,7 +3866,7 @@ async function registerRoutes(app2) {
       res.json({
         authenticated: false,
         cookieCount: 0,
-        message: "Please log into Kinray and extract session cookies"
+        message: "Please extract session cookies from your logged-in browser"
       });
     } catch (error) {
       console.error("\u274C Auth status check failed:", error);
