@@ -1,0 +1,77 @@
+📊 Storage instance: MemStorage - Global ID: dbfd8f
+
+📊 Available searches: 3 - IDs: [1, 2, 3]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 3
+
+✅ API: Returning search 3 with 0 results
+
+9:55:02 PM [express] GET /api/search/3 200 in 2ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+🔍 API: Fetching search 3
+
+🔍 getSearchWithResults called for searchId: 3
+
+📊 Storage instance: MemStorage - Global ID: dbfd8f
+
+📊 Available searches: 3 - IDs: [1, 2, 3]
+
+📊 Available results: 0 - IDs: []
+
+📊 Available medications: 0 - IDs: []
+
+📋 Found 0 results for search 3
+
+✅ API: Returning search 3 with 0 results
+
+9:55:02 PM [express] GET /api/search/3 304 in 1ms :: {"vendorId":1,"searchTerm":"lisinopril","search…
+
+✅ Browser initialized successfully
+
+🔑 Performing fresh Kinray login...
+
+🌐 Navigating to Kinray login page...
+
+🔑 Filling login credentials...
+
+📤 Submitting login form...
+
+🔍 Current URL after login: https://kinrayweblink.cardinalhealth.com/signin/verify/okta/call
+
+🔐 2FA verification page detected - attempting to bypass...
+
+🏠 Attempting direct navigation to home page...
+
+🔍 URL after home navigation: https://kinrayweblink.cardinalhealth.com/login
+
+🔍 Final URL: https://kinrayweblink.cardinalhealth.com/login
+
+🔍 Final title: Kinray Weblink
+
+❌ Authentication verification failed
+
+❌ Live search failed: Error: Authentication failed - invalid credentials
+
+    at LiveSearchService.performLiveSearch (file:///app/dist/index.js:2927:15)
+
+    at async performLiveSearch (file:///app/dist/index.js:3924:23)
+
+🧹 Live search service cleanup completed
+
+❌ Live search 3 failed: Error: Authentication failed - invalid credentials
+
+    at LiveSearchService.performLiveSearch (file:///app/dist/index.js:2927:15)
+
+    at async performLiveSearch (file:///app/dist/index.js:3924:23)
+
+❌ Error stack: Error: Authentication failed - invalid credentials
+
+    at LiveSearchService.performLiveSearch (file:///app/dist/index.js:2927:15)
+
+    at async performLiveSearch (file:///app/dist/index.js:3924:23)
+
+🏁 performLiveSearch FINISHED for search 3

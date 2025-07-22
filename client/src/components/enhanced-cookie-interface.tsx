@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CookieStatus } from '@/components/cookie-status';
 
 export function EnhancedCookieInterface() {
+  const [showManualInstructions, setShowManualInstructions] = useState(false);
   // Automatic extraction state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
