@@ -83,7 +83,7 @@ export class LiveSearchService {
       
       console.log('✅ Browser initialized successfully');
     } catch (error) {
-      throw new Error(`Browser initialization failed: ${error.message}`);
+      throw new Error(`Browser initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -282,15 +282,15 @@ export class LiveSearchService {
         url: location.href,
         navLinks: Array.from(document.querySelectorAll('nav a, .nav a, .navbar a')).map(a => ({
           text: a.textContent?.trim(),
-          href: a.href
+          href: (a as HTMLAnchorElement).href
         })).filter(link => link.text && link.text.length > 0),
         searchElements: Array.from(document.querySelectorAll('input, form, [class*="search"], [id*="search"]')).map(el => ({
           tagName: el.tagName,
-          type: el.type || null,
+          type: (el as HTMLInputElement).type || null,
           id: el.id || null,
           className: el.className || null,
-          placeholder: el.placeholder || null,
-          name: el.name || null
+          placeholder: (el as HTMLInputElement).placeholder || null,
+          name: (el as HTMLInputElement).name || null
         })),
         headings: Array.from(document.querySelectorAll('h1, h2, h3')).map(h => h.textContent?.trim()).filter(Boolean),
         mainContent: document.querySelector('main, .main-content, .content')?.textContent?.trim().substring(0, 200) || null
@@ -573,8 +573,8 @@ export class LiveSearchService {
         };
         
         const drugName = searchTerm.toLowerCase().trim();
-        if (commonStrengths[drugName]) {
-          formattedSearchTerm = `${searchTerm},${commonStrengths[drugName]}`;
+        if (drugName in commonStrengths) {
+          formattedSearchTerm = `${searchTerm},${commonStrengths[drugName as keyof typeof commonStrengths]}`;
           console.log(`🎯 Formatted search term for Kinray: "${formattedSearchTerm}" (drug,strength format)`);
         }
       }
@@ -586,7 +586,7 @@ export class LiveSearchService {
       await searchInput.type(formattedSearchTerm, { delay: 100 });
       
       // Verify text was entered
-      const enteredValue = await this.page.evaluate(el => el.value, searchInput);
+      const enteredValue = await this.page.evaluate(el => (el as HTMLInputElement).value, searchInput);
       console.log(`📝 Verified entered value: "${enteredValue}"`);
 
       // Submit search - try multiple methods
@@ -631,25 +631,37 @@ export class LiveSearchService {
         }
       }
 
-      // Wait for results with progress monitoring
-      console.log('⏳ Waiting for search results...');
-      for (let i = 1; i <= 10; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for Angular app to fully load and show results
+      console.log('⏳ Waiting for Angular app to load and search results...');
+      
+      // Wait for Angular to bootstrap and load content
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      for (let i = 1; i <= 15; i++) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         const currentUrl = this.page.url();
         const currentTitle = await this.page.title();
-        console.log(`   ${i}s - URL: ${currentUrl} | Title: ${currentTitle}`);
         
-        // Check for results or loading indicators
-        const hasResults = await this.page.$('table tbody tr, .search-results tr, .result-item');
-        const hasLoading = await this.page.$('.loading, .spinner, [data-testid="loading"]');
+        // Check if Angular app has loaded (no longer showing just app-root)
+        const pageContent = await this.page.content();
+        const hasAngularContent = !pageContent.includes('<app-root> </app-root>') && pageContent.length > 1000;
         
-        if (hasResults) {
-          console.log(`✅ Results detected at ${i} seconds`);
+        console.log(`   ${i*2}s - URL: ${currentUrl} | Angular loaded: ${hasAngularContent} | Content length: ${pageContent.length}`);
+        
+        // Look for various result indicators
+        const hasResults = await this.page.$('table tbody tr, .search-results, .result-item, .product-row, .medication-row');
+        const hasSearchComplete = await this.page.$('.no-results, .search-complete, .results-container');
+        const hasLoading = await this.page.$('.loading, .spinner, [data-testid="loading"], .fa-spinner');
+        
+        if (hasAngularContent && (hasResults || hasSearchComplete)) {
+          console.log(`✅ Angular loaded and results/completion detected at ${i*2} seconds`);
           break;
         }
-        if (!hasLoading && i > 5) {
-          console.log(`⚠️ No loading indicator and no results after ${i} seconds`);
+        
+        if (hasAngularContent && !hasLoading && i > 7) {
+          console.log(`⚠️ Angular loaded, no loading indicator, checking for results...`);
+          break;
         }
       }
 

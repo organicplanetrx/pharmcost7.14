@@ -2942,7 +2942,7 @@ var LiveSearchService = class {
       await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
       console.log("\u2705 Browser initialized successfully");
     } catch (error) {
-      throw new Error(`Browser initialization failed: ${error.message}`);
+      throw new Error(`Browser initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   async findBrowserPath() {
@@ -3343,7 +3343,7 @@ var LiveSearchService = class {
           "atorvastatin": "20"
         };
         const drugName = searchTerm.toLowerCase().trim();
-        if (commonStrengths[drugName]) {
+        if (drugName in commonStrengths) {
           formattedSearchTerm = `${searchTerm},${commonStrengths[drugName]}`;
           console.log(`\u{1F3AF} Formatted search term for Kinray: "${formattedSearchTerm}" (drug,strength format)`);
         }
@@ -3390,20 +3390,25 @@ var LiveSearchService = class {
           throw new Error("Could not submit search - no Enter key or submit button worked");
         }
       }
-      console.log("\u23F3 Waiting for search results...");
-      for (let i = 1; i <= 10; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1e3));
+      console.log("\u23F3 Waiting for Angular app to load and search results...");
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      for (let i = 1; i <= 15; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 2e3));
         const currentUrl = this.page.url();
         const currentTitle = await this.page.title();
-        console.log(`   ${i}s - URL: ${currentUrl} | Title: ${currentTitle}`);
-        const hasResults = await this.page.$("table tbody tr, .search-results tr, .result-item");
-        const hasLoading = await this.page.$('.loading, .spinner, [data-testid="loading"]');
-        if (hasResults) {
-          console.log(`\u2705 Results detected at ${i} seconds`);
+        const pageContent = await this.page.content();
+        const hasAngularContent = !pageContent.includes("<app-root> </app-root>") && pageContent.length > 1e3;
+        console.log(`   ${i * 2}s - URL: ${currentUrl} | Angular loaded: ${hasAngularContent} | Content length: ${pageContent.length}`);
+        const hasResults = await this.page.$("table tbody tr, .search-results, .result-item, .product-row, .medication-row");
+        const hasSearchComplete = await this.page.$(".no-results, .search-complete, .results-container");
+        const hasLoading = await this.page.$('.loading, .spinner, [data-testid="loading"], .fa-spinner');
+        if (hasAngularContent && (hasResults || hasSearchComplete)) {
+          console.log(`\u2705 Angular loaded and results/completion detected at ${i * 2} seconds`);
           break;
         }
-        if (!hasLoading && i > 5) {
-          console.log(`\u26A0\uFE0F No loading indicator and no results after ${i} seconds`);
+        if (hasAngularContent && !hasLoading && i > 7) {
+          console.log(`\u26A0\uFE0F Angular loaded, no loading indicator, checking for results...`);
+          break;
         }
       }
       console.log("\u{1F3AF} Extracting search results...");
