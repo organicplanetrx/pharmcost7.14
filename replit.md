@@ -407,6 +407,9 @@ Changelog:
 - July 22, 2025: Enhanced comprehensive page analysis system to understand Kinray's actual results page structure and format
 - July 22, 2025: Issue isolated to result extraction logic - authentication, 2FA bypass, navigation, and search submission all working flawlessly
 - July 22, 2025: User confirmed Kinray definitely stocks generic medications and supports generic name searches - extraction logic needs refinement for their specific results format
+- July 22, 2025: CRITICAL DISCOVERY: Kinray requires specific search format "drug,strength(mg)" - e.g., "lisinopril,40" instead of just "lisinopril"
+- July 22, 2025: Implemented automatic formatting system to convert generic searches to Kinray's required drug,strength format
+- July 22, 2025: Testing authentic Kinray search format with proper medication strengths to extract real pharmaceutical pricing data
 ```
 
 ## User Preferences

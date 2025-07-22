@@ -3320,10 +3320,38 @@ var LiveSearchService = class {
       if (!searchInput) {
         throw new Error(`No search input found on page. Available inputs: ${allInputs.length} total, visible: ${allInputs.filter((i) => i.visible).length}`);
       }
-      console.log(`\u{1F524} Entering search term "${searchTerm}" into ${foundSelector}`);
+      let formattedSearchTerm = searchTerm;
+      if (!searchTerm.includes(",")) {
+        const commonStrengths = {
+          "lisinopril": "10",
+          // Common lisinopril strength
+          "aspirin": "325",
+          // Common aspirin strength
+          "ibuprofen": "200",
+          // Common ibuprofen strength
+          "tylenol": "325",
+          // Common acetaminophen strength
+          "acetaminophen": "325",
+          "metformin": "500",
+          // Common metformin strength
+          "advil": "200",
+          // Common ibuprofen strength
+          "amoxicillin": "500",
+          // Common amoxicillin strength
+          "lipitor": "20",
+          // Common atorvastatin strength
+          "atorvastatin": "20"
+        };
+        const drugName = searchTerm.toLowerCase().trim();
+        if (commonStrengths[drugName]) {
+          formattedSearchTerm = `${searchTerm},${commonStrengths[drugName]}`;
+          console.log(`\u{1F3AF} Formatted search term for Kinray: "${formattedSearchTerm}" (drug,strength format)`);
+        }
+      }
+      console.log(`\u{1F524} Entering search term "${formattedSearchTerm}" into ${foundSelector}`);
       await searchInput.click({ clickCount: 3 });
       await new Promise((resolve) => setTimeout(resolve, 500));
-      await searchInput.type(searchTerm, { delay: 100 });
+      await searchInput.type(formattedSearchTerm, { delay: 100 });
       const enteredValue = await this.page.evaluate((el) => el.value, searchInput);
       console.log(`\u{1F4DD} Verified entered value: "${enteredValue}"`);
       console.log("\u{1F4E4} Submitting search...");
