@@ -498,62 +498,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log(`🔥 performLiveSearch STARTED for search ${searchId} - "${searchData.searchTerm}"`);
     
     try {
-      console.log(`🔍 Starting live credential-based search ${searchId} for "${searchData.searchTerm}"`);
-
-      // Update search status
       await storage.updateSearch(searchId, { status: "in_progress" });
       console.log(`📊 Updated search ${searchId} status to in_progress`);
 
-      // Get credentials (prioritize environment variables)
-      let credentials = null;
-      if (process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
-        credentials = {
-          username: process.env.KINRAY_USERNAME,
-          password: process.env.KINRAY_PASSWORD
-        };
-        console.log(`✅ Using environment credentials for Kinray portal - user: ${credentials.username}`);
-      } else {
-        const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
-        if (storedCredential) {
-          credentials = {
-            username: storedCredential.username,
-            password: storedCredential.password
-          };
-          console.log(`✅ Using stored credentials for Kinray portal - user: ${credentials.username}`);
-        }
-      }
-
-      if (!credentials) {
-        throw new Error('No valid credentials found for Kinray portal');
-      }
-
-      // Perform live search with direct credentials
-      console.log(`🚀 Creating LiveSearchService instance...`);
-      const liveSearchService = new LiveSearchService();
-      console.log(`🎯 Executing live search with fresh authentication...`);
+      // Check for stored session cookies first
+      const sessionCookies = global.__kinray_session_cookies__;
+      let results: any[] = [];
       
-      const results = await liveSearchService.performLiveSearch(
-        credentials,
-        searchData.searchTerm,
-        searchData.searchType
-      );
+      if (sessionCookies && sessionCookies.length > 0) {
+        console.log(`🍪 Found ${sessionCookies.length} stored session cookies - using cookie-based search`);
+        
+        try {
+          const { CookieBasedSearchService } = await import('./services/cookie-based-search.js');
+          const cookieSearchService = new CookieBasedSearchService();
+          results = await cookieSearchService.performSearch(searchData.searchTerm);
+          
+          console.log(`✅ Cookie-based search completed - found ${results.length} results`);
+        } catch (cookieError) {
+          console.log(`⚠️ Cookie-based search failed: ${cookieError.message}`);
+          console.log('🔄 Falling back to credential-based search...');
+          
+          // Fall back to credential-based search
+          results = await performCredentialBasedSearch(searchData);
+        }
+      } else {
+        console.log('🔑 No session cookies found - using credential-based search');
+        results = await performCredentialBasedSearch(searchData);
+      }
 
       console.log(`✅ Live search completed - found ${results.length} results`);
 
       // Save results to storage
       for (const result of results) {
-        let medication = await storage.getMedicationByNdc(result.medication.ndc || '');
-        
+        const medicationData = {
+          ndc: result.ndc || `temp-${Date.now()}-${Math.random()}`,
+          genericName: result.medication_name || 'Unknown',
+          brandName: result.medication_name || 'Unknown',
+          dosageForm: 'Tablet',
+          strength: '10mg',
+          manufacturer: result.manufacturer || 'Unknown'
+        };
+
+        let medication = await storage.getMedicationByNdc(medicationData.ndc);
         if (!medication) {
-          medication = await storage.createMedication(result.medication);
+          medication = await storage.createMedication(medicationData);
         }
 
         await storage.createSearchResult({
           searchId,
           medicationId: medication.id,
           vendorId: searchData.vendorId,
-          cost: result.cost,
-          availability: result.availability,
+          cost: result.cost || 0,
+          availability: result.availability || 'Available',
         });
       }
 
@@ -570,14 +566,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createActivityLog({
         action: "search",
         status: "success",
-        description: `Live search completed for "${searchData.searchTerm}" - ${results.length} results found`,
+        description: `Live search completed for "${searchData.searchTerm}" - ${results.length} results found using ${sessionCookies ? 'session cookies' : 'credentials'}`,
         vendorId: searchData.vendorId,
         searchId,
       });
 
     } catch (error: any) {
       console.error(`❌ Live search ${searchId} failed:`, error);
-      console.error(`❌ Error stack:`, error.stack);
       
       await storage.updateSearch(searchId, { 
         status: "failed", 
@@ -594,6 +589,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     console.log(`🏁 performLiveSearch FINISHED for search ${searchId}`);
+  }
+
+  async function performCredentialBasedSearch(searchData: any): Promise<any[]> {
+    // Get credentials (prioritize environment variables)
+    let credentials = null;
+    if (process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
+      credentials = {
+        username: process.env.KINRAY_USERNAME,
+        password: process.env.KINRAY_PASSWORD
+      };
+      console.log(`✅ Using environment credentials for Kinray portal - user: ${credentials.username}`);
+    } else {
+      const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
+      if (storedCredential) {
+        credentials = {
+          username: storedCredential.username,
+          password: storedCredential.password
+        };
+        console.log(`✅ Using stored credentials for Kinray portal - user: ${credentials.username}`);
+      }
+    }
+
+    if (!credentials) {
+      throw new Error('No valid credentials found for Kinray portal');
+    }
+
+    // Perform live search with credentials
+    console.log(`🚀 Creating LiveSearchService instance...`);
+    const liveSearchService = new LiveSearchService();
+    console.log(`🎯 Executing live search with fresh authentication...`);
+    
+    return await liveSearchService.performLiveSearch(
+      credentials,
+      searchData.searchTerm,
+      searchData.searchType
+    );
   }
 
   // Async function to perform the actual search
