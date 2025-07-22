@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import CredentialForm from "@/components/credential-form";
 import SearchInterface from "@/components/search-interface";
 import ActivityLog from "@/components/activity-log";
-import { EnhancedCookieInterface } from "@/components/enhanced-cookie-interface";
+import { SimpleCookieInterface } from "@/components/simple-cookie-interface";
 import { SeamlessAuthNotice } from "@/components/seamless-auth-notice";
 import { SmartAuthStatus } from "@/components/smart-auth-status";
 import { EnhancedSessionDetector } from "@/components/enhanced-session-detector";
@@ -89,7 +89,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
               <div>
                 <h4 className="font-medium text-slate-700 mb-3">Session Management</h4>
-                <EnhancedCookieInterface />
+                <SimpleCookieInterface />
               </div>
               <div>
                 <h4 className="font-medium text-slate-700 mb-3">Vendor Credentials</h4>
