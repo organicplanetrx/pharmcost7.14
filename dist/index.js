@@ -14,7 +14,7 @@ __export(simple_cookie_extractor_exports, {
   SimpleCookieExtractor: () => SimpleCookieExtractor,
   simpleCookieExtractor: () => simpleCookieExtractor
 });
-import puppeteer2 from "puppeteer";
+import puppeteer3 from "puppeteer";
 var SimpleCookieExtractor, simpleCookieExtractor;
 var init_simple_cookie_extractor = __esm({
   "server/services/simple-cookie-extractor.ts"() {
@@ -42,7 +42,7 @@ var init_simple_cookie_extractor = __esm({
             console.log("\u{1F682} Railway detected - using Chrome");
             launchConfig.executablePath = "/usr/bin/google-chrome-stable";
           }
-          this.browser = await puppeteer2.launch(launchConfig);
+          this.browser = await puppeteer3.launch(launchConfig);
           this.page = await this.browser.newPage();
           await this.page.setViewport({ width: 1920, height: 1080 });
           console.log("\u{1F310} Navigating to Kinray login...");
@@ -115,7 +115,7 @@ __export(cookie_extractor_exports, {
   CookieExtractor: () => CookieExtractor,
   cookieExtractor: () => cookieExtractor
 });
-import puppeteer3 from "puppeteer";
+import puppeteer4 from "puppeteer";
 var CookieExtractor, cookieExtractor;
 var init_cookie_extractor = __esm({
   "server/services/cookie-extractor.ts"() {
@@ -144,7 +144,7 @@ var init_cookie_extractor = __esm({
             console.log("\u{1F682} Railway detected - using optimized browser config");
             launchConfig.executablePath = "/usr/bin/google-chrome-stable";
           }
-          this.browser = await puppeteer3.launch(launchConfig);
+          this.browser = await puppeteer4.launch(launchConfig);
           this.page = await this.browser.newPage();
           await this.page.setViewport({ width: 1920, height: 1080 });
           await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
@@ -2889,6 +2889,270 @@ var CSVExportServiceImpl = class {
 };
 var csvExportService = new CSVExportServiceImpl();
 
+// server/services/live-search-service.ts
+import puppeteer2 from "puppeteer";
+import { execSync as execSync2 } from "child_process";
+var LiveSearchService = class {
+  browser = null;
+  page = null;
+  async performLiveSearch(credentials2, searchTerm, searchType) {
+    try {
+      console.log(`\u{1F50D} Starting live search for: ${searchTerm} (${searchType})`);
+      await this.initBrowser();
+      if (!this.page) throw new Error("Failed to initialize browser");
+      console.log("\u{1F511} Performing fresh Kinray login...");
+      const loginSuccess = await this.performKinrayLogin(credentials2);
+      if (!loginSuccess) {
+        throw new Error("Authentication failed - invalid credentials");
+      }
+      console.log("\u{1F50D} Navigating to search interface...");
+      await this.navigateToSearchInterface();
+      console.log(`\u{1F3AF} Executing search for: ${searchTerm}`);
+      const results = await this.executeSearch(searchTerm, searchType);
+      console.log(`\u2705 Search completed - found ${results.length} results`);
+      return results;
+    } catch (error) {
+      console.error("\u274C Live search failed:", error);
+      throw error;
+    } finally {
+      await this.cleanup();
+    }
+  }
+  async initBrowser() {
+    try {
+      const browserPath = await this.findBrowserPath();
+      if (!browserPath) {
+        throw new Error("No browser executable found");
+      }
+      this.browser = await puppeteer2.launch({
+        headless: true,
+        executablePath: browserPath,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--disable-web-security",
+          "--disable-extensions",
+          "--no-first-run",
+          "--single-process"
+        ]
+      });
+      this.page = await this.browser.newPage();
+      await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+      console.log("\u2705 Browser initialized successfully");
+    } catch (error) {
+      throw new Error(`Browser initialization failed: ${error.message}`);
+    }
+  }
+  async findBrowserPath() {
+    const possiblePaths = [
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/google-chrome",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/chromium",
+      "/opt/google/chrome/chrome",
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    ];
+    if (process.env.RAILWAY_ENVIRONMENT) {
+      possiblePaths.unshift("/usr/bin/google-chrome-stable");
+    }
+    for (const path4 of possiblePaths) {
+      try {
+        execSync2(`test -x "${path4}"`, { stdio: "ignore" });
+        console.log(`Found browser at: ${path4}`);
+        return path4;
+      } catch {
+        continue;
+      }
+    }
+    return null;
+  }
+  async performKinrayLogin(credentials2) {
+    if (!this.page) return false;
+    try {
+      console.log("\u{1F310} Navigating to Kinray login page...");
+      await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
+        waitUntil: "domcontentloaded",
+        timeout: 15e3
+      });
+      await this.page.waitForSelector('input[name="username"], input[id*="username"], input[type="email"]', { timeout: 1e4 });
+      await this.page.waitForSelector('input[name="password"], input[type="password"]', { timeout: 1e4 });
+      console.log("\u{1F511} Filling login credentials...");
+      const usernameField = await this.page.$('input[name="username"], input[id*="username"], input[type="email"]');
+      const passwordField = await this.page.$('input[name="password"], input[type="password"]');
+      if (!usernameField || !passwordField) {
+        throw new Error("Login form fields not found");
+      }
+      await usernameField.type(credentials2.username, { delay: 50 });
+      await passwordField.type(credentials2.password, { delay: 50 });
+      console.log("\u{1F4E4} Submitting login form...");
+      const submitButton = await this.page.$('button[type="submit"], input[type="submit"], .login-btn');
+      if (submitButton) {
+        await submitButton.click();
+      } else {
+        await passwordField.press("Enter");
+      }
+      try {
+        await this.page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 1e4 });
+      } catch {
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      const currentUrl = this.page.url();
+      const hasLoginForm = await this.page.$('input[type="password"]') !== null;
+      if (!currentUrl.includes("login") && !hasLoginForm) {
+        console.log("\u2705 Login successful - authenticated");
+        return true;
+      } else {
+        console.log("\u274C Login failed - still on login page");
+        return false;
+      }
+    } catch (error) {
+      console.error("\u274C Login error:", error);
+      return false;
+    }
+  }
+  async navigateToSearchInterface() {
+    if (!this.page) throw new Error("Page not initialized");
+    const searchUrls = [
+      "https://kinrayweblink.cardinalhealth.com/search",
+      "https://kinrayweblink.cardinalhealth.com/product-search",
+      "https://kinrayweblink.cardinalhealth.com/portal/search",
+      "https://kinrayweblink.cardinalhealth.com/dashboard"
+    ];
+    for (const url of searchUrls) {
+      try {
+        console.log(`\u{1F504} Trying search URL: ${url}`);
+        await this.page.goto(url, { waitUntil: "domcontentloaded", timeout: 1e4 });
+        const searchInput = await this.page.$('input[type="search"], input[name*="search"], input[placeholder*="search"], input.search-input');
+        if (searchInput) {
+          console.log(`\u2705 Found search interface at: ${url}`);
+          return;
+        }
+      } catch {
+        continue;
+      }
+    }
+    const currentUrl = this.page.url();
+    console.log(`\u{1F50D} Looking for search on current page: ${currentUrl}`);
+  }
+  async executeSearch(searchTerm, searchType) {
+    if (!this.page) throw new Error("Page not initialized");
+    try {
+      const searchSelectors = [
+        'input[type="search"]',
+        'input[name*="search"]',
+        'input[placeholder*="search"]',
+        'input[placeholder*="product"]',
+        'input[placeholder*="drug"]',
+        'input[placeholder*="medication"]',
+        ".search-input",
+        'input[type="text"]',
+        "input.form-control"
+      ];
+      let searchInput = null;
+      for (const selector of searchSelectors) {
+        try {
+          searchInput = await this.page.$(selector);
+          if (searchInput) {
+            console.log(`\u2705 Found search input: ${selector}`);
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+      if (!searchInput) {
+        throw new Error("No search input found on page");
+      }
+      await searchInput.click({ clickCount: 3 });
+      await searchInput.type(searchTerm, { delay: 100 });
+      console.log(`\u2705 Entered search term: ${searchTerm}`);
+      await searchInput.press("Enter");
+      console.log("\u2705 Search submitted");
+      await new Promise((resolve) => setTimeout(resolve, 5e3));
+      const results = await this.extractSearchResults();
+      return results;
+    } catch (error) {
+      throw new Error(`Search execution failed: ${error.message}`);
+    }
+  }
+  async extractSearchResults() {
+    if (!this.page) return [];
+    try {
+      const results = await this.page.evaluate(() => {
+        const medicationResults = [];
+        const resultSelectors = [
+          "table tbody tr",
+          ".search-results tr",
+          ".product-results .product",
+          ".result-item",
+          "tr:not(:first-child)",
+          ".data-row"
+        ];
+        for (const selector of resultSelectors) {
+          const rows = document.querySelectorAll(selector);
+          if (rows.length > 0) {
+            console.log(`Found ${rows.length} results with selector: ${selector}`);
+            rows.forEach((row, index) => {
+              try {
+                const nameEl = row.querySelector("td:first-child, .product-name, .name, .drug-name");
+                const name = nameEl?.textContent?.trim();
+                const ndcEl = row.querySelector("td:nth-child(2), .ndc, .product-code");
+                const ndc = ndcEl?.textContent?.trim();
+                const priceEl = row.querySelector("td:nth-child(3), td:nth-child(4), .price, .cost");
+                const priceText = priceEl?.textContent?.trim() || "0.00";
+                const priceMatch = priceText.match(/[\d,]+\.?\d*/);
+                const cost = priceMatch ? `$${priceMatch[0]}` : "$0.00";
+                if (name && name.length > 3) {
+                  medicationResults.push({
+                    medication: {
+                      id: index + 1,
+                      name,
+                      genericName: null,
+                      ndc: ndc || null,
+                      packageSize: null,
+                      strength: null,
+                      dosageForm: "Tablet"
+                    },
+                    cost,
+                    availability: "In Stock",
+                    vendor: "Kinray (Cardinal Health)"
+                  });
+                }
+              } catch (error) {
+                console.log(`Error processing row ${index}:`, error);
+              }
+            });
+            if (medicationResults.length > 0) break;
+          }
+        }
+        return medicationResults;
+      });
+      console.log(`\u2705 Extracted ${results.length} results from search`);
+      return results;
+    } catch (error) {
+      console.error("\u274C Result extraction error:", error);
+      return [];
+    }
+  }
+  async cleanup() {
+    try {
+      if (this.page) {
+        await this.page.close();
+        this.page = null;
+      }
+      if (this.browser) {
+        await this.browser.close();
+        this.browser = null;
+      }
+      console.log("\u{1F9F9} Live search service cleanup completed");
+    } catch (error) {
+      console.error("\u274C Cleanup error:", error);
+    }
+  }
+};
+
 // server/routes.ts
 import { z } from "zod";
 async function registerRoutes(app2) {
@@ -3003,7 +3267,7 @@ async function registerRoutes(app2) {
         resultCount: 0
       });
       setTimeout(() => {
-        performSearch(search.id, searchData).catch((error) => {
+        performLiveSearch(search.id, searchData).catch((error) => {
           console.error(`Background search ${search.id} failed:`, error);
           storage.updateSearch(search.id, {
             status: "failed",
@@ -3187,6 +3451,79 @@ async function registerRoutes(app2) {
       });
     }
   });
+  async function performLiveSearch(searchId, searchData) {
+    try {
+      console.log(`\u{1F50D} Starting live credential-based search ${searchId} for "${searchData.searchTerm}"`);
+      await storage.updateSearch(searchId, { status: "in_progress" });
+      let credentials2 = null;
+      if (process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
+        credentials2 = {
+          username: process.env.KINRAY_USERNAME,
+          password: process.env.KINRAY_PASSWORD
+        };
+        console.log(`\u2705 Using environment credentials for Kinray portal`);
+      } else {
+        const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
+        if (storedCredential) {
+          credentials2 = {
+            username: storedCredential.username,
+            password: storedCredential.password
+          };
+          console.log(`\u2705 Using stored credentials for Kinray portal`);
+        }
+      }
+      if (!credentials2) {
+        throw new Error("No valid credentials found for Kinray portal");
+      }
+      const liveSearchService = new LiveSearchService();
+      console.log(`\u{1F680} Executing live search with fresh authentication...`);
+      const results = await liveSearchService.performLiveSearch(
+        credentials2,
+        searchData.searchTerm,
+        searchData.searchType
+      );
+      console.log(`\u2705 Live search completed - found ${results.length} results`);
+      for (const result of results) {
+        let medication = await storage.getMedicationByNdc(result.medication.ndc || "");
+        if (!medication) {
+          medication = await storage.createMedication(result.medication);
+        }
+        await storage.createSearchResult({
+          searchId,
+          medicationId: medication.id,
+          vendorId: searchData.vendorId,
+          cost: result.cost,
+          availability: result.availability
+        });
+      }
+      await storage.updateSearch(searchId, {
+        status: "completed",
+        resultCount: results.length,
+        completedAt: /* @__PURE__ */ new Date()
+      });
+      console.log(`\u2705 Search ${searchId} completed with ${results.length} results`);
+      await storage.createActivityLog({
+        action: "search",
+        status: "success",
+        description: `Live search completed for "${searchData.searchTerm}" - ${results.length} results found`,
+        vendorId: searchData.vendorId,
+        searchId
+      });
+    } catch (error) {
+      console.error(`\u274C Live search ${searchId} failed:`, error);
+      await storage.updateSearch(searchId, {
+        status: "failed",
+        completedAt: /* @__PURE__ */ new Date()
+      });
+      await storage.createActivityLog({
+        action: "search",
+        status: "failure",
+        description: `Live search failed for "${searchData.searchTerm}": ${error.message}`,
+        vendorId: searchData.vendorId,
+        searchId
+      });
+    }
+  }
   async function performSearch(searchId, searchData) {
     try {
       console.log(`\u{1F50D} Starting search ${searchId} for "${searchData.searchTerm}"`);

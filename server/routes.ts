@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { scrapingService } from "./services/scraper";
 import { csvExportService } from "./services/csv-export";
+import { LiveSearchService } from "./services/live-search-service";
 import { insertCredentialSchema, insertSearchSchema, MedicationSearchResult } from "@shared/schema";
 import { z } from "zod";
 
@@ -224,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Start search in background immediately - use setTimeout for better stability
       setTimeout(() => {
-        performSearch(search.id, searchData).catch(error => {
+        performLiveSearch(search.id, searchData).catch(error => {
           console.error(`Background search ${search.id} failed:`, error);
           storage.updateSearch(search.id, { 
             status: 'failed', 
@@ -454,6 +455,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Live search function using direct credential-based authentication
+  async function performLiveSearch(searchId: number, searchData: any): Promise<void> {
+    try {
+      console.log(`🔍 Starting live credential-based search ${searchId} for "${searchData.searchTerm}"`);
+
+      // Update search status
+      await storage.updateSearch(searchId, { status: "in_progress" });
+
+      // Get credentials (prioritize environment variables)
+      let credentials = null;
+      if (process.env.KINRAY_USERNAME && process.env.KINRAY_PASSWORD) {
+        credentials = {
+          username: process.env.KINRAY_USERNAME,
+          password: process.env.KINRAY_PASSWORD
+        };
+        console.log(`✅ Using environment credentials for Kinray portal`);
+      } else {
+        const storedCredential = await storage.getCredentialByVendorId(searchData.vendorId);
+        if (storedCredential) {
+          credentials = {
+            username: storedCredential.username,
+            password: storedCredential.password
+          };
+          console.log(`✅ Using stored credentials for Kinray portal`);
+        }
+      }
+
+      if (!credentials) {
+        throw new Error('No valid credentials found for Kinray portal');
+      }
+
+      // Perform live search with direct credentials
+      const liveSearchService = new LiveSearchService();
+      console.log(`🚀 Executing live search with fresh authentication...`);
+      
+      const results = await liveSearchService.performLiveSearch(
+        credentials,
+        searchData.searchTerm,
+        searchData.searchType
+      );
+
+      console.log(`✅ Live search completed - found ${results.length} results`);
+
+      // Save results to storage
+      for (const result of results) {
+        let medication = await storage.getMedicationByNdc(result.medication.ndc || '');
+        
+        if (!medication) {
+          medication = await storage.createMedication(result.medication);
+        }
+
+        await storage.createSearchResult({
+          searchId,
+          medicationId: medication.id,
+          vendorId: searchData.vendorId,
+          cost: result.cost,
+          availability: result.availability,
+        });
+      }
+
+      // Update search completion
+      await storage.updateSearch(searchId, {
+        status: "completed",
+        resultCount: results.length,
+        completedAt: new Date(),
+      });
+
+      console.log(`✅ Search ${searchId} completed with ${results.length} results`);
+
+      // Log success
+      await storage.createActivityLog({
+        action: "search",
+        status: "success",
+        description: `Live search completed for "${searchData.searchTerm}" - ${results.length} results found`,
+        vendorId: searchData.vendorId,
+        searchId,
+      });
+
+    } catch (error: any) {
+      console.error(`❌ Live search ${searchId} failed:`, error);
+      
+      await storage.updateSearch(searchId, { 
+        status: "failed", 
+        completedAt: new Date() 
+      });
+
+      await storage.createActivityLog({
+        action: "search",
+        status: "failure",
+        description: `Live search failed for "${searchData.searchTerm}": ${error.message}`,
+        vendorId: searchData.vendorId,
+        searchId,
+      });
+    }
+  }
 
   // Async function to perform the actual search
   async function performSearch(searchId: number, searchData: any) {
