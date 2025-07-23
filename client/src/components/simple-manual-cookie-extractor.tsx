@@ -27,17 +27,24 @@ export function SimpleManualCookieExtractor() {
       try {
         cookieArray = JSON.parse(cookies);
       } catch {
-        // Parse simple text format: name=value
+        // Parse the actual cookie format from browser (name=value format)
         cookieArray = cookies.split('\n')
-          .filter(line => line.includes('='))
+          .filter(line => line.trim() && line.includes('='))
           .map(line => {
-            const [name, value] = line.split('=');
+            const trimmedLine = line.trim();
+            const equalIndex = trimmedLine.indexOf('=');
+            if (equalIndex === -1) return null;
+            
+            const name = trimmedLine.substring(0, equalIndex).trim();
+            const value = trimmedLine.substring(equalIndex + 1).trim();
+            
             return {
-              name: name.trim(),
-              value: value.trim(),
+              name: name,
+              value: value,
               domain: '.kinrayweblink.cardinalhealth.com'
             };
-          });
+          })
+          .filter(cookie => cookie !== null);
       }
 
       const response = await fetch('/api/inject-cookies', {
@@ -99,7 +106,10 @@ export function SimpleManualCookieExtractor() {
         <Textarea
           value={cookies}
           onChange={(e) => setCookies(e.target.value)}
-          placeholder="Paste cookies here (JSON format or name=value format)"
+          placeholder={`Paste cookies here (name=value format, one per line):
+_abck=AC756293DF37C...
+ak_bmsc=58B66B03F19235A...
+dtCookie=v_4_srv_11_sn_B83C...`}
           className="min-h-[100px] font-mono text-sm"
           disabled={status === 'injecting'}
         />
