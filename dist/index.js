@@ -4093,13 +4093,36 @@ async function registerRoutes(app2) {
     }
   });
   app2.get("/api/cookie-status", async (req, res) => {
-    const globalCookies = global.__kinray_session_cookies__;
-    const hasSessionCookies = globalCookies && Array.isArray(globalCookies) && globalCookies.length > 0;
-    res.json({
-      hasSessionCookies,
-      cookieCount: hasSessionCookies ? globalCookies.length : 0,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString()
-    });
+    try {
+      const globalCookies = global.__kinray_session_cookies__;
+      const hasSessionCookies = globalCookies && Array.isArray(globalCookies) && globalCookies.length > 0;
+      if (!hasSessionCookies) {
+        return res.json({
+          hasSessionCookies: false,
+          cookieCount: 0,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          status: "No session cookies stored"
+        });
+      }
+      console.log(`\u{1F50D} Validating ${globalCookies.length} stored session cookies...`);
+      const isValid = await validateSessionCookies(globalCookies);
+      res.json({
+        hasSessionCookies: true,
+        cookieCount: globalCookies.length,
+        isValid,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        status: isValid ? "Session active and valid" : "Session cookies expired or invalid"
+      });
+    } catch (error) {
+      console.error("\u274C Cookie status check failed:", error);
+      res.json({
+        hasSessionCookies: false,
+        cookieCount: 0,
+        isValid: false,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        status: "Error checking cookie status"
+      });
+    }
   });
   app2.get("/api/check-auth-status", async (req, res) => {
     try {
@@ -4402,6 +4425,72 @@ async function registerRoutes(app2) {
   }
   const httpServer = createServer(app2);
   return httpServer;
+}
+async function validateSessionCookies(cookies) {
+  const puppeteer6 = await import("puppeteer");
+  let browser = null;
+  let page = null;
+  try {
+    const findBrowserPath = async () => {
+      const paths = [
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/google-chrome",
+        "/usr/bin/chromium-browser",
+        "/usr/bin/chromium"
+      ];
+      for (const path4 of paths) {
+        try {
+          const fs3 = await import("fs");
+          if (fs3.existsSync(path4)) return path4;
+        } catch {
+        }
+      }
+      return null;
+    };
+    const browserPath = await findBrowserPath();
+    if (!browserPath) {
+      console.log("\u274C Browser not found for cookie validation");
+      return false;
+    }
+    browser = await puppeteer6.launch({
+      headless: true,
+      executablePath: browserPath,
+      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+    });
+    page = await browser.newPage();
+    await page.goto("https://kinrayweblink.cardinalhealth.com", {
+      waitUntil: "domcontentloaded",
+      timeout: 1e4
+    });
+    for (const cookie of cookies) {
+      try {
+        await page.setCookie(cookie);
+      } catch (cookieError) {
+        console.log(`\u26A0\uFE0F Failed to set cookie: ${cookie.name}`);
+      }
+    }
+    await page.goto("https://kinrayweblink.cardinalhealth.com/product/search", {
+      waitUntil: "domcontentloaded",
+      timeout: 1e4
+    });
+    await new Promise((resolve) => setTimeout(resolve, 3e3));
+    const currentUrl = page.url();
+    const isLoggedIn = !currentUrl.includes("login") && !currentUrl.includes("signin");
+    if (isLoggedIn) {
+      console.log("\u2705 Session cookies are valid - authenticated access confirmed");
+      return true;
+    } else {
+      console.log("\u274C Session cookies are invalid - redirected to login");
+      global.__kinray_session_cookies__ = [];
+      return false;
+    }
+  } catch (error) {
+    console.log(`\u274C Cookie validation failed: ${error.message}`);
+    return false;
+  } finally {
+    if (page) await page.close();
+    if (browser) await browser.close();
+  }
 }
 
 // server/vite.ts

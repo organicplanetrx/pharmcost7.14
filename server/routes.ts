@@ -377,18 +377,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cookie status endpoint
+  // Cookie status endpoint with validation
   app.get('/api/cookie-status', async (req, res) => {
-    const globalCookies = (global as any).__kinray_session_cookies__;
-    const hasSessionCookies = globalCookies && 
-                              Array.isArray(globalCookies) && 
-                              globalCookies.length > 0;
-    
-    res.json({
-      hasSessionCookies,
-      cookieCount: hasSessionCookies ? globalCookies.length : 0,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      const globalCookies = (global as any).__kinray_session_cookies__;
+      const hasSessionCookies = globalCookies && 
+                                Array.isArray(globalCookies) && 
+                                globalCookies.length > 0;
+      
+      if (!hasSessionCookies) {
+        return res.json({
+          hasSessionCookies: false,
+          cookieCount: 0,
+          timestamp: new Date().toISOString(),
+          status: 'No session cookies stored'
+        });
+      }
+
+      // Validate cookies by testing them against Kinray portal
+      console.log(`🔍 Validating ${globalCookies.length} stored session cookies...`);
+      
+      const isValid = await validateSessionCookies(globalCookies);
+      
+      res.json({
+        hasSessionCookies: true,
+        cookieCount: globalCookies.length,
+        isValid,
+        timestamp: new Date().toISOString(),
+        status: isValid ? 'Session active and valid' : 'Session cookies expired or invalid'
+      });
+      
+    } catch (error) {
+      console.error('❌ Cookie status check failed:', error);
+      res.json({
+        hasSessionCookies: false,
+        cookieCount: 0,
+        isValid: false,
+        timestamp: new Date().toISOString(),
+        status: 'Error checking cookie status'
+      });
+    }
   });
 
   // Automatic cookie extraction endpoint
@@ -789,4 +817,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Cookie validation function
+async function validateSessionCookies(cookies: any[]): Promise<boolean> {
+  const puppeteer = await import('puppeteer');
+  let browser = null;
+  let page = null;
+  
+  try {
+    // Find browser path
+    const findBrowserPath = async () => {
+      const paths = [
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium'
+      ];
+      
+      for (const path of paths) {
+        try {
+          const fs = await import('fs');
+          if (fs.existsSync(path)) return path;
+        } catch {}
+      }
+      return null;
+    };
+
+    const browserPath = await findBrowserPath();
+    if (!browserPath) {
+      console.log('❌ Browser not found for cookie validation');
+      return false;
+    }
+
+    browser = await puppeteer.launch({
+      headless: true,
+      executablePath: browserPath,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    });
+
+    page = await browser.newPage();
+    
+    // Navigate to Kinray domain to set cookies
+    await page.goto('https://kinrayweblink.cardinalhealth.com', { 
+      waitUntil: 'domcontentloaded',
+      timeout: 10000 
+    });
+    
+    // Inject cookies
+    for (const cookie of cookies) {
+      try {
+        await page.setCookie(cookie);
+      } catch (cookieError) {
+        console.log(`⚠️ Failed to set cookie: ${cookie.name}`);
+      }
+    }
+    
+    // Test if cookies provide access to protected areas
+    await page.goto('https://kinrayweblink.cardinalhealth.com/product/search', {
+      waitUntil: 'domcontentloaded',
+      timeout: 10000
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const currentUrl = page.url();
+    const isLoggedIn = !currentUrl.includes('login') && !currentUrl.includes('signin');
+    
+    if (isLoggedIn) {
+      console.log('✅ Session cookies are valid - authenticated access confirmed');
+      return true;
+    } else {
+      console.log('❌ Session cookies are invalid - redirected to login');
+      
+      // Clear invalid cookies
+      (global as any).__kinray_session_cookies__ = [];
+      return false;
+    }
+    
+  } catch (error) {
+    console.log(`❌ Cookie validation failed: ${error.message}`);
+    return false;
+  } finally {
+    if (page) await page.close();
+    if (browser) await browser.close();
+  }
 }
