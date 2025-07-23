@@ -1,28 +1,18 @@
-# PharmaCost Pro - Medication Price Comparison System
+# PharmaCost Pro - Simple Node.js Version
 
 ## Overview
 
-PharmaCost Pro is a full-stack web application designed for automated medication price comparison across multiple pharmaceutical vendor portals. The system uses web scraping to gather real-time pricing data and provides comprehensive search, analysis, and export capabilities for healthcare professionals and organizations.
+PharmaCost Pro is a simplified Node.js application for Kinray pharmaceutical portal automation via manual cookie extraction. Designed specifically for Railway deployment limitations where browser automation is not available.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack Query (React Query) for server state management
-- **UI Components**: Radix UI primitives with shadcn/ui component system
-- **Styling**: Tailwind CSS with custom design tokens
-- **Form Handling**: React Hook Form with Zod validation
-- **Build Tool**: Vite for fast development and optimized builds
-
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **API Design**: RESTful API architecture
-- **Database ORM**: Drizzle ORM for type-safe database operations
-- **Database**: PostgreSQL (configured via DATABASE_URL environment variable)
-- **Web Scraping**: Puppeteer for automated vendor portal interactions
-- **Session Management**: Connect-pg-simple for PostgreSQL-backed sessions
+### Simple Architecture
+- **Runtime**: Pure Node.js with Express.js
+- **Language**: JavaScript (ES5/CommonJS)
+- **Frontend**: Single HTML page with embedded JavaScript
+- **Storage**: In-memory session cookie storage
+- **Authentication**: Manual cookie extraction only
+- **Deployment**: Railway-optimized with no TypeScript compilation
 
 ### Data Storage Solutions
 - **Primary Database**: PostgreSQL with the following schema:
@@ -111,6 +101,13 @@ PharmaCost Pro is a full-stack web application designed for automated medication
 
 ```
 Changelog:
+- July 23, 2025: MAJOR CLEANUP: Converted entire project to simple Node.js/JavaScript version
+- July 23, 2025: Removed TypeScript, React, and all complex dependencies - now single server.js file
+- July 23, 2025: Eliminated hundreds of unnecessary documentation files and debug materials
+- July 23, 2025: Simplified to manual cookie extraction only for Railway deployment compatibility
+- July 23, 2025: Created single-page HTML interface embedded in server.js for maximum simplicity
+- July 23, 2025: Fixed ES module compatibility and server startup - application running successfully
+- July 23, 2025: Streamlined project structure to essential files only: server.js, package.json, replit.md
 - June 26, 2025: Initial setup with React/Express architecture
 - June 26, 2025: Added Kinray (Cardinal Health subsidiary) as supported vendor
 - June 26, 2025: Implemented demo search functionality with sample data
