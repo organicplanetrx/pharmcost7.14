@@ -8,372 +8,213 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// server/services/simple-cookie-extractor.ts
-var simple_cookie_extractor_exports = {};
-__export(simple_cookie_extractor_exports, {
-  SimpleCookieExtractor: () => SimpleCookieExtractor,
-  simpleCookieExtractor: () => simpleCookieExtractor
+// server/services/fresh-cookie-extractor.ts
+var fresh_cookie_extractor_exports = {};
+__export(fresh_cookie_extractor_exports, {
+  FreshCookieExtractor: () => FreshCookieExtractor
 });
 import puppeteer3 from "puppeteer";
-var SimpleCookieExtractor, simpleCookieExtractor;
-var init_simple_cookie_extractor = __esm({
-  "server/services/simple-cookie-extractor.ts"() {
+var FreshCookieExtractor;
+var init_fresh_cookie_extractor = __esm({
+  "server/services/fresh-cookie-extractor.ts"() {
     "use strict";
-    SimpleCookieExtractor = class {
+    FreshCookieExtractor = class {
       browser = null;
       page = null;
-      async extractSessionCookies(username, password) {
-        console.log("\u{1F36A} Starting simple automatic cookie extraction...");
+      async extractFreshSessionCookies(username, password) {
         try {
-          const launchConfig = {
+          console.log("\u{1F504} Starting fresh cookie extraction with new browser session...");
+          await this.initBrowser();
+          console.log("\u{1F310} Navigating to Kinray login page...");
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
+            waitUntil: "domcontentloaded",
+            timeout: 15e3
+          });
+          console.log("\u{1F510} Performing fresh login...");
+          const loginSuccess = await this.performLogin(username, password);
+          if (!loginSuccess) {
+            throw new Error("Login failed - please check your Kinray credentials");
+          }
+          console.log("\u{1F36A} Extracting fresh session cookies...");
+          const cookies = await this.page.cookies();
+          const sessionCookies = cookies.filter(
+            (cookie) => cookie.domain.includes("kinrayweblink") || cookie.domain.includes("cardinalhealth.com")
+          );
+          console.log(`\u2705 Extracted ${sessionCookies.length} fresh session cookies`);
+          const isValid = await this.validateCookies(sessionCookies);
+          if (!isValid) {
+            throw new Error("Extracted cookies are not valid for accessing Kinray portal");
+          }
+          return sessionCookies;
+        } catch (error) {
+          console.error("\u274C Fresh cookie extraction failed:", error);
+          throw error;
+        } finally {
+          await this.cleanup();
+        }
+      }
+      async initBrowser() {
+        try {
+          const browserPath = await this.findBrowserPath();
+          if (!browserPath) {
+            throw new Error("Browser not found for cookie extraction");
+          }
+          this.browser = await puppeteer3.launch({
             headless: true,
+            executablePath: browserPath,
             args: [
               "--no-sandbox",
               "--disable-setuid-sandbox",
               "--disable-dev-shm-usage",
-              "--disable-accelerated-2d-canvas",
-              "--no-first-run",
-              "--no-zygote",
               "--disable-gpu",
-              "--disable-web-security"
+              "--no-first-run"
             ]
-          };
-          if (process.env.RAILWAY_ENVIRONMENT) {
-            console.log("\u{1F682} Railway detected - using Chrome");
-            launchConfig.executablePath = "/usr/bin/google-chrome-stable";
-          }
-          this.browser = await puppeteer3.launch(launchConfig);
-          this.page = await this.browser.newPage();
-          await this.page.setViewport({ width: 1920, height: 1080 });
-          console.log("\u{1F310} Navigating to Kinray login...");
-          await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
-            waitUntil: "networkidle2",
-            timeout: 3e4
           });
-          console.log("\u{1F50D} Waiting for form fields...");
-          await this.page.waitForSelector("input", { timeout: 1e4 });
-          const usernameSelectors = [
-            'input[name="username"]',
-            'input[type="email"]',
-            "#username",
-            'input[placeholder*="username" i]',
-            'input[placeholder*="email" i]'
-          ];
-          let usernameField = null;
-          for (const selector of usernameSelectors) {
-            try {
-              usernameField = await this.page.$(selector);
-              if (usernameField) {
-                console.log(`\u2705 Found username field: ${selector}`);
-                await usernameField.type(username);
-                break;
-              }
-            } catch (e) {
-            }
-          }
-          const passwordField = await this.page.$('input[type="password"]');
-          if (passwordField) {
-            console.log("\u2705 Found password field");
-            await passwordField.type(password);
-          }
-          console.log("\u{1F680} Submitting form...");
-          await passwordField?.press("Enter");
-          console.log("\u23F3 Monitoring authentication completion...");
-          let authenticatedUrl = "";
-          let finalCookies = [];
-          for (let i = 0; i < 20; i++) {
-            await new Promise((resolve) => setTimeout(resolve, 2e3));
-            const currentUrl = this.page.url();
-            const pageTitle = await this.page.title();
-            console.log(`   ${(i + 1) * 2}s - URL: ${currentUrl} | Title: ${pageTitle}`);
-            if (currentUrl.includes("verify") || currentUrl.includes("mfa") || currentUrl.includes("2fa")) {
-              console.log("\u{1F510} 2FA verification detected - waiting for completion...");
-              continue;
-            }
-            const isAuthenticated = !currentUrl.includes("login") && !currentUrl.includes("signin") && (currentUrl.includes("home") || currentUrl.includes("dashboard") || currentUrl.includes("portal") || pageTitle.toLowerCase().includes("kinray") && !pageTitle.toLowerCase().includes("login"));
-            if (isAuthenticated) {
-              console.log(`\u2705 Authentication completed at ${(i + 1) * 2}s - URL: ${currentUrl}`);
-              authenticatedUrl = currentUrl;
-              break;
-            }
-            if (i > 15 && currentUrl.includes("login")) {
-              console.log("\u26A0\uFE0F Still on login page after 30+ seconds - credentials may be incorrect");
-              break;
-            }
-          }
-          const cookies = await this.page.cookies();
-          const relevantCookies = cookies.filter(
-            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck") || cookie.name.includes("JSESSIONID") || cookie.name.includes("AWSALB") || cookie.name.includes("AWSELB")
-          );
-          console.log(`\u2705 Extracted ${relevantCookies.length} cookies from ${authenticatedUrl || "login page"}`);
-          console.log("\u{1F4CB} Cookie names:", relevantCookies.map((c) => c.name).join(", "));
-          return relevantCookies.map((cookie) => ({
-            name: cookie.name,
-            value: cookie.value,
-            domain: cookie.domain,
-            path: cookie.path,
-            expires: cookie.expires,
-            httpOnly: cookie.httpOnly,
-            secure: cookie.secure
-          }));
+          this.page = await this.browser.newPage();
+          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         } catch (error) {
-          console.error("\u274C Simple extraction failed:", error.message);
-          throw new Error(`Simple extraction failed: ${error.message}`);
-        } finally {
-          if (this.browser) {
-            await this.browser.close();
-          }
+          console.error("\u274C Browser initialization failed:", error);
+          throw error;
         }
       }
-    };
-    simpleCookieExtractor = new SimpleCookieExtractor();
-  }
-});
-
-// server/services/cookie-extractor.ts
-var cookie_extractor_exports = {};
-__export(cookie_extractor_exports, {
-  CookieExtractor: () => CookieExtractor,
-  cookieExtractor: () => cookieExtractor
-});
-import puppeteer4 from "puppeteer";
-var CookieExtractor, cookieExtractor;
-var init_cookie_extractor = __esm({
-  "server/services/cookie-extractor.ts"() {
-    "use strict";
-    CookieExtractor = class {
-      browser = null;
-      page = null;
-      async extractSessionCookies(username, password) {
-        console.log("\u{1F36A} Starting automatic cookie extraction from Kinray portal...");
+      async findBrowserPath() {
+        const paths = [
+          "/usr/bin/google-chrome-stable",
+          "/usr/bin/google-chrome",
+          "/usr/bin/chromium-browser",
+          "/usr/bin/chromium"
+        ];
+        for (const path4 of paths) {
+          try {
+            const fs3 = await import("fs");
+            if (fs3.existsSync(path4)) {
+              return path4;
+            }
+          } catch {
+          }
+        }
+        return null;
+      }
+      async performLogin(username, password) {
         try {
-          console.log("\u{1F310} Launching browser for cookie extraction...");
-          const browserArgs = [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-accelerated-2d-canvas",
-            "--no-first-run",
-            "--no-zygote",
-            "--disable-gpu",
-            "--disable-web-security",
-            "--disable-features=VizDisplayCompositor",
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-          ];
-          let launchConfig = { headless: true, args: browserArgs };
-          if (process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_DEPLOYMENT_ID) {
-            console.log("\u{1F682} Railway detected - using optimized browser config");
-            launchConfig.executablePath = "/usr/bin/google-chrome-stable";
-          }
-          this.browser = await puppeteer4.launch(launchConfig);
-          this.page = await this.browser.newPage();
-          await this.page.setViewport({ width: 1920, height: 1080 });
-          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-          console.log("\u{1F310} Navigating to Kinray login page...");
-          await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
-            waitUntil: "networkidle2",
-            timeout: 3e4
-          });
-          await this.page.screenshot({ path: "cookie-extraction-start.png", fullPage: true });
-          console.log("\u{1F4F8} Initial page screenshot saved");
-          const pageTitle = await this.page.title();
-          const pageUrl = this.page.url();
-          console.log(`\u{1F4C4} Page title: "${pageTitle}"`);
-          console.log(`\u{1F310} Current URL: ${pageUrl}`);
-          console.log("\u{1F511} Performing automated login...");
-          console.log("\u{1F50D} Waiting for login form...");
-          const usernameSelectors = [
-            'input[name="username"]',
-            'input[type="email"]',
-            "#username",
-            "#email",
-            'input[placeholder*="username"]',
-            'input[placeholder*="email"]',
-            'input[class*="username"]',
-            'input[class*="email"]'
-          ];
-          const passwordSelectors = [
-            'input[name="password"]',
-            'input[type="password"]',
-            "#password",
-            'input[placeholder*="password"]',
-            'input[class*="password"]'
-          ];
-          let usernameField = null;
-          for (const selector of usernameSelectors) {
-            try {
-              await this.page.waitForSelector(selector, { timeout: 2e3 });
-              usernameField = await this.page.$(selector);
-              if (usernameField) {
-                console.log(`\u{1F3AF} Found username field: ${selector}`);
-                break;
-              }
-            } catch (e) {
-            }
-          }
-          let passwordField = null;
-          for (const selector of passwordSelectors) {
-            try {
-              passwordField = await this.page.$(selector);
-              if (passwordField) {
-                console.log(`\u{1F3AF} Found password field: ${selector}`);
-                break;
-              }
-            } catch (e) {
-            }
-          }
-          if (!usernameField || !passwordField) {
-            console.log("\u274C Could not find login form fields");
-            throw new Error("Login form fields not found");
-          }
+          await this.page.waitForSelector('input[type="email"], input[name="username"], input[id*="user"]', { timeout: 1e4 });
+          const usernameField = await this.page.$('input[type="email"], input[name="username"], input[id*="user"]');
           if (usernameField) {
             await usernameField.type(username);
             console.log("\u2705 Username entered");
           }
+          const passwordField = await this.page.$('input[type="password"]');
           if (passwordField) {
             await passwordField.type(password);
             console.log("\u2705 Password entered");
           }
-          console.log("\u{1F50D} Looking for submit button...");
-          const buttonSelectors = [
-            'input[type="submit"]',
-            'button[type="submit"]',
-            'button[class*="submit"]',
-            'button[class*="login"]',
-            'button[class*="sign"]',
-            ".btn-primary",
-            ".submit-btn",
-            'input[value*="Sign"]',
-            'input[value*="Log"]',
-            "button"
-          ];
-          let submitButton = null;
-          for (const selector of buttonSelectors) {
-            try {
-              submitButton = await this.page.$(selector);
-              if (submitButton) {
-                const buttonText = await this.page.evaluate((btn) => btn.textContent || btn.value || "", submitButton);
-                console.log(`\u{1F3AF} Found button with selector "${selector}": "${buttonText}"`);
-                if (buttonText.toLowerCase().includes("sign") || buttonText.toLowerCase().includes("log") || buttonText.toLowerCase().includes("submit") || selector.includes("submit")) {
-                  console.log(`\u2705 Using button: "${buttonText}"`);
-                  break;
-                }
-              }
-            } catch (e) {
-            }
+          const loginButton = await this.page.$('button[type="submit"], input[type="submit"], button:contains("Sign In"), button:contains("Login")');
+          if (loginButton) {
+            await loginButton.click();
+            console.log("\u2705 Login button clicked");
           }
-          if (submitButton) {
-            await submitButton.click();
-            console.log("\u2705 Login form submitted");
-          } else {
-            console.log("\u23CE No submit button found, trying Enter key on password field");
-            if (passwordField) {
-              await passwordField.press("Enter");
-            }
-          }
-          console.log("\u23F3 Waiting for authentication to complete...");
           await new Promise((resolve) => setTimeout(resolve, 5e3));
-          const loginUrl = this.page.url();
-          console.log(`\u{1F4CD} Current URL after login: ${loginUrl}`);
-          if (loginUrl.includes("verify") || loginUrl.includes("2fa")) {
-            console.log("\u{1F510} 2FA detected - waiting for manual completion...");
-            console.log("\u{1F4A1} Please complete 2FA in your browser, then the system will extract the authenticated cookies");
-            for (let i = 0; i < 24; i++) {
-              await new Promise((resolve) => setTimeout(resolve, 5e3));
-              const newUrl = this.page.url();
-              if (!newUrl.includes("verify") && !newUrl.includes("2fa") && !newUrl.includes("login")) {
-                console.log("\u2705 2FA completed - authenticated session detected");
-                break;
-              }
-              if (i === 23) {
-                console.log("\u23F0 2FA timeout - extracting available cookies anyway");
-              }
-            }
+          const currentUrl = this.page.url();
+          const isLoggedIn = !currentUrl.includes("login") && !currentUrl.includes("signin");
+          if (isLoggedIn) {
+            console.log("\u2705 Login successful - redirected to dashboard");
+            return true;
+          } else {
+            console.log("\u274C Login failed - still on login page");
+            return false;
           }
-          console.log("\u{1F36A} Extracting session cookies...");
-          const cookies = await this.page.cookies();
-          const relevantCookies = cookies.filter(
-            (cookie) => cookie.domain.includes("cardinalhealth.com") || cookie.domain.includes("kinray") || cookie.name.includes("session") || cookie.name.includes("auth") || cookie.name.includes("okta") || cookie.name.includes("_abck") || cookie.name.includes("rxVisitor")
-          );
-          console.log(`\u2705 Extracted ${relevantCookies.length} relevant cookies from authenticated session`);
-          await this.page.screenshot({ path: "cookie-extraction-complete.png", fullPage: true });
-          console.log("\u{1F4F8} Final authenticated page screenshot saved");
-          return relevantCookies.map((cookie) => ({
-            name: cookie.name,
-            value: cookie.value,
-            domain: cookie.domain,
-            path: cookie.path,
-            expires: cookie.expires,
-            httpOnly: cookie.httpOnly,
-            secure: cookie.secure
-          }));
         } catch (error) {
-          console.error("\u274C Cookie extraction failed:", error.message);
-          throw new Error(`Cookie extraction failed: ${error.message}`);
-        } finally {
-          if (this.browser) {
-            await this.browser.close();
-            console.log("\u{1F512} Browser closed after cookie extraction");
-          }
+          console.error("\u274C Login process failed:", error);
+          return false;
         }
       }
-      async extractCookiesFromRunningSession() {
-        console.log("\u{1F36A} Attempting to extract cookies from any running browser sessions...");
+      async validateCookies(cookies) {
         try {
-          console.log("\u26A0\uFE0F This feature requires browser debugging port to be enabled");
-          console.log("\u{1F4A1} For now, use the automatic login method or manual cookie injection");
-          return [];
+          const testPage = await this.browser.newPage();
+          for (const cookie of cookies) {
+            try {
+              await testPage.setCookie(cookie);
+            } catch (cookieError2) {
+              console.log(`\u26A0\uFE0F Failed to set cookie: ${cookie.name}`);
+            }
+          }
+          await testPage.goto("https://kinrayweblink.cardinalhealth.com/product/search", {
+            waitUntil: "domcontentloaded",
+            timeout: 1e4
+          });
+          await new Promise((resolve) => setTimeout(resolve, 3e3));
+          const url = testPage.url();
+          const isValid = !url.includes("login") && !url.includes("signin");
+          await testPage.close();
+          if (isValid) {
+            console.log("\u2705 Cookies validated - provide access to protected areas");
+          } else {
+            console.log("\u274C Cookies invalid - redirected to login");
+          }
+          return isValid;
         } catch (error) {
-          console.error("\u274C Running session extraction failed:", error.message);
-          throw error;
+          console.error("\u274C Cookie validation failed:", error);
+          return false;
+        }
+      }
+      async cleanup() {
+        try {
+          if (this.page) {
+            await this.page.close();
+            this.page = null;
+          }
+          if (this.browser) {
+            await this.browser.close();
+            this.browser = null;
+          }
+        } catch (error) {
+          console.error("\u274C Cleanup failed:", error);
         }
       }
     };
-    cookieExtractor = new CookieExtractor();
   }
 });
 
-// server/services/cookie-based-search.ts
-var cookie_based_search_exports = {};
-__export(cookie_based_search_exports, {
-  CookieBasedSearchService: () => CookieBasedSearchService
+// server/services/verified-search-service.ts
+var verified_search_service_exports = {};
+__export(verified_search_service_exports, {
+  VerifiedSearchService: () => VerifiedSearchService
 });
-import puppeteer5 from "puppeteer";
-var CookieBasedSearchService;
-var init_cookie_based_search = __esm({
-  "server/services/cookie-based-search.ts"() {
+import puppeteer4 from "puppeteer";
+var VerifiedSearchService;
+var init_verified_search_service = __esm({
+  "server/services/verified-search-service.ts"() {
     "use strict";
-    CookieBasedSearchService = class {
+    VerifiedSearchService = class {
       browser = null;
       page = null;
-      async performSearch(searchTerm) {
+      async performVerifiedSearch(searchTerm) {
         try {
-          console.log(`\u{1F50D} Starting cookie-based search for: ${searchTerm}`);
+          console.log(`\u{1F50D} Starting verified search for: ${searchTerm}`);
           const sessionCookies = global.__kinray_session_cookies__;
           if (!sessionCookies || sessionCookies.length === 0) {
-            throw new Error("No session cookies available. Please extract session cookies first.");
+            throw new Error("No session cookies available. Please extract fresh cookies first.");
           }
-          console.log(`\u{1F36A} Using ${sessionCookies.length} stored session cookies`);
+          console.log(`\u{1F36A} Using ${sessionCookies.length} validated session cookies`);
           await this.initBrowser();
           await this.injectCookies(sessionCookies);
+          console.log("\u{1F310} Navigating to Kinray portal...");
           await this.page.goto("https://kinrayweblink.cardinalhealth.com", {
             waitUntil: "domcontentloaded",
             timeout: 15e3
           });
           await new Promise((resolve) => setTimeout(resolve, 3e3));
-          const currentUrl = this.page.url();
-          console.log(`\u{1F4CD} Current URL after cookie injection: ${currentUrl}`);
-          console.log("\u{1F510} Proceeding with search using injected session cookies...");
-          const results = await this.searchKinrayPortal(searchTerm);
-          console.log(`\u2705 Cookie-based search completed: ${results.length} results found`);
-          if (results.length > 0) {
-            return results;
-          } else {
-            console.log("\u26A0\uFE0F No results extracted - portal may have changed structure");
-            throw new Error("No results found in Kinray portal - search may need adjustment");
+          const isLoggedIn = await this.verifyLoginStatus();
+          if (!isLoggedIn) {
+            throw new Error("Not logged into Kinray portal - cookies may have expired");
           }
+          console.log("\u2705 Verified logged into Kinray portal - ready to search");
+          await this.navigateToSearchPage();
+          const results = await this.searchMedication(searchTerm);
+          console.log(`\u2705 Search completed: ${results.length} results found`);
+          return results;
         } catch (error) {
-          console.error("\u274C Cookie-based search failed:", error);
+          console.error("\u274C Verified search failed:", error);
           throw error;
         } finally {
           await this.cleanup();
@@ -385,7 +226,7 @@ var init_cookie_based_search = __esm({
           if (!browserPath) {
             throw new Error("Browser not found");
           }
-          this.browser = await puppeteer5.launch({
+          this.browser = await puppeteer4.launch({
             headless: true,
             executablePath: browserPath,
             args: [
@@ -393,192 +234,214 @@ var init_cookie_based_search = __esm({
               "--disable-setuid-sandbox",
               "--disable-dev-shm-usage",
               "--disable-gpu",
-              "--disable-web-security",
-              "--no-first-run",
-              "--single-process"
+              "--no-first-run"
             ]
           });
           this.page = await this.browser.newPage();
-          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-          console.log("\u2705 Browser initialized for cookie-based search");
+          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
         } catch (error) {
-          throw new Error(`Browser initialization failed: ${error}`);
+          console.error("\u274C Browser initialization failed:", error);
+          throw error;
         }
       }
       async findBrowserPath() {
-        const possiblePaths = [
+        const paths = [
           "/usr/bin/google-chrome-stable",
           "/usr/bin/google-chrome",
           "/usr/bin/chromium-browser",
           "/usr/bin/chromium"
         ];
-        if (process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === "production") {
-          return "/usr/bin/google-chrome-stable";
+        for (const path4 of paths) {
+          try {
+            const fs3 = await import("fs");
+            if (fs3.existsSync(path4)) return path4;
+          } catch {
+          }
         }
-        return possiblePaths[0];
+        return null;
       }
       async injectCookies(cookies) {
         try {
-          console.log("\u{1F36A} Injecting session cookies...");
-          await this.page.goto("https://kinrayweblink.cardinalhealth.com", { waitUntil: "domcontentloaded" });
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com", {
+            waitUntil: "domcontentloaded",
+            timeout: 1e4
+          });
           for (const cookie of cookies) {
             try {
               await this.page.setCookie(cookie);
-            } catch (cookieError) {
-              console.log(`\u26A0\uFE0F Failed to set cookie ${cookie.name}:`, cookieError.message);
+            } catch (cookieError2) {
+              console.log(`\u26A0\uFE0F Failed to inject cookie: ${cookie.name}`);
             }
           }
           console.log(`\u2705 Injected ${cookies.length} session cookies`);
         } catch (error) {
-          throw new Error(`Cookie injection failed: ${error}`);
+          console.error("\u274C Cookie injection failed:", error);
+          throw error;
         }
       }
-      async searchKinrayPortal(searchTerm) {
+      async verifyLoginStatus() {
         try {
-          console.log(`\u{1F50D} Performing Kinray portal search for: ${searchTerm}`);
+          const currentUrl = this.page.url();
+          if (currentUrl.includes("login") || currentUrl.includes("signin")) {
+            console.log("\u274C Redirected to login page - not authenticated");
+            return false;
+          }
+          await this.page.goto("https://kinrayweblink.cardinalhealth.com/product/search", {
+            waitUntil: "domcontentloaded",
+            timeout: 1e4
+          });
+          await new Promise((resolve) => setTimeout(resolve, 3e3));
+          const finalUrl = this.page.url();
+          const isAuthenticated = !finalUrl.includes("login") && !finalUrl.includes("signin");
+          if (isAuthenticated) {
+            console.log("\u2705 Verified authenticated access to Kinray portal");
+          } else {
+            console.log("\u274C Not authenticated - redirected to login");
+          }
+          return isAuthenticated;
+        } catch (error) {
+          console.error("\u274C Login verification failed:", error);
+          return false;
+        }
+      }
+      async navigateToSearchPage() {
+        try {
+          console.log("\u{1F50D} Navigating to search page...");
           await this.page.goto("https://kinrayweblink.cardinalhealth.com/product/search", {
             waitUntil: "domcontentloaded",
             timeout: 15e3
           });
           await new Promise((resolve) => setTimeout(resolve, 3e3));
-          const currentUrl = this.page.url();
-          console.log(`\u{1F4CD} Search page URL: ${currentUrl}`);
-          if (currentUrl.includes("login") || currentUrl.includes("signin")) {
-            console.log("\u274C Still on login page - cookies may have expired");
-            return [];
+          console.log("\u2705 Successfully navigated to search page");
+        } catch (error) {
+          console.error("\u274C Navigation to search page failed:", error);
+          throw error;
+        }
+      }
+      async searchMedication(searchTerm) {
+        try {
+          console.log(`\u{1F50D} Searching for medication: ${searchTerm}`);
+          const searchSelectors = [
+            'input[name="search"]',
+            'input[placeholder*="search"]',
+            'input[type="search"]',
+            "input.search-input",
+            "#search-input",
+            ".search-field input"
+          ];
+          let searchInput = null;
+          for (const selector of searchSelectors) {
+            try {
+              searchInput = await this.page.$(selector);
+              if (searchInput) {
+                console.log(`\u2705 Found search input with selector: ${selector}`);
+                break;
+              }
+            } catch {
+            }
           }
-          const searchInput = await this.page.$('input[type="text"]');
           if (!searchInput) {
-            console.log("\u274C Search input not found");
-            return [];
+            throw new Error("Could not find search input field on Kinray portal");
           }
           await searchInput.click({ clickCount: 3 });
           await searchInput.type(searchTerm);
           console.log(`\u2705 Entered search term: ${searchTerm}`);
           await this.page.keyboard.press("Enter");
-          console.log("\u{1F50D} Search submitted");
           await new Promise((resolve) => setTimeout(resolve, 5e3));
-          await this.page.screenshot({ path: "/tmp/kinray-search-results.png", fullPage: true });
-          console.log("\u{1F4F7} Results page screenshot saved");
-          const pageHTML = await this.page.content();
-          console.log(`\u{1F4C4} Page HTML length: ${pageHTML.length} characters`);
-          const hasResultsTable = await this.page.evaluate(() => {
-            const table = document.querySelector("table");
-            const resultCount = document.querySelector('[class*="result"]')?.textContent || "";
-            const allRows = document.querySelectorAll("tr").length;
-            return {
-              hasTable: !!table,
-              resultCountText: resultCount,
-              totalRows: allRows,
-              url: window.location.href
-            };
-          });
-          console.log("\u{1F4CA} Page analysis:", JSON.stringify(hasResultsTable, null, 2));
-          const results = await this.page.evaluate(() => {
-            console.log("\u{1F50D} Starting result extraction...");
-            const allTables = document.querySelectorAll("table");
-            console.log(`Found ${allTables.length} tables on page`);
-            const extractedResults = [];
-            const strategies = [
-              // Strategy 1: Angular table rows
-              () => document.querySelectorAll('tr[class*="ng-star-inserted"]'),
-              // Strategy 2: All table rows
-              () => document.querySelectorAll("tr"),
-              // Strategy 3: Table body rows
-              () => document.querySelectorAll("tbody tr"),
-              // Strategy 4: Any row with multiple cells
-              () => document.querySelectorAll("tr:has(td)")
-            ];
-            for (let i = 0; i < strategies.length; i++) {
-              try {
-                const rows = strategies[i]();
-                console.log(`Strategy ${i + 1}: Found ${rows.length} rows`);
-                rows.forEach((row, rowIndex) => {
-                  const cells = row.querySelectorAll("td");
-                  console.log(`Row ${rowIndex}: ${cells.length} cells`);
-                  if (cells.length >= 6) {
-                    const allText = Array.from(cells).map((cell) => cell.textContent?.trim() || "");
-                    console.log(`Row ${rowIndex} data:`, allText);
-                    const rowText = row.textContent?.toLowerCase() || "";
-                    if (rowText.includes("lisinopril") || rowText.includes("mg")) {
-                      let medicationName = "", ndc = "", price = 0;
-                      for (let cellIndex = 0; cellIndex < cells.length; cellIndex++) {
-                        const cellText = cells[cellIndex].textContent?.trim() || "";
-                        if (cellText.includes("mg") || cellText.toUpperCase().includes("LISINOPRIL")) {
-                          medicationName = cellText;
-                        }
-                        if (/^\d{11}$/.test(cellText.replace(/\D/g, "")) && cellText.length >= 10) {
-                          ndc = cellText;
-                        }
-                        if (cellText.includes("$") || /^\d+\.\d{2}$/.test(cellText)) {
-                          const priceMatch = cellText.match(/\$?([\d.]+)/);
-                          if (priceMatch) price = parseFloat(priceMatch[1]);
-                        }
-                      }
-                      if (medicationName && (ndc || price > 0)) {
-                        extractedResults.push({
-                          id: `kinray_row_${rowIndex}`,
-                          medication_name: medicationName,
-                          ndc: ndc || `temp-${Date.now()}-${rowIndex}`,
-                          cost: price,
-                          manufacturer: "Kinray/Cardinal Health",
-                          availability: "Available",
-                          vendor_id: 1
-                        });
-                      }
-                    }
-                  }
-                });
-                if (extractedResults.length > 0) {
-                  console.log(`Strategy ${i + 1} successful: ${extractedResults.length} results`);
-                  break;
-                }
-              } catch (strategyError) {
-                console.log(`Strategy ${i + 1} failed:`, strategyError);
-              }
-            }
-            console.log(`Final extraction: ${extractedResults.length} results`);
-            return extractedResults;
-          });
-          console.log(`\u2705 Extracted ${results.length} results from Kinray portal`);
-          if (results.length > 0) {
-            console.log("\u{1F4CA} Sample result:", JSON.stringify(results[0], null, 2));
-            return results;
-          }
-          console.log("\u{1F504} Trying alternative result extraction...");
-          const alternativeResults = await this.page.evaluate(() => {
-            const resultCountElement = document.querySelector('[class*="result"]');
-            const resultText = resultCountElement?.textContent || "";
-            console.log("Result count text:", resultText);
-            const allRows = document.querySelectorAll("tr");
-            const foundResults = [];
-            console.log("\u26A0\uFE0F Alternative extraction disabled - no fake data generation allowed");
-            return foundResults;
-          });
-          if (alternativeResults.length > 0) {
-            console.log(`\u2705 Alternative extraction found ${alternativeResults.length} results`);
-            return alternativeResults.slice(0, 10);
-          }
-          console.log("\u274C No results could be extracted from the portal");
-          return [];
+          const results = await this.extractSearchResults();
+          return results;
         } catch (error) {
-          console.error("\u274C Kinray portal search error:", error);
+          console.error("\u274C Medication search failed:", error);
+          throw error;
+        }
+      }
+      async extractSearchResults() {
+        try {
+          console.log("\u{1F4CA} Extracting search results...");
+          const results = [];
+          const resultSelectors = [
+            ".result-item",
+            ".product-item",
+            ".search-result",
+            "tr[data-product]",
+            ".medication-row",
+            '[class*="result"]'
+          ];
+          let resultElements = [];
+          for (const selector of resultSelectors) {
+            try {
+              resultElements = await this.page.$$(selector);
+              if (resultElements.length > 0) {
+                console.log(`\u2705 Found ${resultElements.length} results with selector: ${selector}`);
+                break;
+              }
+            } catch {
+            }
+          }
+          if (resultElements.length === 0) {
+            console.log("\u26A0\uFE0F No result elements found - checking page content");
+            const pageContent = await this.page.content();
+            await this.page.screenshot({ path: "kinray-search-results.png" });
+            console.log("\u{1F4F8} Screenshot saved: kinray-search-results.png");
+            return [];
+          }
+          for (let i = 0; i < Math.min(resultElements.length, 20); i++) {
+            try {
+              const element = resultElements[i];
+              const result = await this.page.evaluate((el) => {
+                const name = el.querySelector('[class*="name"], [class*="product"]')?.textContent?.trim() || "";
+                const ndc = el.textContent?.match(/\d{5}-\d{4}-\d{2}|\d{11}/)?.[0] || "";
+                const price = el.textContent?.match(/\$[\d,]+\.?\d*/)?.[0] || "";
+                const manufacturer = el.querySelector('[class*="manufacturer"], [class*="mfr"]')?.textContent?.trim() || "";
+                const strength = el.textContent?.match(/\d+\s*(mg|mcg|g|ml)/i)?.[0] || "";
+                return {
+                  name,
+                  ndc,
+                  price,
+                  manufacturer,
+                  strength
+                };
+              }, element);
+              if (result.name && result.name.length > 3) {
+                results.push({
+                  medication: {
+                    id: i + 1,
+                    name: result.name,
+                    genericName: result.name,
+                    ndc: result.ndc || null,
+                    packageSize: null,
+                    strength: result.strength || null,
+                    dosageForm: null,
+                    manufacturer: result.manufacturer || null
+                  },
+                  cost: result.price || "0.00",
+                  availability: "Available",
+                  vendor: "Kinray"
+                });
+              }
+            } catch (extractError) {
+              console.log(`\u26A0\uFE0F Failed to extract result ${i}:`, extractError);
+            }
+          }
+          console.log(`\u2705 Successfully extracted ${results.length} medication results`);
+          return results;
+        } catch (error) {
+          console.error("\u274C Result extraction failed:", error);
           return [];
         }
       }
-      generateSampleResults(searchTerm) {
-        throw new Error(`No real results extracted from Kinray portal for ${searchTerm}. Check portal structure and extraction logic.`);
-      }
       async cleanup() {
         try {
+          if (this.page) {
+            await this.page.close();
+            this.page = null;
+          }
           if (this.browser) {
             await this.browser.close();
             this.browser = null;
-            this.page = null;
-            console.log("\u2705 Browser cleanup completed");
           }
         } catch (error) {
-          console.error("\u274C Cleanup error:", error);
+          console.error("\u274C Cleanup failed:", error);
         }
       }
     };
@@ -4150,52 +4013,42 @@ async function registerRoutes(app2) {
       });
     }
   });
-  app2.post("/api/extract-cookies", async (req, res) => {
+  app2.post("/api/extract-fresh-cookies", async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
-        return res.status(400).json({ error: "Username and password required for automatic cookie extraction" });
+        return res.status(400).json({ error: "Username and password required for fresh cookie extraction" });
       }
-      console.log("\u{1F36A} Starting automatic cookie extraction...");
-      try {
-        const { simpleCookieExtractor: simpleCookieExtractor2 } = await Promise.resolve().then(() => (init_simple_cookie_extractor(), simple_cookie_extractor_exports));
-        const extractedCookies2 = await simpleCookieExtractor2.extractSessionCookies(username, password);
-        if (extractedCookies2.length > 0) {
-          global.__kinray_session_cookies__ = extractedCookies2;
-          console.log(`\u2705 Simple extractor: ${extractedCookies2.length} cookies`);
-          return res.json({
-            success: true,
-            message: `Successfully extracted and injected ${extractedCookies2.length} session cookies`,
-            cookieCount: extractedCookies2.length,
-            cookies: extractedCookies2.map((c) => ({ name: c.name, domain: c.domain }))
-          });
-        }
-      } catch (simpleError) {
-        console.log("\u26A0\uFE0F Simple extractor failed, trying advanced...");
-      }
-      const { cookieExtractor: cookieExtractor2 } = await Promise.resolve().then(() => (init_cookie_extractor(), cookie_extractor_exports));
-      const extractedCookies = await cookieExtractor2.extractSessionCookies(username, password);
+      console.log("\u{1F504} STEP 1: Starting fresh cookie extraction with new browser session...");
+      const { FreshCookieExtractor: FreshCookieExtractor2 } = await Promise.resolve().then(() => (init_fresh_cookie_extractor(), fresh_cookie_extractor_exports));
+      const extractor = new FreshCookieExtractor2();
+      const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
       if (extractedCookies.length > 0) {
         global.__kinray_session_cookies__ = extractedCookies;
-        console.log(`\u2705 Automatically extracted and injected ${extractedCookies.length} session cookies`);
+        console.log(`\u2705 STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
         res.json({
           success: true,
-          message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
+          step: 1,
+          message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
           cookieCount: extractedCookies.length,
+          validated: true,
+          nextStep: "Ready for verified search",
           cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
         });
       } else {
         res.status(400).json({
-          error: "No relevant cookies extracted from authentication session",
-          message: "Login may have failed or 2FA required"
+          success: false,
+          step: 1,
+          error: "No session cookies could be extracted. Please check your Kinray credentials and try again."
         });
       }
     } catch (error) {
-      console.error("\u274C Automatic cookie extraction failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("\u274C STEP 1 FAILED: Fresh cookie extraction error:", errorMessage);
       res.status(500).json({
-        error: "Cookie extraction failed",
-        message: error.message,
-        suggestion: "Try manual cookie injection or check credentials"
+        success: false,
+        step: 1,
+        error: errorMessage
       });
     }
   });
@@ -4207,14 +4060,15 @@ async function registerRoutes(app2) {
       const sessionCookies = global.__kinray_session_cookies__;
       let results = [];
       if (sessionCookies && sessionCookies.length > 0) {
-        console.log(`\u{1F36A} Found ${sessionCookies.length} stored session cookies - using cookie-based search`);
+        console.log(`\u{1F504} STEP 2: Starting verified search with ${sessionCookies.length} stored session cookies`);
         try {
-          const { CookieBasedSearchService: CookieBasedSearchService2 } = await Promise.resolve().then(() => (init_cookie_based_search(), cookie_based_search_exports));
-          const cookieSearchService = new CookieBasedSearchService2();
-          results = await cookieSearchService.performSearch(searchData.searchTerm);
-          console.log(`\u2705 Cookie-based search completed - found ${results.length} results`);
-        } catch (cookieError) {
-          console.log(`\u26A0\uFE0F Cookie-based search failed: ${cookieError.message}`);
+          const { VerifiedSearchService: VerifiedSearchService2 } = await Promise.resolve().then(() => (init_verified_search_service(), verified_search_service_exports));
+          const verifiedSearchService = new VerifiedSearchService2();
+          results = await verifiedSearchService.performVerifiedSearch(searchData.searchTerm);
+          console.log(`\u2705 STEP 2 COMPLETE: Verified search found ${results.length} results`);
+        } catch (searchError) {
+          const errorMessage = searchError instanceof Error ? searchError.message : "Unknown search error";
+          console.log(`\u274C STEP 2 FAILED: Verified search error: ${errorMessage}`);
           console.log("\u{1F504} Falling back to credential-based search...");
           try {
             results = await performCredentialBasedSearch(searchData);
@@ -4427,7 +4281,7 @@ async function registerRoutes(app2) {
   return httpServer;
 }
 async function validateSessionCookies(cookies) {
-  const puppeteer6 = await import("puppeteer");
+  const puppeteer5 = await import("puppeteer");
   let browser = null;
   let page = null;
   try {
@@ -4452,7 +4306,7 @@ async function validateSessionCookies(cookies) {
       console.log("\u274C Browser not found for cookie validation");
       return false;
     }
-    browser = await puppeteer6.launch({
+    browser = await puppeteer5.launch({
       headless: true,
       executablePath: browserPath,
       args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
@@ -4465,7 +4319,7 @@ async function validateSessionCookies(cookies) {
     for (const cookie of cookies) {
       try {
         await page.setCookie(cookie);
-      } catch (cookieError) {
+      } catch (cookieError2) {
         console.log(`\u26A0\uFE0F Failed to set cookie: ${cookie.name}`);
       }
     }

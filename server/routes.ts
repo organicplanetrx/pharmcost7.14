@@ -426,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 Smart auth check: Looking for existing session...');
       
       // First check if we already have stored cookies
-      const existingCookies = global.__kinray_session_cookies__;
+      const existingCookies = (global as any).__kinray_session_cookies__;
       
       if (existingCookies && existingCookies.length > 5) {
         console.log(`✅ Found existing session with ${existingCookies.length} cookies`);
@@ -456,66 +456,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/extract-cookies', async (req, res) => {
+  // STEP 1: Fresh cookie extraction with systematic validation
+  app.post('/api/extract-fresh-cookies', async (req, res) => {
     try {
       const { username, password } = req.body;
       
       if (!username || !password) {
-        return res.status(400).json({ error: 'Username and password required for automatic cookie extraction' });
+        return res.status(400).json({ error: 'Username and password required for fresh cookie extraction' });
       }
 
-      console.log('🍪 Starting automatic cookie extraction...');
+      console.log('🔄 STEP 1: Starting fresh cookie extraction with new browser session...');
       
-      // Try simple extractor first (more reliable)
-      try {
-        const { simpleCookieExtractor } = await import('./services/simple-cookie-extractor.js');
-        const extractedCookies = await simpleCookieExtractor.extractSessionCookies(username, password);
-        
-        if (extractedCookies.length > 0) {
-          // Success with simple extractor
-          (global as any).__kinray_session_cookies__ = extractedCookies;
-          
-          console.log(`✅ Simple extractor: ${extractedCookies.length} cookies`);
-          
-          return res.json({
-            success: true,
-            message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
-            cookieCount: extractedCookies.length,
-            cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
-          });
-        }
-      } catch (simpleError) {
-        console.log('⚠️ Simple extractor failed, trying advanced...');
-      }
+      const { FreshCookieExtractor } = await import('./services/fresh-cookie-extractor.js');
+      const extractor = new FreshCookieExtractor();
       
-      // Fallback to advanced extractor
-      const { cookieExtractor } = await import('./services/cookie-extractor.js');
-      const extractedCookies = await cookieExtractor.extractSessionCookies(username, password);
+      const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
       
       if (extractedCookies.length > 0) {
-        // Automatically inject the extracted cookies
+        // Store validated cookies globally
         (global as any).__kinray_session_cookies__ = extractedCookies;
         
-        console.log(`✅ Automatically extracted and injected ${extractedCookies.length} session cookies`);
+        console.log(`✅ STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
         
         res.json({
           success: true,
-          message: `Successfully extracted and injected ${extractedCookies.length} session cookies`,
+          step: 1,
+          message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
           cookieCount: extractedCookies.length,
+          validated: true,
+          nextStep: 'Ready for verified search',
           cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
         });
       } else {
-        res.status(400).json({ 
-          error: 'No relevant cookies extracted from authentication session',
-          message: 'Login may have failed or 2FA required'
+        res.status(400).json({
+          success: false,
+          step: 1,
+          error: 'No session cookies could be extracted. Please check your Kinray credentials and try again.'
         });
       }
-    } catch (error) {
-      console.error('❌ Automatic cookie extraction failed:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('❌ STEP 1 FAILED: Fresh cookie extraction error:', errorMessage);
       res.status(500).json({ 
-        error: 'Cookie extraction failed', 
-        message: error.message,
-        suggestion: 'Try manual cookie injection or check credentials'
+        success: false,
+        step: 1,
+        error: errorMessage
       });
     }
   });
@@ -528,21 +513,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateSearch(searchId, { status: "in_progress" });
       console.log(`📊 Updated search ${searchId} status to in_progress`);
 
-      // Check for stored session cookies first
-      const sessionCookies = global.__kinray_session_cookies__;
+      // STEP 2: Use verified search service with stored cookies
+      const sessionCookies = (global as any).__kinray_session_cookies__;
       let results: any[] = [];
       
       if (sessionCookies && sessionCookies.length > 0) {
-        console.log(`🍪 Found ${sessionCookies.length} stored session cookies - using cookie-based search`);
+        console.log(`🔄 STEP 2: Starting verified search with ${sessionCookies.length} stored session cookies`);
         
         try {
-          const { CookieBasedSearchService } = await import('./services/cookie-based-search.js');
-          const cookieSearchService = new CookieBasedSearchService();
-          results = await cookieSearchService.performSearch(searchData.searchTerm);
+          const { VerifiedSearchService } = await import('./services/verified-search-service.js');
+          const verifiedSearchService = new VerifiedSearchService();
+          results = await verifiedSearchService.performVerifiedSearch(searchData.searchTerm);
           
-          console.log(`✅ Cookie-based search completed - found ${results.length} results`);
-        } catch (cookieError) {
-          console.log(`⚠️ Cookie-based search failed: ${cookieError.message}`);
+          console.log(`✅ STEP 2 COMPLETE: Verified search found ${results.length} results`);
+        } catch (searchError: unknown) {
+          const errorMessage = searchError instanceof Error ? searchError.message : 'Unknown search error';
+          console.log(`❌ STEP 2 FAILED: Verified search error: ${errorMessage}`);
           console.log('🔄 Falling back to credential-based search...');
           
           try {
