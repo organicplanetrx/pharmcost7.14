@@ -4139,6 +4139,51 @@ async function registerRoutes(app2) {
       });
     }
   });
+  app2.post("/api/extract-cookies", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password required" });
+      }
+      console.log("\u{1F504} Legacy cookie extraction called - redirecting to fresh extraction...");
+      try {
+        const { FreshCookieExtractor: FreshCookieExtractor2 } = await Promise.resolve().then(() => (init_fresh_cookie_extractor(), fresh_cookie_extractor_exports));
+        const extractor = new FreshCookieExtractor2();
+        const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
+        if (extractedCookies.length > 0) {
+          global.__kinray_session_cookies__ = extractedCookies;
+          console.log(`\u2705 Legacy extraction successful: ${extractedCookies.length} cookies`);
+          res.json({
+            success: true,
+            message: `Successfully extracted ${extractedCookies.length} session cookies`,
+            cookieCount: extractedCookies.length,
+            cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            error: "No session cookies could be extracted"
+          });
+        }
+      } catch (browserError) {
+        const errorMessage = browserError instanceof Error ? browserError.message : "Unknown browser error";
+        console.error("\u274C Browser automation failed:", errorMessage);
+        res.status(503).json({
+          success: false,
+          error: "Network error during cookie extraction - browser automation not available on Railway",
+          requiresManualCookies: true,
+          message: "Please use manual cookie extraction instead"
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("\u274C Legacy cookie extraction failed:", errorMessage);
+      res.status(500).json({
+        success: false,
+        error: errorMessage
+      });
+    }
+  });
   app2.get("/api/check-auth-status", async (req, res) => {
     try {
       console.log("\u{1F50D} Smart auth check: Looking for existing session...");

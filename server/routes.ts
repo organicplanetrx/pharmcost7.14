@@ -419,7 +419,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Automatic cookie extraction endpoint
+  // Legacy cookie extraction endpoint (for backward compatibility)
+  app.post('/api/extract-cookies', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password required' });
+      }
+
+      console.log('🔄 Legacy cookie extraction called - redirecting to fresh extraction...');
+      
+      // Use the fresh cookie extractor
+      try {
+        const { FreshCookieExtractor } = await import('./services/fresh-cookie-extractor.js');
+        const extractor = new FreshCookieExtractor();
+        
+        const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
+        
+        if (extractedCookies.length > 0) {
+          // Store validated cookies globally
+          (global as any).__kinray_session_cookies__ = extractedCookies;
+          
+          console.log(`✅ Legacy extraction successful: ${extractedCookies.length} cookies`);
+          
+          res.json({
+            success: true,
+            message: `Successfully extracted ${extractedCookies.length} session cookies`,
+            cookieCount: extractedCookies.length,
+            cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            error: 'No session cookies could be extracted'
+          });
+        }
+      } catch (browserError: unknown) {
+        const errorMessage = browserError instanceof Error ? browserError.message : 'Unknown browser error';
+        console.error('❌ Browser automation failed:', errorMessage);
+        
+        res.status(503).json({
+          success: false,
+          error: 'Network error during cookie extraction - browser automation not available on Railway',
+          requiresManualCookies: true,
+          message: 'Please use manual cookie extraction instead'
+        });
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('❌ Legacy cookie extraction failed:', errorMessage);
+      res.status(500).json({ 
+        success: false,
+        error: errorMessage
+      });
+    }
+  });
+
   // Smart authentication status check
   app.get('/api/check-auth-status', async (req, res) => {
     try {
