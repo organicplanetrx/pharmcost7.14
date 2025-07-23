@@ -11,10 +11,10 @@ export function SmartAuthStatus() {
     setAuthStatus('checking');
     
     try {
-      const response = await fetch('/api/check-auth-status');
+      const response = await fetch('/api/cookie-status');
       const result = await response.json();
       
-      if (result.authenticated) {
+      if (result.hasSessionCookies && result.isValid === true) {
         setAuthStatus('authenticated');
         setCookieCount(result.cookieCount || 0);
       } else {
