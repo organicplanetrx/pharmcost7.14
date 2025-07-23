@@ -5,7 +5,7 @@ import CredentialForm from "@/components/credential-form";
 import SearchInterface from "@/components/search-interface";
 import ActivityLog from "@/components/activity-log";
 import { SimpleCookieInterface } from "@/components/simple-cookie-interface";
-import { DirectManualInstructions } from "@/components/direct-manual-instructions";
+import { SimpleManualCookieExtractor } from "@/components/simple-manual-cookie-extractor";
 import { SeamlessAuthNotice } from "@/components/seamless-auth-notice";
 import { SmartAuthStatus } from "@/components/smart-auth-status";
 import { EnhancedSessionDetector } from "@/components/enhanced-session-detector";
@@ -87,8 +87,8 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-slate-800 inline">Advanced Tools</h3>
               <p className="text-sm text-slate-600 mt-1">Session management and credential tools</p>
             </summary>
-            <div className="space-y-6 p-6">
-              <DirectManualInstructions />
+            <div className="p-6">
+              <SimpleManualCookieExtractor />
             </div>
           </details>
         </main>

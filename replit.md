@@ -434,4 +434,6 @@ Changelog:
 
 ```
 Preferred communication style: Simple, everyday language.
+Be clear about limitations upfront - work around them to avoid wasting time.
+Make things as simple as possible.
 ```

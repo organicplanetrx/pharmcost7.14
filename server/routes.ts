@@ -419,32 +419,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Railway-optimized cookie extraction endpoint
+  // Simple response: Railway cannot do browser automation
   app.post('/api/extract-cookies', async (req, res) => {
-    console.log('🔄 Cookie extraction called on Railway deployment');
-    
-    // Railway deployment cannot run browser automation
-    // Immediately return instructions for manual cookie extraction
-    
-    const { ManualCookieGuidance } = await import('./services/manual-cookie-guidance.js');
-    
     res.status(503).json({
       success: false,
-      error: 'Browser automation not supported on Railway deployment',
-      requiresManualCookies: true,
-      deployment: 'Railway',
-      solution: 'Manual cookie extraction required',
-      guidance: {
-        message: 'Railway deployment cannot run browser automation. Please extract cookies manually from your logged-in browser session.',
-        instructions: ManualCookieGuidance.getInstructions(),
-        template: ManualCookieGuidance.generateCookieTemplate(),
-        nextSteps: [
-          '1. Log into kinrayweblink.cardinalhealth.com in your browser',
-          '2. Open Developer Tools (F12)',
-          '3. Go to Application → Cookies',
-          '4. Copy all cookies and paste them using the manual cookie injection below'
-        ]
-      }
+      error: 'Railway deployment cannot run browser automation. Use manual cookie extraction instead.',
+      requiresManualCookies: true
     });
   });
 
