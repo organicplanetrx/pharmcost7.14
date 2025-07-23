@@ -48,6 +48,14 @@ export function SimpleCookieInterface() {
           description: `Extracted and injected ${result.cookieCount} session cookies. You can now search for medications.`,
         });
         setPassword(''); // Clear password for security
+      } else if (result.requiresManualCookies || result.deployment === 'Railway') {
+        setExtractionStatus('error');
+        setExtractionMessage('Railway deployment requires manual cookie extraction - scroll down to "Manual Cookie Injection" section');
+        toast({
+          title: "Manual Cookie Extraction Required",
+          description: "Railway deployment cannot run browser automation. Please use manual cookie extraction below.",
+          variant: "default"
+        });
       } else {
         setExtractionStatus('error');
         setExtractionMessage(result.message || result.error || 'Cookie extraction failed');

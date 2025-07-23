@@ -8,6 +8,64 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// server/services/manual-cookie-guidance.ts
+var manual_cookie_guidance_exports = {};
+__export(manual_cookie_guidance_exports, {
+  ManualCookieGuidance: () => ManualCookieGuidance
+});
+var ManualCookieGuidance;
+var init_manual_cookie_guidance = __esm({
+  "server/services/manual-cookie-guidance.ts"() {
+    "use strict";
+    ManualCookieGuidance = class {
+      static getInstructions() {
+        return [
+          {
+            step: "1. Log into Kinray Portal",
+            instructions: "Open kinrayweblink.cardinalhealth.com in your browser and log in with your credentials",
+            technical: "Ensure you're fully authenticated and can access the product search page"
+          },
+          {
+            step: "2. Open Browser Developer Tools",
+            instructions: "Press F12 (or right-click \u2192 Inspect) to open developer tools",
+            technical: "Navigate to the Application tab (Chrome) or Storage tab (Firefox)"
+          },
+          {
+            step: "3. Extract Session Cookies",
+            instructions: "Go to Application \u2192 Cookies \u2192 kinrayweblink.cardinalhealth.com",
+            technical: "Copy all cookies, especially: JSESSIONID, abck, bm_sz, ak_bmsc"
+          },
+          {
+            step: "4. Use Manual Cookie Injection",
+            instructions: "Use the 'Manual Cookie Injection' section in the app interface",
+            technical: 'Paste cookies in JSON format: [{"name":"JSESSIONID","value":"...","domain":"..."}]'
+          }
+        ];
+      }
+      static generateCookieTemplate() {
+        return `[
+  {
+    "name": "JSESSIONID",
+    "value": "YOUR_SESSION_ID_HERE",
+    "domain": ".kinrayweblink.cardinalhealth.com",
+    "path": "/",
+    "httpOnly": true,
+    "secure": true
+  },
+  {
+    "name": "abck",
+    "value": "YOUR_ABCK_VALUE_HERE",
+    "domain": ".cardinalhealth.com",
+    "path": "/",
+    "httpOnly": false,
+    "secure": true
+  }
+]`;
+      }
+    };
+  }
+});
+
 // server/services/railway-browser-installer.ts
 var railway_browser_installer_exports = {};
 __export(railway_browser_installer_exports, {
@@ -264,64 +322,6 @@ var init_fresh_cookie_extractor = __esm({
         } catch (error) {
           console.error("\u274C Cleanup failed:", error);
         }
-      }
-    };
-  }
-});
-
-// server/services/manual-cookie-guidance.ts
-var manual_cookie_guidance_exports = {};
-__export(manual_cookie_guidance_exports, {
-  ManualCookieGuidance: () => ManualCookieGuidance
-});
-var ManualCookieGuidance;
-var init_manual_cookie_guidance = __esm({
-  "server/services/manual-cookie-guidance.ts"() {
-    "use strict";
-    ManualCookieGuidance = class {
-      static getInstructions() {
-        return [
-          {
-            step: "1. Log into Kinray Portal",
-            instructions: "Open kinrayweblink.cardinalhealth.com in your browser and log in with your credentials",
-            technical: "Ensure you're fully authenticated and can access the product search page"
-          },
-          {
-            step: "2. Open Browser Developer Tools",
-            instructions: "Press F12 (or right-click \u2192 Inspect) to open developer tools",
-            technical: "Navigate to the Application tab (Chrome) or Storage tab (Firefox)"
-          },
-          {
-            step: "3. Extract Session Cookies",
-            instructions: "Go to Application \u2192 Cookies \u2192 kinrayweblink.cardinalhealth.com",
-            technical: "Copy all cookies, especially: JSESSIONID, abck, bm_sz, ak_bmsc"
-          },
-          {
-            step: "4. Use Manual Cookie Injection",
-            instructions: "Use the 'Manual Cookie Injection' section in the app interface",
-            technical: 'Paste cookies in JSON format: [{"name":"JSESSIONID","value":"...","domain":"..."}]'
-          }
-        ];
-      }
-      static generateCookieTemplate() {
-        return `[
-  {
-    "name": "JSESSIONID",
-    "value": "YOUR_SESSION_ID_HERE",
-    "domain": ".kinrayweblink.cardinalhealth.com",
-    "path": "/",
-    "httpOnly": true,
-    "secure": true
-  },
-  {
-    "name": "abck",
-    "value": "YOUR_ABCK_VALUE_HERE",
-    "domain": ".cardinalhealth.com",
-    "path": "/",
-    "httpOnly": false,
-    "secure": true
-  }
-]`;
       }
     };
   }
@@ -4140,49 +4140,26 @@ async function registerRoutes(app2) {
     }
   });
   app2.post("/api/extract-cookies", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      if (!username || !password) {
-        return res.status(400).json({ error: "Username and password required" });
+    console.log("\u{1F504} Cookie extraction called on Railway deployment");
+    const { ManualCookieGuidance: ManualCookieGuidance2 } = await Promise.resolve().then(() => (init_manual_cookie_guidance(), manual_cookie_guidance_exports));
+    res.status(503).json({
+      success: false,
+      error: "Browser automation not supported on Railway deployment",
+      requiresManualCookies: true,
+      deployment: "Railway",
+      solution: "Manual cookie extraction required",
+      guidance: {
+        message: "Railway deployment cannot run browser automation. Please extract cookies manually from your logged-in browser session.",
+        instructions: ManualCookieGuidance2.getInstructions(),
+        template: ManualCookieGuidance2.generateCookieTemplate(),
+        nextSteps: [
+          "1. Log into kinrayweblink.cardinalhealth.com in your browser",
+          "2. Open Developer Tools (F12)",
+          "3. Go to Application \u2192 Cookies",
+          "4. Copy all cookies and paste them using the manual cookie injection below"
+        ]
       }
-      console.log("\u{1F504} Legacy cookie extraction called - redirecting to fresh extraction...");
-      try {
-        const { FreshCookieExtractor: FreshCookieExtractor2 } = await Promise.resolve().then(() => (init_fresh_cookie_extractor(), fresh_cookie_extractor_exports));
-        const extractor = new FreshCookieExtractor2();
-        const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
-        if (extractedCookies.length > 0) {
-          global.__kinray_session_cookies__ = extractedCookies;
-          console.log(`\u2705 Legacy extraction successful: ${extractedCookies.length} cookies`);
-          res.json({
-            success: true,
-            message: `Successfully extracted ${extractedCookies.length} session cookies`,
-            cookieCount: extractedCookies.length,
-            cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
-          });
-        } else {
-          res.status(400).json({
-            success: false,
-            error: "No session cookies could be extracted"
-          });
-        }
-      } catch (browserError) {
-        const errorMessage = browserError instanceof Error ? browserError.message : "Unknown browser error";
-        console.error("\u274C Browser automation failed:", errorMessage);
-        res.status(503).json({
-          success: false,
-          error: "Network error during cookie extraction - browser automation not available on Railway",
-          requiresManualCookies: true,
-          message: "Please use manual cookie extraction instead"
-        });
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("\u274C Legacy cookie extraction failed:", errorMessage);
-      res.status(500).json({
-        success: false,
-        error: errorMessage
-      });
-    }
+    });
   });
   app2.get("/api/check-auth-status", async (req, res) => {
     try {
