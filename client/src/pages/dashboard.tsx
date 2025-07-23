@@ -5,6 +5,7 @@ import CredentialForm from "@/components/credential-form";
 import SearchInterface from "@/components/search-interface";
 import ActivityLog from "@/components/activity-log";
 import { SimpleCookieInterface } from "@/components/simple-cookie-interface";
+import { DirectManualInstructions } from "@/components/direct-manual-instructions";
 import { SeamlessAuthNotice } from "@/components/seamless-auth-notice";
 import { SmartAuthStatus } from "@/components/smart-auth-status";
 import { EnhancedSessionDetector } from "@/components/enhanced-session-detector";
@@ -86,15 +87,8 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-slate-800 inline">Advanced Tools</h3>
               <p className="text-sm text-slate-600 mt-1">Session management and credential tools</p>
             </summary>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-              <div>
-                <h4 className="font-medium text-slate-700 mb-3">Session Management</h4>
-                <SimpleCookieInterface />
-              </div>
-              <div>
-                <h4 className="font-medium text-slate-700 mb-3">Vendor Credentials</h4>
-                <CredentialForm />
-              </div>
+            <div className="space-y-6 p-6">
+              <DirectManualInstructions />
             </div>
           </details>
         </main>

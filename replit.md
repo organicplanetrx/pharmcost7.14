@@ -425,6 +425,9 @@ Changelog:
 - July 23, 2025: Added Railway browser compatibility with fallback to manual cookie extraction when automation unavailable
 - July 23, 2025: Implemented SystematicSearchInterface with visual step indicators and immediate error identification
 - July 23, 2025: Created ManualCookieInterface for platforms without browser automation support (Railway deployment)
+- July 23, 2025: CRITICAL REALIZATION: Railway deployment fundamentally cannot run browser automation - wasted time on impossible solutions
+- July 23, 2025: Created DirectManualInstructions component providing clear Railway-specific manual cookie extraction workflow
+- July 23, 2025: Simplified dashboard to focus on manual cookie extraction as primary method for Railway deployment
 ```
 
 ## User Preferences
