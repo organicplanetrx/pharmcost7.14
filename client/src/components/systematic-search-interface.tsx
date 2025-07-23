@@ -4,14 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, AlertCircle, Clock, Search } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Search, Settings } from 'lucide-react';
+import { ManualCookieInterface } from './manual-cookie-interface';
 
 interface SystematicSearchInterfaceProps {
   onSearchComplete: (searchId: number) => void;
 }
 
 export function SystematicSearchInterface({ onSearchComplete }: SystematicSearchInterfaceProps) {
-  const [step, setStep] = useState<'credentials' | 'cookies' | 'search' | 'results'>('credentials');
+  const [step, setStep] = useState<'credentials' | 'manual-cookies' | 'cookies' | 'search' | 'results'>('credentials');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +23,7 @@ export function SystematicSearchInterface({ onSearchComplete }: SystematicSearch
   }>({ extracted: false, count: 0, validated: false });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [requiresManualCookies, setRequiresManualCookies] = useState(false);
 
   // STEP 1: Extract fresh cookies from credentials
   const handleExtractCookies = async () => {
@@ -52,6 +54,11 @@ export function SystematicSearchInterface({ onSearchComplete }: SystematicSearch
         });
         setStep('cookies');
         console.log('✅ STEP 1 COMPLETE: Fresh cookies extracted and validated');
+      } else if (result.requiresManualCookies) {
+        console.log('⚠️ Browser automation not available - switching to manual cookie extraction');
+        setRequiresManualCookies(true);
+        setStep('manual-cookies');
+        setError('');
       } else {
         setError(result.error || 'Failed to extract cookies');
       }
@@ -213,8 +220,33 @@ export function SystematicSearchInterface({ onSearchComplete }: SystematicSearch
                   'Extract Fresh Session Cookies'
                 )}
               </Button>
+              
+              <div className="text-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setStep('manual-cookies')}
+                  className="text-sm"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Use Manual Cookie Extraction Instead
+                </Button>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* MANUAL COOKIE EXTRACTION */}
+        {step === 'manual-cookies' && (
+          <ManualCookieInterface 
+            onCookiesInjected={() => {
+              setCookieStatus({
+                extracted: true,
+                count: 10, // Will be updated by actual cookie count
+                validated: true
+              });
+              setStep('cookies');
+            }} 
+          />
         )}
 
         {/* STEP 2: Cookie Status & Search */}

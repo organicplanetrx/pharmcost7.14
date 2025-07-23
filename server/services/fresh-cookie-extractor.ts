@@ -8,6 +8,14 @@ export class FreshCookieExtractor {
     try {
       console.log('🔄 Starting fresh cookie extraction with new browser session...');
       
+      // First check if browser is available in Railway
+      const { RailwayBrowserInstaller } = await import('./railway-browser-installer.js');
+      const browserPath = await RailwayBrowserInstaller.ensureBrowserAvailable();
+      
+      if (!browserPath) {
+        throw new Error('Browser automation not available in Railway deployment environment. Please ensure Chrome is installed or use a platform that supports Puppeteer.');
+      }
+      
       await this.initBrowser();
       
       // Step 1: Navigate to Kinray login page
@@ -53,52 +61,96 @@ export class FreshCookieExtractor {
   }
 
   private async initBrowser(): Promise<void> {
-    try {
-      const browserPath = await this.findBrowserPath();
-      if (!browserPath) {
-        throw new Error('Browser not found for cookie extraction');
+    const maxRetries = 3;
+    let currentRetry = 0;
+    
+    while (currentRetry < maxRetries) {
+      try {
+        console.log(`🔄 Browser initialization attempt ${currentRetry + 1}/${maxRetries}`);
+        
+        const browserPath = await this.findBrowserPath();
+        
+        const launchOptions: any = {
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--no-first-run',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--remote-debugging-port=9222',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows'
+          ]
+        };
+        
+        if (browserPath) {
+          launchOptions.executablePath = browserPath;
+          console.log(`✅ Using browser at: ${browserPath}`);
+        } else {
+          console.log('⚠️ Using default Puppeteer browser');
+        }
+
+        this.browser = await puppeteer.launch(launchOptions);
+        this.page = await this.browser.newPage();
+        
+        // Set viewport and user agent
+        await this.page.setViewport({ width: 1280, height: 720 });
+        await this.page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        
+        console.log('✅ Browser initialized successfully');
+        return;
+
+      } catch (error) {
+        currentRetry++;
+        console.error(`❌ Browser initialization attempt ${currentRetry} failed:`, error);
+        
+        if (currentRetry >= maxRetries) {
+          throw new Error(`Browser initialization failed after ${maxRetries} attempts. Railway may not have browser automation support.`);
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
-
-      this.browser = await puppeteer.launch({
-        headless: true,
-        executablePath: browserPath,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--no-first-run'
-        ]
-      });
-
-      this.page = await this.browser.newPage();
-      
-      // Set realistic user agent
-      await this.page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
-    } catch (error) {
-      console.error('❌ Browser initialization failed:', error);
-      throw error;
     }
   }
 
   private async findBrowserPath(): Promise<string | null> {
-    const paths = [
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium'
-    ];
-    
-    for (const path of paths) {
-      try {
-        const fs = await import('fs');
+    try {
+      // Try Railway's Chrome installation first
+      const railwayPaths = [
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome'
+      ];
+      
+      // Try bundled browser path
+      const bundledPath = puppeteer.executablePath();
+      
+      const fs = await import('fs');
+      
+      // Check Railway paths first
+      for (const path of railwayPaths) {
         if (fs.existsSync(path)) {
+          console.log(`✅ Found Railway Chrome at: ${path}`);
           return path;
         }
-      } catch {}
+      }
+      
+      // Try bundled browser
+      if (bundledPath && fs.existsSync(bundledPath)) {
+        console.log(`✅ Found bundled browser at: ${bundledPath}`);
+        return bundledPath;
+      }
+      
+      console.log('❌ No browser found - Railway may not have Chrome installed');
+      return null;
+      
+    } catch (error) {
+      console.error('❌ Browser path detection failed:', error);
+      return null;
     }
-    return null;
   }
 
   private async performLogin(username: string, password: string): Promise<boolean> {

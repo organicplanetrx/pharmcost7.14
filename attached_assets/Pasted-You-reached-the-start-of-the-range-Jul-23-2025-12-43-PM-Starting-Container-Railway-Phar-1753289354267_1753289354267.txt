@@ -1,0 +1,163 @@
+You reached the start of the range → Jul 23, 2025, 12:43 PM
+
+Starting Container
+
+🚂 Railway PharmaCost Pro Server Starting...
+
+=== RAILWAY ENVIRONMENT DEBUG ===
+
+Railway detected: YES
+
+NODE_ENV: production
+
+PORT env var: 8080
+
+Server will bind to port: 8080
+
+All environment variables containing RAILWAY: [
+
+  'RAILWAY_REPLICA_REGION: us-east4-eqdc4a',
+
+  'RAILWAY_PUBLIC_DOMAIN: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_REPLICA_ID: fa7d9237-3d92-44d9-92ce-aba3be3801bf',
+
+  'RAILWAY_GIT_AUTHOR: organicplanetrx',
+
+  'RAILWAY_GIT_BRANCH: main',
+
+  'RAILWAY_STATIC_URL: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_SERVICE_NAME: pharmcost7.14',
+
+  'RAILWAY_PRIVATE_DOMAIN: pharmcost7-14.railway.internal',
+
+  'RAILWAY_PROJECT_NAME: accomplished-flexibility',
+
+  'RAILWAY_SERVICE_ID: 23a0149f-ae92-4056-8d79-528be3717919',
+
+  'RAILWAY_GIT_COMMIT_MESSAGE: Automate Kinray login and medication search with enhanced cookie handling\n' +
+
+    '\n' +
+
+    'Implements fresh cookie extraction, validation and verified search using Puppeteer.\n' +
+
+    '\n' +
+
+    'Replit-Commit-Author: Agent\n' +
+
+    'Replit-Commit-Session-Id: 028a46d3-4c44-4bf1-b639-37b69a33736e\n' +
+
+    'Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/27c7860c-6b7c-4071-b6ec-59c6d7082d49/028a46d3-4c44-4bf1-b639-37b69a33736e/eOnnaUh';,
+
+  'RAILWAY_ENVIRONMENT_NAME: production',
+
+  'RAILWAY_PROJECT_ID: 3fb5727b-290e-4d77-be0e-0301636c227d',
+
+  'RAILWAY_DEPLOYMENT_ID: ba083a9c-5b67-454d-baf1-341be0003ba2',
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL: pharmcost714-production.up.railway.app',
+
+  'RAILWAY_GIT_REPO_OWNER: organicplanetrx',
+
+  'RAILWAY_ENVIRONMENT: production',
+
+  'RAILWAY_ENVIRONMENT_ID: 7545f10b-d513-4031-9d9b-03b17b9ed615',
+
+  'RAILWAY_BETA_ENABLE_RUNTIME_V2: 1',
+
+  'RAILWAY_SNAPSHOT_ID: 5f3b0f2c-8461-44a3-a267-541aae5a0958',
+
+  'RAILWAY_GIT_COMMIT_SHA: 3bb9f78357e54427e55a931fa4d2c42b14c5bd15',
+
+  'RAILWAY_GIT_REPO_NAME: pharmcost7.14'
+
+]
+
+===================================
+
+💾 PostgreSQL not available - using memory storage
+
+   DATABASE_URL missing or invalid - check Railway PostgreSQL service
+
+🗄️ Creating GLOBAL singleton MemStorage instance - ID: iwbmf0
+
+🔍 MemStorage constructor called - instance creation - ID: 8w13kn
+
+🚀 Starting PharmaCost Pro server...
+
+Environment: production
+
+=== RAILWAY PORT DETECTION ===
+
+Raw PORT env: 8080
+
+PORT type: string
+
+Railway vars found: 22
+
+Will use port: 8080
+
+==============================
+
+✓ Express app created
+
+✓ Express middleware configured
+
+Starting server initialization...
+
+Routes registered successfully
+
+Setting up static file serving...
+
+Static files directory: /app/dist/public
+
+✅ Static files configured for Railway deployment
+
+=== RAILWAY PORT DEBUGGING ===
+
+Railway PORT environment variable: "8080"
+
+Parsed port number: 8080
+
+Is Railway deployment: YES
+
+All Railway env vars: [
+
+  'RAILWAY_REPLICA_REGION',
+
+  'RAILWAY_PUBLIC_DOMAIN',
+
+  'RAILWAY_REPLICA_ID',
+
+  'RAILWAY_GIT_AUTHOR',
+
+  'RAILWAY_GIT_BRANCH',
+
+  'RAILWAY_STATIC_URL',
+
+  'RAILWAY_SERVICE_NAME',
+
+  'RAILWAY_PRIVATE_DOMAIN',
+
+  'RAILWAY_PROJECT_NAME',
+
+  'RAILWAY_SERVICE_ID',
+
+  'RAILWAY_GIT_COMMIT_MESSAGE',
+
+  'RAILWAY_ENVIRONMENT_NAME',
+
+  'RAILWAY_PROJECT_ID',
+
+  'RAILWAY_DEPLOYMENT_ID',
+
+  'RAILWAY_SERVICE_PHARMCOST7_14_URL',
+
+  'RAILWAY_GIT_REPO_OWNER',
+
+  'RAILWAY_ENVIRONMENT',
+
+  'RAILWAY_ENVIRONMENT_ID',
+
+  'RAILWAY_BETA_ENABLE_RUNTIME_V2',

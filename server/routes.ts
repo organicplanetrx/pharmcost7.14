@@ -467,31 +467,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🔄 STEP 1: Starting fresh cookie extraction with new browser session...');
       
-      const { FreshCookieExtractor } = await import('./services/fresh-cookie-extractor.js');
-      const extractor = new FreshCookieExtractor();
-      
-      const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
-      
-      if (extractedCookies.length > 0) {
-        // Store validated cookies globally
-        (global as any).__kinray_session_cookies__ = extractedCookies;
+      try {
+        const { FreshCookieExtractor } = await import('./services/fresh-cookie-extractor.js');
+        const extractor = new FreshCookieExtractor();
         
-        console.log(`✅ STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
+        const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
         
-        res.json({
-          success: true,
-          step: 1,
-          message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
-          cookieCount: extractedCookies.length,
-          validated: true,
-          nextStep: 'Ready for verified search',
-          cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
-        });
-      } else {
-        res.status(400).json({
+        if (extractedCookies.length > 0) {
+          // Store validated cookies globally
+          (global as any).__kinray_session_cookies__ = extractedCookies;
+          
+          console.log(`✅ STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
+          
+          res.json({
+            success: true,
+            step: 1,
+            message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
+            cookieCount: extractedCookies.length,
+            validated: true,
+            nextStep: 'Ready for verified search',
+            cookies: extractedCookies.map(c => ({ name: c.name, domain: c.domain }))
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            step: 1,
+            error: 'No session cookies could be extracted. Please check your Kinray credentials and try again.'
+          });
+        }
+      } catch (browserError: unknown) {
+        const errorMessage = browserError instanceof Error ? browserError.message : 'Unknown browser error';
+        console.error('❌ STEP 1 BROWSER ISSUE:', errorMessage);
+        
+        // Import manual guidance
+        const { ManualCookieGuidance } = await import('./services/manual-cookie-guidance.js');
+        
+        res.status(503).json({
           success: false,
           step: 1,
-          error: 'No session cookies could be extracted. Please check your Kinray credentials and try again.'
+          error: 'Browser automation not available in Railway environment',
+          requiresManualCookies: true,
+          guidance: {
+            message: 'Browser automation is not supported on Railway. Please extract cookies manually.',
+            instructions: ManualCookieGuidance.getInstructions(),
+            template: ManualCookieGuidance.generateCookieTemplate()
+          }
         });
       }
     } catch (error: unknown) {

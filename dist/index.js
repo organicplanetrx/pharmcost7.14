@@ -8,6 +8,68 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// server/services/railway-browser-installer.ts
+var railway_browser_installer_exports = {};
+__export(railway_browser_installer_exports, {
+  RailwayBrowserInstaller: () => RailwayBrowserInstaller
+});
+import { execSync as execSync3 } from "child_process";
+var RailwayBrowserInstaller;
+var init_railway_browser_installer = __esm({
+  "server/services/railway-browser-installer.ts"() {
+    "use strict";
+    RailwayBrowserInstaller = class {
+      static async ensureBrowserAvailable() {
+        try {
+          console.log("\u{1F504} Checking Railway browser availability...");
+          const chromePaths = [
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/google-chrome"
+          ];
+          const fs3 = await import("fs");
+          for (const path4 of chromePaths) {
+            if (fs3.existsSync(path4)) {
+              console.log(`\u2705 Found Railway Chrome at: ${path4}`);
+              return path4;
+            }
+          }
+          console.log("\u26A0\uFE0F Chrome not found - attempting installation...");
+          try {
+            execSync3("apt-get update", { stdio: "pipe" });
+            console.log("\u2705 Package lists updated");
+            execSync3("apt-get install -y wget gnupg", { stdio: "pipe" });
+            execSync3("wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -", { stdio: "pipe" });
+            execSync3(`sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'`, { stdio: "pipe" });
+            execSync3("apt-get update", { stdio: "pipe" });
+            execSync3("apt-get install -y google-chrome-stable", { stdio: "pipe" });
+            console.log("\u2705 Chrome installation completed");
+            if (fs3.existsSync("/usr/bin/google-chrome-stable")) {
+              return "/usr/bin/google-chrome-stable";
+            }
+          } catch (installError) {
+            console.log("\u274C Chrome installation failed - Railway may not allow package installation");
+          }
+          try {
+            const puppeteer5 = await import("puppeteer");
+            const bundledPath = puppeteer5.executablePath();
+            if (bundledPath && fs3.existsSync(bundledPath)) {
+              console.log(`\u2705 Using Puppeteer bundled browser at: ${bundledPath}`);
+              return bundledPath;
+            }
+          } catch (bundledError) {
+            console.log("\u274C Puppeteer bundled browser not available");
+          }
+          console.log("\u274C No browser available on Railway - browser automation not supported");
+          return null;
+        } catch (error) {
+          console.error("\u274C Browser availability check failed:", error);
+          return null;
+        }
+      }
+    };
+  }
+});
+
 // server/services/fresh-cookie-extractor.ts
 var fresh_cookie_extractor_exports = {};
 __export(fresh_cookie_extractor_exports, {
@@ -24,6 +86,11 @@ var init_fresh_cookie_extractor = __esm({
       async extractFreshSessionCookies(username, password) {
         try {
           console.log("\u{1F504} Starting fresh cookie extraction with new browser session...");
+          const { RailwayBrowserInstaller: RailwayBrowserInstaller2 } = await Promise.resolve().then(() => (init_railway_browser_installer(), railway_browser_installer_exports));
+          const browserPath = await RailwayBrowserInstaller2.ensureBrowserAvailable();
+          if (!browserPath) {
+            throw new Error("Browser automation not available in Railway deployment environment. Please ensure Chrome is installed or use a platform that supports Puppeteer.");
+          }
           await this.initBrowser();
           console.log("\u{1F310} Navigating to Kinray login page...");
           await this.page.goto("https://kinrayweblink.cardinalhealth.com/login", {
@@ -54,46 +121,73 @@ var init_fresh_cookie_extractor = __esm({
         }
       }
       async initBrowser() {
-        try {
-          const browserPath = await this.findBrowserPath();
-          if (!browserPath) {
-            throw new Error("Browser not found for cookie extraction");
+        const maxRetries = 3;
+        let currentRetry = 0;
+        while (currentRetry < maxRetries) {
+          try {
+            console.log(`\u{1F504} Browser initialization attempt ${currentRetry + 1}/${maxRetries}`);
+            const browserPath = await this.findBrowserPath();
+            const launchOptions = {
+              headless: true,
+              args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--no-first-run",
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
+                "--remote-debugging-port=9222",
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows"
+              ]
+            };
+            if (browserPath) {
+              launchOptions.executablePath = browserPath;
+              console.log(`\u2705 Using browser at: ${browserPath}`);
+            } else {
+              console.log("\u26A0\uFE0F Using default Puppeteer browser");
+            }
+            this.browser = await puppeteer3.launch(launchOptions);
+            this.page = await this.browser.newPage();
+            await this.page.setViewport({ width: 1280, height: 720 });
+            await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            console.log("\u2705 Browser initialized successfully");
+            return;
+          } catch (error) {
+            currentRetry++;
+            console.error(`\u274C Browser initialization attempt ${currentRetry} failed:`, error);
+            if (currentRetry >= maxRetries) {
+              throw new Error(`Browser initialization failed after ${maxRetries} attempts. Railway may not have browser automation support.`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 2e3));
           }
-          this.browser = await puppeteer3.launch({
-            headless: true,
-            executablePath: browserPath,
-            args: [
-              "--no-sandbox",
-              "--disable-setuid-sandbox",
-              "--disable-dev-shm-usage",
-              "--disable-gpu",
-              "--no-first-run"
-            ]
-          });
-          this.page = await this.browser.newPage();
-          await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-        } catch (error) {
-          console.error("\u274C Browser initialization failed:", error);
-          throw error;
         }
       }
       async findBrowserPath() {
-        const paths = [
-          "/usr/bin/google-chrome-stable",
-          "/usr/bin/google-chrome",
-          "/usr/bin/chromium-browser",
-          "/usr/bin/chromium"
-        ];
-        for (const path4 of paths) {
-          try {
-            const fs3 = await import("fs");
+        try {
+          const railwayPaths = [
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/google-chrome"
+          ];
+          const bundledPath = puppeteer3.executablePath();
+          const fs3 = await import("fs");
+          for (const path4 of railwayPaths) {
             if (fs3.existsSync(path4)) {
+              console.log(`\u2705 Found Railway Chrome at: ${path4}`);
               return path4;
             }
-          } catch {
           }
+          if (bundledPath && fs3.existsSync(bundledPath)) {
+            console.log(`\u2705 Found bundled browser at: ${bundledPath}`);
+            return bundledPath;
+          }
+          console.log("\u274C No browser found - Railway may not have Chrome installed");
+          return null;
+        } catch (error) {
+          console.error("\u274C Browser path detection failed:", error);
+          return null;
         }
-        return null;
       }
       async performLogin(username, password) {
         try {
@@ -170,6 +264,64 @@ var init_fresh_cookie_extractor = __esm({
         } catch (error) {
           console.error("\u274C Cleanup failed:", error);
         }
+      }
+    };
+  }
+});
+
+// server/services/manual-cookie-guidance.ts
+var manual_cookie_guidance_exports = {};
+__export(manual_cookie_guidance_exports, {
+  ManualCookieGuidance: () => ManualCookieGuidance
+});
+var ManualCookieGuidance;
+var init_manual_cookie_guidance = __esm({
+  "server/services/manual-cookie-guidance.ts"() {
+    "use strict";
+    ManualCookieGuidance = class {
+      static getInstructions() {
+        return [
+          {
+            step: "1. Log into Kinray Portal",
+            instructions: "Open kinrayweblink.cardinalhealth.com in your browser and log in with your credentials",
+            technical: "Ensure you're fully authenticated and can access the product search page"
+          },
+          {
+            step: "2. Open Browser Developer Tools",
+            instructions: "Press F12 (or right-click \u2192 Inspect) to open developer tools",
+            technical: "Navigate to the Application tab (Chrome) or Storage tab (Firefox)"
+          },
+          {
+            step: "3. Extract Session Cookies",
+            instructions: "Go to Application \u2192 Cookies \u2192 kinrayweblink.cardinalhealth.com",
+            technical: "Copy all cookies, especially: JSESSIONID, abck, bm_sz, ak_bmsc"
+          },
+          {
+            step: "4. Use Manual Cookie Injection",
+            instructions: "Use the 'Manual Cookie Injection' section in the app interface",
+            technical: 'Paste cookies in JSON format: [{"name":"JSESSIONID","value":"...","domain":"..."}]'
+          }
+        ];
+      }
+      static generateCookieTemplate() {
+        return `[
+  {
+    "name": "JSESSIONID",
+    "value": "YOUR_SESSION_ID_HERE",
+    "domain": ".kinrayweblink.cardinalhealth.com",
+    "path": "/",
+    "httpOnly": true,
+    "secure": true
+  },
+  {
+    "name": "abck",
+    "value": "YOUR_ABCK_VALUE_HERE",
+    "domain": ".cardinalhealth.com",
+    "path": "/",
+    "httpOnly": false,
+    "secure": true
+  }
+]`;
       }
     };
   }
@@ -4020,26 +4172,43 @@ async function registerRoutes(app2) {
         return res.status(400).json({ error: "Username and password required for fresh cookie extraction" });
       }
       console.log("\u{1F504} STEP 1: Starting fresh cookie extraction with new browser session...");
-      const { FreshCookieExtractor: FreshCookieExtractor2 } = await Promise.resolve().then(() => (init_fresh_cookie_extractor(), fresh_cookie_extractor_exports));
-      const extractor = new FreshCookieExtractor2();
-      const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
-      if (extractedCookies.length > 0) {
-        global.__kinray_session_cookies__ = extractedCookies;
-        console.log(`\u2705 STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
-        res.json({
-          success: true,
-          step: 1,
-          message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
-          cookieCount: extractedCookies.length,
-          validated: true,
-          nextStep: "Ready for verified search",
-          cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
-        });
-      } else {
-        res.status(400).json({
+      try {
+        const { FreshCookieExtractor: FreshCookieExtractor2 } = await Promise.resolve().then(() => (init_fresh_cookie_extractor(), fresh_cookie_extractor_exports));
+        const extractor = new FreshCookieExtractor2();
+        const extractedCookies = await extractor.extractFreshSessionCookies(username, password);
+        if (extractedCookies.length > 0) {
+          global.__kinray_session_cookies__ = extractedCookies;
+          console.log(`\u2705 STEP 1 COMPLETE: Extracted and stored ${extractedCookies.length} fresh validated session cookies`);
+          res.json({
+            success: true,
+            step: 1,
+            message: `Successfully extracted ${extractedCookies.length} fresh session cookies`,
+            cookieCount: extractedCookies.length,
+            validated: true,
+            nextStep: "Ready for verified search",
+            cookies: extractedCookies.map((c) => ({ name: c.name, domain: c.domain }))
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            step: 1,
+            error: "No session cookies could be extracted. Please check your Kinray credentials and try again."
+          });
+        }
+      } catch (browserError) {
+        const errorMessage = browserError instanceof Error ? browserError.message : "Unknown browser error";
+        console.error("\u274C STEP 1 BROWSER ISSUE:", errorMessage);
+        const { ManualCookieGuidance: ManualCookieGuidance2 } = await Promise.resolve().then(() => (init_manual_cookie_guidance(), manual_cookie_guidance_exports));
+        res.status(503).json({
           success: false,
           step: 1,
-          error: "No session cookies could be extracted. Please check your Kinray credentials and try again."
+          error: "Browser automation not available in Railway environment",
+          requiresManualCookies: true,
+          guidance: {
+            message: "Browser automation is not supported on Railway. Please extract cookies manually.",
+            instructions: ManualCookieGuidance2.getInstructions(),
+            template: ManualCookieGuidance2.generateCookieTemplate()
+          }
         });
       }
     } catch (error) {
