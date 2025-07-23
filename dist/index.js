@@ -4089,22 +4089,46 @@ async function registerRoutes(app2) {
   app2.post("/api/inject-cookies", async (req, res) => {
     try {
       const { cookies } = req.body;
-      if (!cookies || !Array.isArray(cookies)) {
-        return res.status(400).json({ error: "Invalid cookies format" });
+      console.log("\u{1F36A} Cookie injection request received");
+      console.log("Raw cookies data:", typeof cookies, Array.isArray(cookies));
+      if (!cookies) {
+        return res.status(400).json({ error: "No cookies provided" });
       }
-      global.__kinray_session_cookies__ = cookies;
-      console.log(`\u{1F36A} Session cookies stored globally: ${cookies.length} cookies`);
-      cookies.forEach((cookie) => {
+      let processedCookies = [];
+      if (Array.isArray(cookies)) {
+        processedCookies = cookies;
+      } else if (typeof cookies === "string") {
+        processedCookies = cookies.split("\n").filter((line) => line.trim() && line.includes("=")).map((line) => {
+          const trimmedLine = line.trim();
+          const equalIndex = trimmedLine.indexOf("=");
+          if (equalIndex === -1) return null;
+          const name = trimmedLine.substring(0, equalIndex).trim();
+          const value = trimmedLine.substring(equalIndex + 1).trim();
+          return {
+            name,
+            value,
+            domain: ".kinrayweblink.cardinalhealth.com"
+          };
+        }).filter((cookie) => cookie !== null);
+      } else {
+        return res.status(400).json({ error: "Invalid cookies format - expected array or string" });
+      }
+      if (processedCookies.length === 0) {
+        return res.status(400).json({ error: "No valid cookies found in input" });
+      }
+      global.__kinray_session_cookies__ = processedCookies;
+      console.log(`\u{1F36A} Session cookies stored globally: ${processedCookies.length} cookies`);
+      processedCookies.forEach((cookie) => {
         console.log(`   - ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
       });
       res.json({
         success: true,
-        message: `Successfully stored ${cookies.length} session cookies`,
-        cookieCount: cookies.length
+        message: `Successfully stored ${processedCookies.length} session cookies`,
+        cookieCount: processedCookies.length
       });
     } catch (error) {
       console.error("Cookie injection error:", error);
-      res.status(500).json({ error: "Failed to inject cookies" });
+      res.status(500).json({ error: "Failed to inject cookies: " + error.message });
     }
   });
   app2.get("/api/cookie-status", async (req, res) => {

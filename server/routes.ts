@@ -354,26 +354,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { cookies } = req.body;
       
-      if (!cookies || !Array.isArray(cookies)) {
-        return res.status(400).json({ error: 'Invalid cookies format' });
+      console.log('🍪 Cookie injection request received');
+      console.log('Raw cookies data:', typeof cookies, Array.isArray(cookies));
+      
+      if (!cookies) {
+        return res.status(400).json({ error: 'No cookies provided' });
+      }
+
+      let processedCookies = [];
+      
+      if (Array.isArray(cookies)) {
+        processedCookies = cookies;
+      } else if (typeof cookies === 'string') {
+        // Handle string format - parse it
+        processedCookies = cookies.split('\n')
+          .filter(line => line.trim() && line.includes('='))
+          .map(line => {
+            const trimmedLine = line.trim();
+            const equalIndex = trimmedLine.indexOf('=');
+            if (equalIndex === -1) return null;
+            
+            const name = trimmedLine.substring(0, equalIndex).trim();
+            const value = trimmedLine.substring(equalIndex + 1).trim();
+            
+            return {
+              name: name,
+              value: value,
+              domain: '.kinrayweblink.cardinalhealth.com'
+            };
+          })
+          .filter(cookie => cookie !== null);
+      } else {
+        return res.status(400).json({ error: 'Invalid cookies format - expected array or string' });
+      }
+
+      if (processedCookies.length === 0) {
+        return res.status(400).json({ error: 'No valid cookies found in input' });
       }
 
       // Store cookies globally for scraper access
-      (global as any).__kinray_session_cookies__ = cookies;
+      (global as any).__kinray_session_cookies__ = processedCookies;
       
-      console.log(`🍪 Session cookies stored globally: ${cookies.length} cookies`);
-      cookies.forEach(cookie => {
+      console.log(`🍪 Session cookies stored globally: ${processedCookies.length} cookies`);
+      processedCookies.forEach(cookie => {
         console.log(`   - ${cookie.name}: ${cookie.value.substring(0, 20)}...`);
       });
 
       res.json({ 
         success: true, 
-        message: `Successfully stored ${cookies.length} session cookies`,
-        cookieCount: cookies.length
+        message: `Successfully stored ${processedCookies.length} session cookies`,
+        cookieCount: processedCookies.length
       });
     } catch (error) {
       console.error('Cookie injection error:', error);
-      res.status(500).json({ error: 'Failed to inject cookies' });
+      res.status(500).json({ error: 'Failed to inject cookies: ' + (error as Error).message });
     }
   });
 
